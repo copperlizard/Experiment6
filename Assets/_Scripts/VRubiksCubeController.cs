@@ -22,9 +22,9 @@ public class VRubiksCubeController : MonoBehaviour
 
     public void Turn(GameObject touched, Vector2 move)
     {
-        // Finer move direction... 
-        float movedX = Vector2.Dot(move, Vector2.right);
-        float movedY = Vector2.Dot(move, Vector2.up);
+        // Find move direction... 
+        float movedX = Vector2.Dot(move.normalized, Vector2.right);
+        float movedY = Vector2.Dot(move.normalized, Vector2.up);
         // Deadzone approach; Maybe change this to a simple more x or more y comparison (would "eliminate" diagonals; allowing for fewer condition checks; would require an 2 Mathf.Abs() calls)...
         bool movedLeft = false, movedRight = false, movedUp = false, movedDown = false;
         if (movedX >= 0.5f)
@@ -124,43 +124,52 @@ public class VRubiksCubeController : MonoBehaviour
             {
                 Debug.Log("Rotating whole cube left");
 
-                Quaternion tarRot = transform.rotation * Quaternion.Euler(0.0f, 90.0f, 0.0f);
+                float tarAng = transform.rotation.eulerAngles.y + 90.0f;
 
-                while (transform.rotation != tarRot)
-                {                    
-                    RotateWholeCubeRotate(tarRot);
+                while (transform.rotation.eulerAngles.y != tarAng)
+                {
+                    float dif = tarAng - transform.rotation.eulerAngles.y;
+
+                    float ang = Mathf.Lerp(0.0f, dif, 0.1f);                    
+
+                    transform.Rotate(Vector3.up, ang);
+
                     yield return null;
                 }
             }
+            /*
             else if (movedRight)
             {
                 Debug.Log("Rotating whole cube right");
 
                 Quaternion tarRot = transform.rotation * Quaternion.Euler(0.0f, -90.0f, 0.0f);
+                //Quaternion tarRot = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y - 90.0f, transform.rotation.eulerAngles.z);
 
                 while (transform.rotation != tarRot)
                 {
                     RotateWholeCubeRotate(tarRot);
                     yield return null;
                 }
-            }
+            }            
             else if (movedUp)
             {
                 Debug.Log("Rotating whole cube up");
 
                 Quaternion tarRot = transform.rotation * Quaternion.Euler(90.0f, 0.0f, 0.0f);
+                //Quaternion tarRot = Quaternion.Euler(transform.rotation.eulerAngles.x + 90.0f, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z);
 
                 while (transform.rotation != tarRot)
                 {
                     RotateWholeCubeRotate(tarRot);
                     yield return null;
-                }
-            }
+                }                
+            }            
             else if (movedDown)
             {
                 Debug.Log("Rotating whole cube down");
 
                 Quaternion tarRot = transform.rotation * Quaternion.Euler(-90.0f, 0.0f, 0.0f);
+                //Quaternion tarRot = Quaternion.Euler(transform.rotation.eulerAngles.x - 90.0f, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z);
 
                 while (transform.rotation != tarRot)
                 {
@@ -168,6 +177,7 @@ public class VRubiksCubeController : MonoBehaviour
                     yield return null;
                 }
             }
+            */
         }
         else if (top)
         {
@@ -190,13 +200,22 @@ public class VRubiksCubeController : MonoBehaviour
         yield return null;
     }
 
-    void RotateWholeCubeRotate (Quaternion tarRot)
+    //void RotateWholeCubeRotate (Quaternion tarRot)
+    void RotateWholeCubeRotate (Vector3 axis, float ang)
     {
+        //REWRITE THIS TO USE TARGET EULER ANGLES AND A SPECIFIED AXIS OF ROTATION
+
+
+
+
+
+        /*
         transform.rotation = Quaternion.Slerp(transform.rotation, tarRot, 0.1f);
         if (Vector3.Dot(transform.rotation * Vector3.forward, tarRot * Vector3.forward) >= 0.99f)
         {
-            transform.rotation = tarRot;
+            transform.rotation = tarRot;            
         }
+        */
     }
 
     IEnumerator RotateCubeFace (bool front, bool top, bool bottom, bool left, bool right, bool movedLeft, bool movedRight, bool movedUp, bool movedDown)
