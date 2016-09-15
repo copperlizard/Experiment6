@@ -124,26 +124,43 @@ public class VRubiksCubeController : MonoBehaviour
             {
                 Debug.Log("Rotating whole cube left");
 
-                float tarAng = transform.rotation.eulerAngles.y + 90.0f;
-
-                while (transform.rotation.eulerAngles.y != tarAng)
+                //Quaternion tarRot = transform.rotation * Quaternion.Euler(0.0f, 90.0f, 0.0f);
+                Quaternion tarRot = Quaternion.Euler(0.0f, 90.0f, 0.0f) * transform.localRotation;
+                //Quaternion tarRot = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y + 90.0f, transform.rotation.eulerAngles.z);
+                
+                /*
+                Quaternion tarRot = transform.localRotation;
+                // If cube right side up
+                if (transform.up.y >= 0.9f)
                 {
-                    float dif = tarAng - transform.rotation.eulerAngles.y;
-
-                    float ang = Mathf.Lerp(0.0f, dif, 0.1f);                    
-
-                    transform.Rotate(Vector3.up, ang);
-
-                    yield return null;
+                    tarRot *= Quaternion.Euler(0.0f, 90.0f, 0.0f);
                 }
-            }
-            /*
-            else if (movedRight)
-            {
-                Debug.Log("Rotating whole cube right");
-
-                Quaternion tarRot = transform.rotation * Quaternion.Euler(0.0f, -90.0f, 0.0f);
-                //Quaternion tarRot = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y - 90.0f, transform.rotation.eulerAngles.z);
+                // If cube upside down
+                else if (transform.up.y <= -0.9f)
+                {
+                    tarRot *= Quaternion.Euler(0.0f, -90.0f, 0.0f);
+                }
+                // If cube on left side (I think)
+                else if (transform.up.x >= 0.9f)
+                {
+                    tarRot *= Quaternion.Euler(90.0f, 0.0f, 0.0f);
+                }
+                // If cube on right side (I think)
+                else if (transform.up.x <= -0.9f)
+                {
+                    tarRot *= Quaternion.Euler(-90.0f, 0.0f, 0.0f);
+                }
+                // If cube on front
+                else if (transform.up.z >= 0.9f)
+                {
+                    tarRot *= Quaternion.Euler(0.0f, 0.0f, 90.0f);
+                }
+                // If cube on back
+                else if (transform.up.z <= -0.9f)
+                {
+                    tarRot *= Quaternion.Euler(0.0f, 0.0f, -90.0f);
+                }     
+                */           
 
                 while (transform.rotation != tarRot)
                 {
@@ -151,33 +168,150 @@ public class VRubiksCubeController : MonoBehaviour
                     yield return null;
                 }
             }            
+            else if (movedRight)
+            {
+                Debug.Log("Rotating whole cube right");
+
+                //Quaternion tarRot = transform.rotation * Quaternion.Euler(0.0f, -90.0f, 0.0f);
+                Quaternion tarRot = transform.localRotation * Quaternion.Euler(0.0f, -90.0f, 0.0f);
+                //Quaternion tarRot = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y - 90.0f, transform.rotation.eulerAngles.z);
+
+                /*
+                Quaternion tarRot = transform.localRotation;
+                // If cube right side up
+                if (transform.up.y >= 0.9f)
+                {
+                    tarRot *= Quaternion.Euler(0.0f, -90.0f, 0.0f);
+                }
+                // If cube upside down
+                else if (transform.up.y <= -0.9f)
+                {
+                    tarRot *= Quaternion.Euler(0.0f, 90.0f, 0.0f);
+                }
+                // If cube on left side (I think)
+                else if (transform.up.x >= 0.9f)
+                {
+                    tarRot *= Quaternion.Euler(-90.0f, 0.0f, 0.0f);
+                }
+                // If cube on right side (I think)
+                else if (transform.up.x <= -0.9f)
+                {
+                    tarRot *= Quaternion.Euler(90.0f, 0.0f, 0.0f);
+                }
+                // If cube on front
+                else if (transform.up.z >= 0.9f)
+                {
+                    tarRot *= Quaternion.Euler(0.0f, 0.0f, -90.0f);
+                }
+                // If cube on back
+                else if (transform.up.z <= -0.9f)
+                {
+                    tarRot *= Quaternion.Euler(0.0f, 0.0f, 90.0f);
+                }
+
+                while (transform.rotation != tarRot)
+                {
+                    RotateWholeCubeRotate(tarRot);
+                    yield return null;
+                }
+                */
+            }                        
             else if (movedUp)
             {
                 Debug.Log("Rotating whole cube up");
 
-                Quaternion tarRot = transform.rotation * Quaternion.Euler(90.0f, 0.0f, 0.0f);
+                //Quaternion tarRot = transform.rotation * Quaternion.Euler(90.0f, 0.0f, 0.0f);
+                Quaternion tarRot = transform.localRotation * Quaternion.Euler(90.0f, 0.0f, 0.0f);
                 //Quaternion tarRot = Quaternion.Euler(transform.rotation.eulerAngles.x + 90.0f, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z);
+
+                /*
+                Quaternion tarRot = transform.localRotation;
+                // If cube right side up
+                if (transform.up.y >= 0.9f)
+                {
+                    tarRot *= Quaternion.Euler(90.0f, 0.0f, 0.0f);
+                }
+                // If cube upside down
+                else if (transform.up.y <= -0.9f)
+                {
+                    tarRot *= Quaternion.Euler(-90.0f, 0.0f, 0.0f);
+                }
+                // If cube on left side (I think)
+                else if (transform.up.x >= 0.9f)
+                {
+                    tarRot *= Quaternion.Euler(0.0f, 90.0f, 0.0f);
+                }
+                // If cube on right side (I think)
+                else if (transform.up.x <= -0.9f)
+                {
+                    tarRot *= Quaternion.Euler(0.0f, -90.0f, 0.0f);
+                }
+                // If cube on front
+                else if (transform.up.z >= 0.9f)
+                {
+                    tarRot *= Quaternion.Euler(-90.0f, 0.0f, 0.0f);
+                }
+                // If cube on back
+                else if (transform.up.z <= -0.9f)
+                {
+                    tarRot *= Quaternion.Euler(90.0f, 0.0f, 0.0f);
+                }
+                */
 
                 while (transform.rotation != tarRot)
                 {
                     RotateWholeCubeRotate(tarRot);
                     yield return null;
                 }                
-            }            
+            }                        
             else if (movedDown)
             {
                 Debug.Log("Rotating whole cube down");
 
-                Quaternion tarRot = transform.rotation * Quaternion.Euler(-90.0f, 0.0f, 0.0f);
+                //Quaternion tarRot = transform.rotation * Quaternion.Euler(-90.0f, 0.0f, 0.0f);
+                Quaternion tarRot = transform.localRotation * Quaternion.Euler(-90.0f, 0.0f, 0.0f);
                 //Quaternion tarRot = Quaternion.Euler(transform.rotation.eulerAngles.x - 90.0f, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z);
+
+                /*
+                Quaternion tarRot = transform.localRotation;
+                // If cube right side up
+                if (transform.up.y >= 0.9f)
+                {
+                    tarRot *= Quaternion.Euler(-90.0f, 0.0f, 0.0f);
+                }
+                // If cube upside down
+                else if (transform.up.y <= -0.9f)
+                {
+                    tarRot *= Quaternion.Euler(90.0f, 0.0f, 0.0f);
+                }
+                // If cube on left side (I think)
+                else if (transform.up.x >= 0.9f)
+                {
+                    tarRot *= Quaternion.Euler(0.0f, -90.0f, 0.0f);
+                }
+                // If cube on right side (I think)
+                else if (transform.up.x <= -0.9f)
+                {
+                    tarRot *= Quaternion.Euler(0.0f, 90.0f, 0.0f);
+                }
+                // If cube on front
+                else if (transform.up.z >= 0.9f)
+                {
+                    tarRot *= Quaternion.Euler(90.0f, 0.0f, 0.0f);
+                }
+                // If cube on back
+                else if (transform.up.z <= -0.9f)
+                {
+                    tarRot *= Quaternion.Euler(-90.0f, 0.0f, 0.0f);
+                }
+                */
 
                 while (transform.rotation != tarRot)
                 {
                     RotateWholeCubeRotate(tarRot);
                     yield return null;
                 }
-            }
-            */
+            }            
         }
         else if (top)
         {
@@ -200,22 +334,14 @@ public class VRubiksCubeController : MonoBehaviour
         yield return null;
     }
 
-    //void RotateWholeCubeRotate (Quaternion tarRot)
-    void RotateWholeCubeRotate (Vector3 axis, float ang)
-    {
-        //REWRITE THIS TO USE TARGET EULER ANGLES AND A SPECIFIED AXIS OF ROTATION
-
-
-
-
-
-        /*
-        transform.rotation = Quaternion.Slerp(transform.rotation, tarRot, 0.1f);
-        if (Vector3.Dot(transform.rotation * Vector3.forward, tarRot * Vector3.forward) >= 0.99f)
+    void RotateWholeCubeRotate (Quaternion tarRot)
+    {   
+        transform.localRotation = Quaternion.Slerp(transform.localRotation, tarRot, 0.1f);
+        if (Vector3.Dot(transform.localRotation * Vector3.forward, tarRot * Vector3.forward) >= 0.99f)
         {
-            transform.rotation = tarRot;            
+            transform.localRotation = tarRot;            
         }
-        */
+        
     }
 
     IEnumerator RotateCubeFace (bool front, bool top, bool bottom, bool left, bool right, bool movedLeft, bool movedRight, bool movedUp, bool movedDown)
