@@ -42,7 +42,7 @@ public class VRubiksCubeUserInput : MonoBehaviour
                         //Valid touch
                         m_touched = hit.collider.gameObject;
 
-                        Debug.Log("m_touched == " + m_touched.name);
+                        //Debug.Log("m_touched == " + m_touched.name);
 
                         //Add touch noise and "visualization" stuff here
 

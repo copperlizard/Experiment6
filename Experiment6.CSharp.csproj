@@ -63,6 +63,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\RotationTest.cs" />
     <Compile Include="Assets\_Scripts\Utility\LoadScene.cs" />
     <Compile Include="Assets\_Scripts\Utility\QuitApplication.cs" />
     <Compile Include="Assets\_Scripts\VRubiksCubeController.cs" />
