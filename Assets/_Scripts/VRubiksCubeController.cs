@@ -17,18 +17,8 @@ public class VRubiksCubeController : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
     {
-        GyroInput();
+        
 	}
-
-    public void GyroInput ()
-    {
-        // Cube tilt in response to phone gyro
-
-        if (!m_rotatingCube)
-        {
-
-        }
-    }
 
     public void Turn(GameObject touched, Vector2 move)
     {
@@ -83,15 +73,12 @@ public class VRubiksCubeController : MonoBehaviour
             left = true;
         }
 
-        //Debug.Log("movedLeft == " + movedLeft.ToString() + " ; movedRight == " + movedRight.ToString() + " ; movedUp == " + movedUp.ToString() + " ; movedDown == " + movedDown);
-        //Debug.Log("touched.transform.up == " + touched.transform.up.ToString());
-        //Debug.Log("upCheck == " + upCheck.ToString() + " ; forwardCheck == " + forwardCheck.ToString() + " ; rightCheck == " + rightCheck.ToString());
-        //Debug.Log("front == " + front.ToString() + " ; top == " + top.ToString() + " ; left == " + left.ToString() + " ; right == " + right.ToString());
-
+        /*
         Debug.Log("movedLeft == " + movedLeft.ToString() + " ; movedRight == " + movedRight.ToString() + " ; movedUp == " + movedUp.ToString() + " ; movedDown == " + movedDown + System.Environment.NewLine +
             "touched.transform.up == " + touched.transform.up.ToString() + System.Environment.NewLine +
-            /*"upCheck == " + upCheck.ToString() + " ; forwardCheck == " + forwardCheck.ToString() + " ; rightCheck == " + rightCheck.ToString() + System.Environment.NewLine +*/
+            "upCheck == " + upCheck.ToString() + " ; forwardCheck == " + forwardCheck.ToString() + " ; rightCheck == " + rightCheck.ToString() + System.Environment.NewLine +
             "front == " + front.ToString() + " ; top == " + top.ToString() + " ; left == " + left.ToString() + " ; right == " + right.ToString());        
+        */
 
         // Center touch...
         if (touched.transform.parent.gameObject.tag == "center")
@@ -114,74 +101,15 @@ public class VRubiksCubeController : MonoBehaviour
     {
         m_rotatingCube = true;
 
-        float orientationCheckX, orientationCheckY, orientationCheckZ;
-
-        orientationCheckX = Vector3.Dot(transform.up, Vector3.right);
-        orientationCheckY = Vector3.Dot(transform.up, Vector3.up);
-        orientationCheckZ = Vector3.Dot(transform.up, Vector3.forward);
-
-        bool xAligned = false, yAligned = false, zAlingned = false;
-
-        if (orientationCheckX >= 0.9f || orientationCheckX <= -0.9)
-        {
-            Debug.Log("xAligned!");
-            xAligned = true;
-        }
-        else if (orientationCheckY >= 0.9f || orientationCheckY <= -0.9f)
-        {
-            Debug.Log("yAligned!");
-            yAligned = true;
-        }
-        else if (orientationCheckZ >= 0.9f || orientationCheckZ <= -0.9f)
-        {
-            Debug.Log("zAligned!");
-            zAlingned = true;
-        }
-        else
-        {
-            Debug.Log("cube not aligned with any axis!!!");
-        }
-
-
         // Which face was touched?
         if (front)
         {
             // Which direction did user input?
             if (movedLeft)
             {
-                // Should rotate cube 90deg about world Y axis
+                Quaternion tarRot = Quaternion.Euler(0.0f, 90.0f, 0.0f) * transform.rotation;
                 
-                Vector3 axisCheck = new Vector3(90.0f, 90.0f, 90.0f);
-                //axisCheck.x *= transform.up.x;
-                //axisCheck.y *= transform.up.y;
-                //axisCheck.z *= transform.up.z;
-                
-                if (xAligned)
-                {
-                    axisCheck.z *= -transform.up.x;
-                    axisCheck.y *= transform.up.y;
-                    axisCheck.x *= transform.up.z;
-                }
-                else if (yAligned)
-                {
-                    axisCheck.x *= transform.up.x;
-                    axisCheck.y *= transform.up.y;
-                    axisCheck.z *= transform.up.z;
-                }
-                else if (zAlingned)
-                {
-                    axisCheck.x *= transform.up.x;
-                    axisCheck.y *= transform.up.y;
-                    axisCheck.z *= -transform.up.z;
-                }
-
-                Quaternion tarRot = transform.rotation * Quaternion.Euler(axisCheck.x, axisCheck.y, axisCheck.z);
-
-                //Quaternion tarRot = transform.rotation * Quaternion.Euler(0.0f, 90.0f, 0.0f);
-                //Quaternion tarRot = Quaternion.Euler(0.0f, 90.0f, 0.0f) * transform.rotation;
-                //Quaternion tarRot = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y + 90.0f, transform.rotation.eulerAngles.z);
-
-                Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
+                //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
 
                 while (transform.rotation != tarRot)
                 {
@@ -191,18 +119,9 @@ public class VRubiksCubeController : MonoBehaviour
             }            
             else if (movedRight)
             {
-                Vector3 axisCheck = new Vector3(-90.0f, -90.0f, -90.0f);
-                axisCheck.x *= transform.up.x;
-                axisCheck.y *= transform.up.y;
-                axisCheck.z *= transform.up.z;
+                Quaternion tarRot = Quaternion.Euler(0.0f, -90.0f, 0.0f) * transform.rotation;
 
-                Quaternion tarRot = transform.rotation * Quaternion.Euler(axisCheck.x, axisCheck.y, axisCheck.z);
-
-                //Quaternion tarRot = transform.rotation * Quaternion.Euler(0.0f, -90.0f, 0.0f);
-                //Quaternion tarRot = transform.rotation * Quaternion.Euler(0.0f, -90.0f, 0.0f);
-                //Quaternion tarRot = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y - 90.0f, transform.rotation.eulerAngles.z);
-
-                Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
+                //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
 
                 while (transform.rotation != tarRot)
                 {
@@ -212,18 +131,9 @@ public class VRubiksCubeController : MonoBehaviour
             }                        
             else if (movedUp)
             {
-                Vector3 axisCheck = new Vector3(90.0f, 90.0f, 90.0f);
-                axisCheck.x *= transform.right.x;
-                axisCheck.y *= transform.right.y;
-                axisCheck.z *= transform.right.z;
-
-                Quaternion tarRot = transform.rotation * Quaternion.Euler(axisCheck.x, axisCheck.y, axisCheck.z);
-
-                //Quaternion tarRot = transform.rotation * Quaternion.Euler(90.0f, 0.0f, 0.0f);
-                //Quaternion tarRot = transform.rotation * Quaternion.Euler(90.0f, 0.0f, 0.0f);
-                //Quaternion tarRot = Quaternion.Euler(transform.rotation.eulerAngles.x + 90.0f, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z);
-
-                Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
+                Quaternion tarRot = Quaternion.Euler(90.0f, 0.0f, 0.0f) * transform.rotation;
+                
+                //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
 
                 while (transform.rotation != tarRot)
                 {
@@ -233,18 +143,9 @@ public class VRubiksCubeController : MonoBehaviour
             }                        
             else if (movedDown)
             {
-                Vector3 axisCheck = new Vector3(-90.0f, -90.0f, -90.0f);
-                axisCheck.x *= transform.right.x;
-                axisCheck.y *= transform.right.y;
-                axisCheck.z *= transform.right.z;
+                Quaternion tarRot = Quaternion.Euler(-90.0f, 0.0f, 0.0f) * transform.rotation;
 
-                Quaternion tarRot = transform.rotation * Quaternion.Euler(axisCheck.x, axisCheck.y, axisCheck.z);
-
-                //Quaternion tarRot = transform.rotation * Quaternion.Euler(-90.0f, 0.0f, 0.0f);
-                //Quaternion tarRot = transform.rotation * Quaternion.Euler(-90.0f, 0.0f, 0.0f);
-                //Quaternion tarRot = Quaternion.Euler(transform.rotation.eulerAngles.x - 90.0f, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z);
-
-                Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
+                //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
 
                 while (transform.rotation != tarRot)
                 {
@@ -274,23 +175,20 @@ public class VRubiksCubeController : MonoBehaviour
         yield return null;
     }
 
-    static int DEBUG_loopCount = 0;
+    //int DEBUG_loopCount = 0;
     void RotateWholeCubeRotate (Quaternion tarRot)
-    {
-        //transform.rotation = Quaternion.RotateTowards(transform.rotation, tarRot, 5.0f);
+    {        
+        transform.rotation = Quaternion.Slerp(transform.rotation, tarRot, 0.1f);
+        //transform.rotation = Quaternion.SlerpUnclamped(transform.rotation, tarRot, 0.1f);
 
-        //transform.rotation = Quaternion.Slerp(transform.rotation, tarRot, 0.1f);
-        transform.rotation = Quaternion.SlerpUnclamped(transform.rotation, tarRot, 0.1f);
-
-        DEBUG_loopCount++;
+        //DEBUG_loopCount++;
                 
-        //if (Vector3.Dot(transform.rotation * Vector3.forward, tarRot * Vector3.forward) >= 0.99f)
         if (Quaternion.Angle(transform.rotation, tarRot) <= 1.0f)
         {
             transform.rotation = tarRot;
 
-            Debug.Log("RotateWholeCubeRotate() DEBUG_loopCount == " + DEBUG_loopCount.ToString());
-            DEBUG_loopCount = 0;            
+            //Debug.Log("RotateWholeCubeRotate() DEBUG_loopCount == " + DEBUG_loopCount.ToString());
+            //DEBUG_loopCount = 0;            
         }        
     }
 
