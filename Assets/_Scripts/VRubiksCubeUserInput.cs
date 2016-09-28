@@ -44,10 +44,8 @@ public class VRubiksCubeUserInput : MonoBehaviour
 
                         //Debug.Log("m_touched == " + m_touched.name);
 
-                        //Add touch noise and "visualization" stuff here
-
                         //Watch for valid move
-                        StartCoroutine(GetMoveInput());
+                        StartCoroutine(GetMoveInput(m_touched));
                         return;
                     }
                 }                    
@@ -55,13 +53,17 @@ public class VRubiksCubeUserInput : MonoBehaviour
         }
     }
 
-    IEnumerator GetMoveInput ()
+    IEnumerator GetMoveInput (GameObject touched)
     {
         Vector2 touchStart = Input.GetTouch(0).position;
 
+        //Add touch noise and "visualization" stuff here
+        MeshRenderer touchedRenderer = touched.GetComponent<MeshRenderer>();
+        touchedRenderer.enabled = true;
+
         Vector2 move;
 
-        while(Input.touchCount >= 0)
+        do
         {
             move = Input.GetTouch(0).position - touchStart;
 
@@ -75,7 +77,9 @@ public class VRubiksCubeUserInput : MonoBehaviour
             }
 
             yield return null;
-        }
+        } while (Input.touchCount > 0);
+
+        touchedRenderer.enabled = false;
 
         yield return null;
     }

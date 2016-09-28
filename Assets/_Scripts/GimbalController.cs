@@ -20,14 +20,17 @@ public class GimbalController : MonoBehaviour
 	void Update ()
     {
         GyroInput();
-	}
+
+        transform.rotation = Quaternion.LookRotation(Quaternion.Euler(m_desiredTilt, 0.0f, 0.0f) * m_phoneUp);
+    }
 
     public void GyroInput()
     {           
-        Quaternion phoneAttitude = Input.gyro.attitude; //probably not useful to me...
+        //Quaternion phoneAttitude = Input.gyro.attitude; //probably not useful to me...
 
         m_phoneUp = -Input.gyro.gravity;
 
+        /*
         Vector3 phoneUpTilt = Vector3.ProjectOnPlane(m_phoneUp, Vector3.right); //check tilt
         Vector3 phoneUpRoll = Vector3.ProjectOnPlane(m_phoneUp, Vector3.up); //check roll
 
@@ -40,10 +43,13 @@ public class GimbalController : MonoBehaviour
         tiltAngle *= tiltDir;
         rollAngle *= rollDir;
 
+        
         Debug.Log("Gyro enabled status == " + Input.gyro.enabled.ToString() + System.Environment.NewLine +
             "phoneAttidue == " + phoneAttitude.ToString() + " or " + phoneAttitude.eulerAngles.ToString() + System.Environment.NewLine +
             "phoneUp == " + m_phoneUp.ToString() + System.Environment.NewLine + 
             " ; phoneUpTilt == " + phoneUpTilt.ToString() + " ; phoneUpRoll == " + phoneUpRoll.ToString() + System.Environment.NewLine +
-            "tiltAngle == " + tiltAngle.ToString() + " ; rollAngle == " + rollAngle.ToString());        
+            "tiltAngle == " + tiltAngle.ToString() + " ; rollAngle == " + rollAngle.ToString() + System.Environment.NewLine +
+            "current gimbal.rotation == " + transform.rotation.ToString() + " or " + transform.rotation.eulerAngles.ToString());
+        */
     }
 }
