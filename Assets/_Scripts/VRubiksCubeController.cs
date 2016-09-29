@@ -48,9 +48,12 @@ public class VRubiksCubeController : MonoBehaviour
         // Front/top/bottom or side...
         float upCheck, forwardCheck, rightCheck;
         upCheck = Vector3.Dot(touched.transform.up, Vector3.up);
+        //upCheck = Vector3.Dot(transform.InverseTransformVector(touched.transform.up), Vector3.up);
         forwardCheck = Vector3.Dot(touched.transform.up, Vector3.forward);
+        //forwardCheck = Vector3.Dot(transform.InverseTransformVector(touched.transform.up), Vector3.forward);
         rightCheck = Vector3.Dot(touched.transform.up, Vector3.right);
-        
+        //rightCheck = Vector3.Dot(transform.InverseTransformVector(touched.transform.up), Vector3.right);
+
         bool front = false, top = false, bottom = false, left = false, right = false;
         if (upCheck >= 0.35f)
         {
@@ -63,7 +66,7 @@ public class VRubiksCubeController : MonoBehaviour
         else if (forwardCheck <= -0.9f)
         {
             front = true;
-        }
+        }        
         else if (rightCheck >= 0.35f)
         {
             right = true;
@@ -72,13 +75,11 @@ public class VRubiksCubeController : MonoBehaviour
         {
             left = true;
         }
-
         
         Debug.Log("movedLeft == " + movedLeft.ToString() + " ; movedRight == " + movedRight.ToString() + " ; movedUp == " + movedUp.ToString() + " ; movedDown == " + movedDown + System.Environment.NewLine +
             "touched.transform.up == " + touched.transform.up.ToString() + System.Environment.NewLine +
             "upCheck == " + upCheck.ToString() + " ; forwardCheck == " + forwardCheck.ToString() + " ; rightCheck == " + rightCheck.ToString() + System.Environment.NewLine +
-            "front == " + front.ToString() + " ; top == " + top.ToString() + " ; left == " + left.ToString() + " ; right == " + right.ToString());        
-        
+            "front == " + front.ToString() + " ; top == " + top.ToString() + " ; left == " + left.ToString() + " ; right == " + right.ToString());
 
         // Center touch...
         if (touched.transform.parent.gameObject.tag == "center")
@@ -101,271 +102,89 @@ public class VRubiksCubeController : MonoBehaviour
     {
         m_rotatingCube = true;
 
-        // Which face was touched?
-        if (front)
+        // Which direction did user input?
+        if (movedLeft)
         {
-            // Which direction did user input?
-            if (movedLeft)
+            Quaternion tarRot = Quaternion.Euler(0.0f, 90.0f, 0.0f) * transform.localRotation;
+
+            if (top)
             {
-                Quaternion tarRot = Quaternion.Euler(0.0f, 90.0f, 0.0f) * transform.localRotation;
+                tarRot = Quaternion.Euler(0.0f, 0.0f, 90.0f) * transform.localRotation;
+            }
+            else if (bottom)
+            {
+                tarRot = Quaternion.Euler(0.0f, 0.0f, -90.0f) * transform.localRotation;
+            }
 
-                //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
+            //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
 
-                while (transform.localRotation != tarRot)
-                {
-                    RotateWholeCubeRotate(tarRot);
-                    yield return null;
-                }
+            while (transform.localRotation != tarRot)
+            {
+                RotateWholeCubeRotate(tarRot);
+                yield return null;
+            }
+        }
+        else if (movedRight)
+        {
+            Quaternion tarRot = Quaternion.Euler(0.0f, -90.0f, 0.0f) * transform.localRotation;
+
+            if (top)
+            {
+                tarRot = Quaternion.Euler(0.0f, 0.0f, -90.0f) * transform.localRotation;
+            }
+            else if (bottom)
+            {
+                tarRot = Quaternion.Euler(0.0f, 0.0f, 90.0f) * transform.localRotation;
+            }
+
+            //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
+
+            while (transform.localRotation != tarRot)
+            {
+                RotateWholeCubeRotate(tarRot);
+                yield return null;
+            }
+        }
+        else if (movedUp)
+        {
+            Quaternion tarRot = Quaternion.Euler(90.0f, 0.0f, 0.0f) * transform.localRotation;
+
+            if (left)
+            {
+
+            }
+            else if (right)
+            {
+
             }            
-            else if (movedRight)
+
+            //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
+
+            while (transform.localRotation != tarRot)
             {
-                Quaternion tarRot = Quaternion.Euler(0.0f, -90.0f, 0.0f) * transform.localRotation;
-
-                //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
-
-                while (transform.localRotation != tarRot)
-                {
-                    RotateWholeCubeRotate(tarRot);
-                    yield return null;
-                }                
-            }                        
-            else if (movedUp)
-            {
-                Quaternion tarRot = Quaternion.Euler(90.0f, 0.0f, 0.0f) * transform.localRotation;
-
-                //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
-
-                while (transform.localRotation != tarRot)
-                {
-                    RotateWholeCubeRotate(tarRot);
-                    yield return null;
-                }                
-            }                        
-            else if (movedDown)
-            {
-                Quaternion tarRot = Quaternion.Euler(-90.0f, 0.0f, 0.0f) * transform.localRotation;
-
-                //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
-
-                while (transform.localRotation != tarRot)
-                {
-                    RotateWholeCubeRotate(tarRot);
-                    yield return null;
-                }
-            }            
-        }
-        else if (top)
-        {
-            // Which direction did user input?
-            if (movedLeft)
-            {
-                Quaternion tarRot = Quaternion.Euler(0.0f, 0.0f, 90.0f) * transform.localRotation;
-
-                //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
-
-                while (transform.localRotation != tarRot)
-                {
-                    RotateWholeCubeRotate(tarRot);
-                    yield return null;
-                }
-            }
-            else if (movedRight)
-            {
-                Quaternion tarRot = Quaternion.Euler(0.0f, 0.0f, -90.0f) * transform.localRotation;
-
-                //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
-
-                while (transform.localRotation != tarRot)
-                {
-                    RotateWholeCubeRotate(tarRot);
-                    yield return null;
-                }
-            }
-            /*
-            else if (movedUp)
-            {
-                Quaternion tarRot = Quaternion.Euler(90.0f, 0.0f, 0.0f) * transform.localRotation;
-
-                //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
-
-                while (transform.localRotation != tarRot)
-                {
-                    RotateWholeCubeRotate(tarRot);
-                    yield return null;
-                }
-            }
-            else if (movedDown)
-            {
-                Quaternion tarRot = Quaternion.Euler(-90.0f, 0.0f, 0.0f) * transform.localRotation;
-
-                //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
-
-                while (transform.localRotation != tarRot)
-                {
-                    RotateWholeCubeRotate(tarRot);
-                    yield return null;
-                }
-            }
-            */
-        }
-        else if (bottom)
-        {
-            // Which direction did user input?
-            if (movedLeft)
-            {
-                Quaternion tarRot = Quaternion.Euler(0.0f, 0.0f, -90.0f) * transform.localRotation;
-
-                //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
-
-                while (transform.localRotation != tarRot)
-                {
-                    RotateWholeCubeRotate(tarRot);
-                    yield return null;
-                }
-            }
-            else if (movedRight)
-            {
-                Quaternion tarRot = Quaternion.Euler(0.0f, 0.0f, 90.0f) * transform.localRotation;
-
-                //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
-
-                while (transform.localRotation != tarRot)
-                {
-                    RotateWholeCubeRotate(tarRot);
-                    yield return null;
-                }
-            }
-            /*
-            else if (movedUp)
-            {
-                Quaternion tarRot = Quaternion.Euler(90.0f, 0.0f, 0.0f) * transform.localRotation;
-
-                //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
-
-                while (transform.localRotation != tarRot)
-                {
-                    RotateWholeCubeRotate(tarRot);
-                    yield return null;
-                }
-            }
-            else if (movedDown)
-            {
-                Quaternion tarRot = Quaternion.Euler(-90.0f, 0.0f, 0.0f) * transform.localRotation;
-
-                //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
-
-                while (transform.localRotation != tarRot)
-                {
-                    RotateWholeCubeRotate(tarRot);
-                    yield return null;
-                }
-            }
-            */
-        }
-        else if (left)
-        {
-            // Which direction did user input?
-            /*
-            if (movedLeft)
-            {
-                Quaternion tarRot = Quaternion.Euler(0.0f, 90.0f, 0.0f) * transform.localRotation;
-
-                //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
-
-                while (transform.localRotation != tarRot)
-                {
-                    RotateWholeCubeRotate(tarRot);
-                    yield return null;
-                }
-            }
-            else if (movedRight)
-            {
-                Quaternion tarRot = Quaternion.Euler(0.0f, -90.0f, 0.0f) * transform.localRotation;
-
-                //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
-
-                while (transform.localRotation != tarRot)
-                {
-                    RotateWholeCubeRotate(tarRot);
-                    yield return null;
-                }
-            }
-            else*/ if (movedUp)
-            {
-                Quaternion tarRot = Quaternion.Euler(0.0f, 0.0f, -90.0f) * transform.localRotation;
-
-                //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
-
-                while (transform.localRotation != tarRot)
-                {
-                    RotateWholeCubeRotate(tarRot);
-                    yield return null;
-                }
-            }
-            else if (movedDown)
-            {
-                Quaternion tarRot = Quaternion.Euler(0.0f, 0.0f, 90.0f) * transform.localRotation;
-
-                //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
-
-                while (transform.localRotation != tarRot)
-                {
-                    RotateWholeCubeRotate(tarRot);
-                    yield return null;
-                }
+                RotateWholeCubeRotate(tarRot);
+                yield return null;
             }
         }
-        else if (right)
+        else if (movedDown)
         {
-            // Which direction did user input?
-            /*
-            if (movedLeft)
+            Quaternion tarRot = Quaternion.Euler(-90.0f, 0.0f, 0.0f) * transform.localRotation;
+
+            if (left)
             {
-                Quaternion tarRot = Quaternion.Euler(0.0f, 90.0f, 0.0f) * transform.localRotation;
 
-                //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
-
-                while (transform.localRotation != tarRot)
-                {
-                    RotateWholeCubeRotate(tarRot);
-                    yield return null;
-                }
             }
-            else if (movedRight)
+            else if (right)
             {
-                Quaternion tarRot = Quaternion.Euler(0.0f, -90.0f, 0.0f) * transform.localRotation;
 
-                //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
-
-                while (transform.localRotation != tarRot)
-                {
-                    RotateWholeCubeRotate(tarRot);
-                    yield return null;
-                }
             }
-            else*/ if (movedUp)
+
+            //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
+
+            while (transform.localRotation != tarRot)
             {
-                Quaternion tarRot = Quaternion.Euler(0.0f, 0.0f, 90.0f) * transform.localRotation;
-
-                //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
-
-                while (transform.localRotation != tarRot)
-                {
-                    RotateWholeCubeRotate(tarRot);
-                    yield return null;
-                }
-            }
-            else if (movedDown)
-            {
-                Quaternion tarRot = Quaternion.Euler(0.0f, 0.0f, -90.0f) * transform.localRotation;
-
-                //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
-
-                while (transform.localRotation != tarRot)
-                {
-                    RotateWholeCubeRotate(tarRot);
-                    yield return null;
-                }
+                RotateWholeCubeRotate(tarRot);
+                yield return null;
             }
         }
 
