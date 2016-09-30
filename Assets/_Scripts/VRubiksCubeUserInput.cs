@@ -4,6 +4,8 @@ using System.Collections;
 [RequireComponent(typeof(VRubiksCubeController))]
 public class VRubiksCubeUserInput : MonoBehaviour
 {
+    public GameObject m_selectHighlight;
+
     public float m_minMove;
 
     private VRubiksCubeController m_cubeController;
@@ -58,8 +60,13 @@ public class VRubiksCubeUserInput : MonoBehaviour
         Vector2 touchStart = Input.GetTouch(0).position;
 
         //Add touch noise and "visualization" stuff here
-        MeshRenderer touchedRenderer = touched.GetComponent<MeshRenderer>();
-        touchedRenderer.enabled = true;
+        //MeshRenderer touchedRenderer = touched.GetComponent<MeshRenderer>();
+        //touchedRenderer.enabled = true;
+
+        m_selectHighlight.transform.position = touched.transform.position;
+        m_selectHighlight.transform.rotation = touched.transform.rotation;
+        m_selectHighlight.transform.parent = touched.transform;
+        m_selectHighlight.SetActive(true);
 
         Vector2 move;
 
@@ -79,7 +86,9 @@ public class VRubiksCubeUserInput : MonoBehaviour
             yield return null;
         } while (Input.touchCount > 0);
 
-        touchedRenderer.enabled = false;
+        //touchedRenderer.enabled = false;
+
+        m_selectHighlight.SetActive(false);
 
         yield return null;
     }

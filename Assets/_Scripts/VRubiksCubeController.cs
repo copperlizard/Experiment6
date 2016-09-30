@@ -47,11 +47,18 @@ public class VRubiksCubeController : MonoBehaviour
 
         // Front/top/bottom or side...
         float upCheck, forwardCheck, rightCheck;
-        upCheck = Vector3.Dot(touched.transform.up, Vector3.up);
+
+        //upCheck = Vector3.Dot(touched.transform.up, Vector3.up);        
+        //forwardCheck = Vector3.Dot(touched.transform.up, Vector3.forward);        
+        //rightCheck = Vector3.Dot(touched.transform.up, Vector3.right);
+
+        Vector3 unTilted = Quaternion.Inverse(transform.parent.rotation) * touched.transform.up;
+        upCheck = Vector3.Dot(unTilted, Vector3.up);
+        forwardCheck = Vector3.Dot(unTilted, Vector3.forward);
+        rightCheck = Vector3.Dot(unTilted, Vector3.right);
+
         //upCheck = Vector3.Dot(transform.InverseTransformVector(touched.transform.up), Vector3.up);
-        forwardCheck = Vector3.Dot(touched.transform.up, Vector3.forward);
         //forwardCheck = Vector3.Dot(transform.InverseTransformVector(touched.transform.up), Vector3.forward);
-        rightCheck = Vector3.Dot(touched.transform.up, Vector3.right);
         //rightCheck = Vector3.Dot(transform.InverseTransformVector(touched.transform.up), Vector3.right);
 
         bool front = false, top = false, bottom = false, left = false, right = false;
@@ -151,11 +158,11 @@ public class VRubiksCubeController : MonoBehaviour
 
             if (left)
             {
-
+                tarRot = Quaternion.Euler(0.0f, 0.0f, -90.0f) * transform.localRotation;
             }
             else if (right)
             {
-
+                tarRot = Quaternion.Euler(0.0f, 0.0f, 90.0f) * transform.localRotation;
             }            
 
             //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
@@ -172,11 +179,11 @@ public class VRubiksCubeController : MonoBehaviour
 
             if (left)
             {
-
+                tarRot = Quaternion.Euler(0.0f, 0.0f, 90.0f) * transform.localRotation;
             }
             else if (right)
             {
-
+                tarRot = Quaternion.Euler(0.0f, 0.0f, -90.0f) * transform.localRotation;
             }
 
             //Debug.Log("tarRot == " + tarRot.ToString() + " or " + tarRot.eulerAngles.ToString());
