@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(VRubiksCubeUserInput))]
 public class VRubiksCubeController : MonoBehaviour
@@ -8,10 +9,27 @@ public class VRubiksCubeController : MonoBehaviour
 
     private bool m_rotatingCube = false;
 
+    private List<GameObject> m_cubes, m_rotationGroup;
+
 	// Use this for initialization
 	void Start ()
     {
         m_userInput = GetComponent<VRubiksCubeUserInput>();
+
+        m_cubes = new List<GameObject>();
+        m_rotationGroup = new List<GameObject>();
+
+        GameObject[] gameObjs = FindObjectsOfType<GameObject>();
+
+        for (int i = 0; i < gameObjs.Length; i++)
+        {
+            if (gameObjs[i].layer == LayerMask.NameToLayer("Cube"))
+            {
+                m_cubes.Add(gameObjs[i]);
+            }
+        }
+
+        //Debug.Log("m_cubes.count == " + m_cubes.Count.ToString());
 	}
 	
 	// Update is called once per frame
@@ -83,10 +101,12 @@ public class VRubiksCubeController : MonoBehaviour
             left = true;
         }
         
+        /*
         Debug.Log("movedLeft == " + movedLeft.ToString() + " ; movedRight == " + movedRight.ToString() + " ; movedUp == " + movedUp.ToString() + " ; movedDown == " + movedDown + System.Environment.NewLine +
             "touched.transform.up == " + touched.transform.up.ToString() + System.Environment.NewLine +
             "upCheck == " + upCheck.ToString() + " ; forwardCheck == " + forwardCheck.ToString() + " ; rightCheck == " + rightCheck.ToString() + System.Environment.NewLine +
             "front == " + front.ToString() + " ; top == " + top.ToString() + " ; left == " + left.ToString() + " ; right == " + right.ToString());
+        */
 
         // Center touch...
         if (touched.transform.parent.gameObject.tag == "center")
@@ -100,7 +120,7 @@ public class VRubiksCubeController : MonoBehaviour
         {
             if (!m_rotatingCube)
             {
-                StartCoroutine(RotateCubeFace(front, top, bottom, left, right, movedLeft, movedRight, movedUp, movedDown));
+                StartCoroutine(RotateCubeFace(touched, front, top, bottom, left, right, movedLeft, movedRight, movedUp, movedDown));
             }
         }
     }
@@ -214,10 +234,160 @@ public class VRubiksCubeController : MonoBehaviour
         }        
     }
 
-    IEnumerator RotateCubeFace (bool front, bool top, bool bottom, bool left, bool right, bool movedLeft, bool movedRight, bool movedUp, bool movedDown)
+    IEnumerator RotateCubeFace (GameObject touched, bool front, bool top, bool bottom, bool left, bool right, bool movedLeft, bool movedRight, bool movedUp, bool movedDown)
     {
         m_rotatingCube = true;
 
+        // Use touched parent obj local coord's and touched.transorm.up to determine rotation group; 
+        // Use touched face and movedDir to determine rotation direction
+        
+        //
+        //
+        // TODO: WRITE A FUNCTION FOR "FINDING ROTATION GROUP"
+        //
+        // TODO: WRITE A FUNCTION FOR ROTATING ROTATION GROUP (SIMILAR TO ROTATING WHOLE CUBE)
+        //
+        //
+
+        if (movedLeft || movedRight)
+        {
+            if (front || left || right)
+            {
+                // Use Y coord to select group
+                float tarCoord = touched.transform.parent.localPosition.y;
+
+                //Debug.Log("tarCoords == " + tarCoord.ToString());
+
+                m_rotationGroup.Clear();
+
+                foreach (GameObject cube in m_cubes)
+                {
+                    if (cube.transform.localPosition.y == tarCoord)
+                    {
+                        m_rotationGroup.Add(cube);
+                    }
+                }
+
+                //Debug.Log("m_rotationGroup.count == " + m_rotationGroup.Count.ToString());
+            }
+            else if(top || bottom)
+            {
+                // Use Z coord to select group                
+                float tarCoord = touched.transform.parent.localPosition.z;
+
+                //Debug.Log("tarCoords == " + tarCoord.ToString());
+
+                m_rotationGroup.Clear();
+
+                foreach (GameObject cube in m_cubes)
+                {
+                    if (cube.transform.localPosition.z == tarCoord)
+                    {
+                        m_rotationGroup.Add(cube);
+                    }
+                }
+            }
+        }
+        else if (movedUp || movedDown)
+        {
+            if (front || top || bottom)
+            {
+                // Use X coord to select group
+                float tarCoord = touched.transform.parent.localPosition.x;
+
+                //Debug.Log("tarCoords == " + tarCoord.ToString());
+
+                m_rotationGroup.Clear();
+
+                foreach (GameObject cube in m_cubes)
+                {
+                    if (cube.transform.localPosition.x == tarCoord)
+                    {
+                        m_rotationGroup.Add(cube);
+                    }
+                }
+            }
+            else if (left || right)
+            {
+                // Use Z coord to select group
+                float tarCoord = touched.transform.parent.localPosition.z;
+
+                //Debug.Log("tarCoords == " + tarCoord.ToString());
+
+                m_rotationGroup.Clear();
+
+                foreach (GameObject cube in m_cubes)
+                {
+                    if (cube.transform.localPosition.z == tarCoord)
+                    {
+                        m_rotationGroup.Add(cube);
+                    }
+                }
+            }
+        }
+        
+
+        if (movedLeft)
+        {
+            if (front || left || right)
+            {
+                // Group rotates CW around Y
+            }
+            else if (top)
+            {
+                // Group rotates CCW around Z
+            }
+            else if (bottom)
+            {
+                // Group rotates CW around Z
+            }                      
+        }
+        else if (movedRight)
+        {
+            if (front || left || right)
+            {
+                // Group rotates CCW around Y
+            }
+            else if (top)
+            {
+                // Group rotates CW around Z
+            }
+            else if (bottom)
+            {
+                // Group rotates CCW around Z
+            }            
+        }
+        else if (movedUp)
+        {
+            if (front || top || bottom)
+            {
+                // Group rotates CW around X
+            }            
+            else if (left)
+            {
+                // Group rotates CW around Z
+            }
+            else if (right)
+            {
+                // Group rotates CCW around Z
+            }
+        }
+        else if (movedDown)
+        {
+            if (front || top || bottom)
+            {
+                // Group rotates CCW around x
+            }            
+            else if (left)
+            {
+                // Group rotates CCW around Z
+            }
+            else if (right)
+            {
+                // Group rotates CW arond Z
+            }
+        }
+        
         m_rotatingCube = false;
         yield return null;
     }
