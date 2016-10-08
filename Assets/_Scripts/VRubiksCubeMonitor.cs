@@ -11,13 +11,15 @@ public class VRubiksCubeMonitor : MonoBehaviour
 
     private GameObject m_whiteCenter, m_blueCenter, m_redCenter, m_orangeCenter, m_greenCenter, m_yellowCenter; // Center TouchPanels
 
-    private Dictionary<Vector3, int> m_cubeMap = new Dictionary<Vector3, int>();
+    private Dictionary<Vector3, int> m_cubeMap;
     private bool[] m_cubeStates = new bool[20];
 
     // Use this for initialization
     void Start ()
     {
         //Build cube map
+        m_cubeMap = new Dictionary<Vector3, int>();
+
         m_cubeMap.Add(new Vector3(-1.0f, -1.0f, -1.0f), 0); //left bottom front
         m_cubeMap.Add(new Vector3(0.0f, -1.0f, -1.0f), 1); //middle bottom front
         m_cubeMap.Add(new Vector3(1.0f, -1.0f, -1.0f), 2); //right bottom front
@@ -66,10 +68,18 @@ public class VRubiksCubeMonitor : MonoBehaviour
         {
             if (gameObjs[i].layer == LayerMask.NameToLayer("Cube"))
             {
+                //Debug.Log("cube found ; name == " + gameObjs[i].name);
+
                 // Store center panels
                 if (gameObjs[i].tag == "center")
                 {
-                    Transform panel = gameObjs[i].GetComponentInChildren<Transform>();
+                    //Transform panel = gameObjs[i].GetComponentInChildren<Transform>();
+
+                    Transform panel = gameObjs[i].transform.GetChild(0);
+
+                    Debug.Log("center cube found ; name == " + gameObjs[i].name + System.Environment.NewLine +
+                        "touch panel name == " + panel.gameObject.name + System.Environment.NewLine +
+                        "touch panel transform.up == " + panel.transform.up.ToString());
 
                     switch (panel.gameObject.tag)
                     {
@@ -101,6 +111,16 @@ public class VRubiksCubeMonitor : MonoBehaviour
                 }
             }
         }
+
+        /*
+        Debug.Log("m_cubes.count == " + m_cubes.Count.ToString() + System.Environment.NewLine +
+            "m_whiteCenter.name == " + m_whiteCenter.name + System.Environment.NewLine +
+            "m_blueCenter.name == " + m_blueCenter.name + System.Environment.NewLine +
+            "m_redCenter.name == " + m_redCenter.name + System.Environment.NewLine +
+            "m_orangeCenter.name == " + m_orangeCenter.name + System.Environment.NewLine +
+            "m_greenCenter.name == " + m_greenCenter.name + System.Environment.NewLine +
+            "m_yellowCenter.name == " + m_yellowCenter.name + System.Environment.NewLine);
+            */
     }
 	
 	// Update is called once per frame
@@ -116,9 +136,15 @@ public class VRubiksCubeMonitor : MonoBehaviour
         {
             // Assume the cube is correctly located
             bool cubeLocated = true;
-                        
+
             // Check panel alignment
-            Transform[] panels = cube.GetComponentsInChildren<Transform>();
+            //Transform[] panels = cube.GetComponentsInChildren<Transform>();
+            Transform[] panels = new Transform[cube.transform.childCount];
+            for (int i = 0; i < cube.transform.childCount; i++)
+            {
+                panels[i] = cube.transform.GetChild(i);
+            }
+
             foreach (Transform panel in panels)
             {
                 float panelCheck = 0.0f;
@@ -222,7 +248,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
                 goodCubes++;
             }
         }
-        m_percentComplete = goodCubes / m_cubeStates.Length;
+        m_percentComplete = (float)goodCubes / (float)m_cubeStates.Length;
 
         // Determine cube stage...
         m_stage = 0; // Assume no completed stages
@@ -396,8 +422,88 @@ public class VRubiksCubeMonitor : MonoBehaviour
         }
 
         // Check front back
+        if (m_cubeStates[1] && m_cubeStates[8] && m_cubeStates[9] && m_cubeStates[13]) // Cross complete
+        {
+            if (1 > m_stage)
+            {
+                m_stage = 1;
+            }
+
+            if (m_cubeStates[0] && m_cubeStates[2] && m_cubeStates[12] && m_cubeStates[14]) // First layer complete
+            {
+                if (2 > m_stage)
+                {
+                    m_stage = 2;
+                }
+
+                if (m_cubeStates[3] && m_cubeStates[4] && m_cubeStates[15] && m_cubeStates[16]) // Second layer complete
+                {
+                    if (3 > m_stage)
+                    {
+                        m_stage = 3;
+                    }
+
+                    if (m_cubeStates[6] && m_cubeStates[10] && m_cubeStates[11] && m_cubeStates[18]) // Other cross complete
+                    {
+                        if (4 > m_stage)
+                        {
+                            m_stage = 4;
+                        }
+
+                        if (m_cubeStates[5] && m_cubeStates[7] && m_cubeStates[17] && m_cubeStates[19]) // Third layer complete
+                        {
+                            if (5 > m_stage)
+                            {
+                                m_stage = 5;
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         // Check back front
+        if (m_cubeStates[6] && m_cubeStates[10] && m_cubeStates[11] && m_cubeStates[18]) // Cross complete
+        {
+            if (1 > m_stage)
+            {
+                m_stage = 1;
+            }
+
+            if (m_cubeStates[5] && m_cubeStates[7] && m_cubeStates[17] && m_cubeStates[19]) // First layer complete
+            {
+                if (2 > m_stage)
+                {
+                    m_stage = 2;
+                }
+
+                if (m_cubeStates[3] && m_cubeStates[4] && m_cubeStates[15] && m_cubeStates[16]) // Second layer complete
+                {
+                    if (3 > m_stage)
+                    {
+                        m_stage = 3;
+                    }
+
+                    if (m_cubeStates[1] && m_cubeStates[8] && m_cubeStates[9] && m_cubeStates[13]) // Other cross complete
+                    {
+                        if (4 > m_stage)
+                        {
+                            m_stage = 4;
+                        }
+
+                        if (m_cubeStates[0] && m_cubeStates[2] && m_cubeStates[12] && m_cubeStates[14]) // Third layer complete
+                        {
+                            if (5 > m_stage)
+                            {
+                                m_stage = 5;
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         return true;
     }

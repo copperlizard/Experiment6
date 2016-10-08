@@ -3,11 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(VRubiksCubeUserInput))]
+[RequireComponent(typeof(VRubiksCubeMonitor))]
 public class VRubiksCubeController : MonoBehaviour
 {
     public float m_cubeRotateSpeed, m_faceRotateSpeed;
 
     private VRubiksCubeUserInput m_userInput;
+
+    private VRubiksCubeMonitor m_monitor;
 
     private bool m_rotatingCube = false, m_rotatingFace = false;
 
@@ -19,6 +22,8 @@ public class VRubiksCubeController : MonoBehaviour
 	void Start ()
     {
         m_userInput = GetComponent<VRubiksCubeUserInput>();
+
+        m_monitor = GetComponent<VRubiksCubeMonitor>();
 
         m_cubes = new List<GameObject>();
         m_rotationGroup = new List<GameObject>();
@@ -378,7 +383,11 @@ public class VRubiksCubeController : MonoBehaviour
                 } while (m_rotatingFace);
             }
         }
-        
+
+        // Check cube status
+        m_monitor.CheckSolved();
+        Debug.Log("m_monitor.m_percentComplete == " + m_monitor.m_percentComplete.ToString() + " ; m_monitor.m_stage == " + m_monitor.m_stage);
+
         m_rotatingCube = false;
         yield return null;
     }
