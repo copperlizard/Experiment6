@@ -43,7 +43,7 @@ public class VRubiksCubeController : MonoBehaviour
         m_faceRotator = new GameObject();
         m_faceRotator.transform.position = transform.parent.position;
         m_faceRotator.transform.rotation = transform.parent.rotation;
-        m_faceRotator.transform.parent = transform.parent;
+        m_faceRotator.transform.parent = transform.parent;                
 	}
 	
 	// Update is called once per frame
