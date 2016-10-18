@@ -116,13 +116,14 @@ public class VRubiksCubeMonitor : MonoBehaviour
                 // Store center panels
                 if (gameObjs[i].tag == "center")
                 {
-                    //Transform panel = gameObjs[i].GetComponentInChildren<Transform>();
-
                     Transform panel = gameObjs[i].transform.GetChild(0);
 
+                    /*
                     Debug.Log("center cube found ; name == " + gameObjs[i].name + System.Environment.NewLine +
                         "touch panel name == " + panel.gameObject.name + System.Environment.NewLine +
                         "touch panel transform.up == " + panel.transform.up.ToString());
+
+                    */
 
                     switch (panel.gameObject.tag)
                     {
@@ -285,7 +286,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
             }
             else
             {
-                RepositionCube(cube, tarPos, true, spot);
+                RepositionCube(cube, tarPos, true);
             }
         }
 
@@ -306,20 +307,27 @@ public class VRubiksCubeMonitor : MonoBehaviour
             }
             else
             {
-                RepositionCube(cube, tarPos, false, spot);
+                RepositionCube(cube, tarPos, false);
             }
         }
         */
     }
 
-    private void RepositionCube (GameObject cube, Vector3 tarPos, bool corner, int spot)
+    private void RepositionCube (GameObject cube, Vector3 tarPos, bool corner)
     {
-        Vector3 oldPos = cube.transform.localPosition;
+        //Debug.Log("spot == " + spot.ToString());
+        // Tried passing spot through as function parameter... did not work as expected; no explanation...
 
+        int spot = -1;
+        bool locFound = m_cubeMap.TryGetValue(tarPos, out spot);
+        if (!locFound)
+        {
+            Debug.Log("could not find loc!!!");
+        }
+
+        // Reposition Cube        
         cube.transform.localPosition = tarPos;
-
-        //Vector3 diff = oldPos - tarPos;
-
+                
         // Store panels in random order
         GameObject[] panels = new GameObject[cube.transform.childCount];
         List<int> slots = new List<int>();
@@ -336,24 +344,63 @@ public class VRubiksCubeMonitor : MonoBehaviour
             panels[slot] = cube.transform.GetChild(i).gameObject;
         }
 
-        
-        // Use tarPos/spot and panelUps to generate new cube orientation
+        // Use tarPos/spot and panel transform.ups to generate new cube orientation              
         Quaternion rot = new Quaternion();
         if (corner)
         {
             switch (spot)
             {
                 case 0:
-
-                    // FIRST SEE WHAT NO ROTATION DOES; THEN TRY TO ALIGN ONE PANEL; THEN TRY AND GET MULTIPLE PANELS ALIGNED
-
-
                     // left bottom front
+
+                    Debug.Log("CASE 0 (left bottom front)!!!");
 
                     // I need to align panel.transform.up's with -transform.up, -transform.right, -transform.forward
 
-                    // An orientation quaternion ... the desired orientation of the panels ... no correlation to current cube orientation
-                    //Quaternion tarRot = Quaternion.LookRotation(-transform.forward, -transform.up);
+                    cube.transform.localRotation = Quaternion.Euler(90.0f, 0.0f, 0.0f);
+
+                    //rot = Quaternion.LookRotation(-transform.forward, -transform.up);
+                    //Quaternion curRot = Quaternion.LookRotation(panels[0].transform.up, panels[1].transform.up);
+
+                    // Rotate cube so panelUp[0] is aligned with -transform.up
+                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(-transform.up));     
+                    //rot = Quaternion.FromToRotation(transform.InverseTransformVector(panels[0].transform.up), transform.InverseTransformVector(-transform.up));
+                    //cube.transform.localRotation = rot * cube.transform.localRotation;
+
+                    // Rotate cube so panelUp[1] is aligned with -transform.right
+                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(-transform.right));
+                    //rot = Quaternion.FromToRotation(transform.InverseTransformVector(panels[1].transform.up), transform.InverseTransformVector(-transform.right));
+                    //cube.transform.localRotation = rot * cube.transform.localRotation;
+
+                    // Rotate cube so panelUp[2] is aligned with -transform.forward
+                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[2].transform.up), cube.transform.InverseTransformVector(-transform.forward));
+                    //rot = Quaternion.FromToRotation(transform.InverseTransformVector(panels[2].transform.up), transform.InverseTransformVector(-transform.forward));
+                    //cube.transform.localRotation = rot * cube.transform.localRotation;
+
+                    break;
+                case 2:
+                    // right bottom front
+
+                    Debug.Log("CASE 2 (right bottom front)!!!");
+
+                    cube.transform.localRotation = Quaternion.Euler(90.0f, 0.0f, 90.0f);
+
+                    // Rotate cube so panelUp[0] is aligned with -transform.up
+                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(-transform.up));
+                    //cube.transform.localRotation = rot * cube.transform.localRotation;
+
+                    // Rotate cube so panelUp[1] is aligned with transform.right
+                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(transform.right));
+                    //cube.transform.localRotation = rot * cube.transform.localRotation;
+
+                    // Rotate cube so panelUp[2] is aligned with -transform.forward
+                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[2].transform.up), cube.transform.InverseTransformVector(-transform.forward));
+                    //cube.transform.localRotation = rot * cube.transform.localRotation;
+                    break;
+                case 5:
+                    // left bottom back
+
+                    cube.transform.localRotation = Quaternion.Euler(90.0f, 90.0f, 0.0f);
 
                     // Rotate cube so panelUp[0] is aligned with -transform.up
                     //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(-transform.up));
@@ -363,115 +410,94 @@ public class VRubiksCubeMonitor : MonoBehaviour
                     //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(-transform.right));
                     //cube.transform.localRotation = rot * cube.transform.localRotation;
 
-                    // Rotate cube so panelUp[2] is aligned with -transform.forward
-                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[2].transform.up), cube.transform.InverseTransformVector(-transform.forward));
-                    //cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    break;
-                case 2:
-                    // right bottom front
-
-                    // Rotate cube so panelUp[0] is aligned with -transform.up
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(-transform.up));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[1] is aligned with transform.right
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(transform.right));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[2] is aligned with -transform.forward
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[2].transform.up), cube.transform.InverseTransformVector(-transform.forward));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-                    break;
-                case 5:
-                    // left bottom back
-
-                    // Rotate cube so panelUp[0] is aligned with -transform.up
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(-transform.up));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[1] is aligned with -transform.right
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(-transform.right));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-
                     // Rotate cube so panelUp[2] is aligned with transform.forward
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[2].transform.up), cube.transform.InverseTransformVector(transform.forward));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
+                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[2].transform.up), cube.transform.InverseTransformVector(transform.forward));
+                    //cube.transform.localRotation = rot * cube.transform.localRotation;
                     break;
                 case 7:
                     // right bottom back
 
+                    cube.transform.localRotation = Quaternion.Euler(90.0f, 180.0f, 0.0f);
+
                     // Rotate cube so panelUp[0] is aligned with -transform.up
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(-transform.up));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
+                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(-transform.up));
+                    //cube.transform.localRotation = rot * cube.transform.localRotation;
 
                     // Rotate cube so panelUp[1] is aligned with transform.right
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(transform.right));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
+                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(transform.right));
+                    //cube.transform.localRotation = rot * cube.transform.localRotation;
 
                     // Rotate cube so panelUp[2] is aligned with transform.forward
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[2].transform.up), cube.transform.InverseTransformVector(transform.forward));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
+                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[2].transform.up), cube.transform.InverseTransformVector(transform.forward));
+                    //cube.transform.localRotation = rot * cube.transform.localRotation;
                     break;
                 case 12:
                     // left top front
 
+                    cube.transform.localRotation = Quaternion.Euler(-90.0f, -90.0f, 0.0f);
+
                     // Rotate cube so panelUp[0] is aligned with transform.up
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(transform.up));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
+                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(transform.up));
+                    //cube.transform.localRotation = rot * cube.transform.localRotation;
 
                     // Rotate cube so panelUp[1] is aligned with -transform.right
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(-transform.right));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
+                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(-transform.right));
+                    //cube.transform.localRotation = rot * cube.transform.localRotation;
 
                     // Rotate cube so panelUp[2] is aligned with -transform.forward
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[2].transform.up), cube.transform.InverseTransformVector(-transform.forward));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
+                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[2].transform.up), cube.transform.InverseTransformVector(-transform.forward));
+                    //cube.transform.localRotation = rot * cube.transform.localRotation;
                     break;
                 case 14:
                     // right top front
 
+                    cube.transform.localRotation = Quaternion.Euler(-90.0f, -180.0f, 0.0f);
+
                     // Rotate cube so panelUp[0] is aligned with transform.up
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(transform.up));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
+                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(transform.up));
+                    //cube.transform.localRotation = rot * cube.transform.localRotation;
 
                     // Rotate cube so panelUp[1] is aligned with transform.right
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(transform.right));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
+                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(transform.right));
+                    //cube.transform.localRotation = rot * cube.transform.localRotation;
 
                     // Rotate cube so panelUp[2] is aligned with -transform.forward
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[2].transform.up), cube.transform.InverseTransformVector(-transform.forward));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
+                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[2].transform.up), cube.transform.InverseTransformVector(-transform.forward));
+                    //cube.transform.localRotation = rot * cube.transform.localRotation;
                     break;
                 case 17:
                     // left top back
 
+                    cube.transform.localRotation = Quaternion.Euler(-90.0f, 0.0f, 0.0f);
+
                     // Rotate cube so panelUp[0] is aligned with transform.up
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(transform.up));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
+                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(transform.up));
+                    //cube.transform.localRotation = rot * cube.transform.localRotation;
 
                     // Rotate cube so panelUp[1] is aligned with -transform.right
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(-transform.right));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
+                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(-transform.right));
+                    //cube.transform.localRotation = rot * cube.transform.localRotation;
 
                     // Rotate cube so panelUp[2] is aligned with transform.forward
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[2].transform.up), cube.transform.InverseTransformVector(transform.forward));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
+                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[2].transform.up), cube.transform.InverseTransformVector(transform.forward));
+                    //cube.transform.localRotation = rot * cube.transform.localRotation;
                     break;
                 case 19:
                     // right top back
 
+                    cube.transform.localRotation = Quaternion.Euler(-90.0f, 90.0f, 0.0f);
+
                     // Rotate cube so panelUp[0] is aligned with transform.up
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(transform.up));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
+                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(transform.up));
+                    //cube.transform.localRotation = rot * cube.transform.localRotation;
 
                     // Rotate cube so panelUp[1] is aligned with transform.right
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(transform.right));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
+                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(transform.right));
+                    //cube.transform.localRotation = rot * cube.transform.localRotation;
 
                     // Rotate cube so panelUp[2] is aligned with transform.forward
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[2].transform.up), cube.transform.InverseTransformVector(transform.forward));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;                    
+                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[2].transform.up), cube.transform.InverseTransformVector(transform.forward));
+                    //cube.transform.localRotation = rot * cube.transform.localRotation;                    
                     break;
             }
         }
@@ -612,7 +638,9 @@ public class VRubiksCubeMonitor : MonoBehaviour
                     cube.transform.localRotation = rot * cube.transform.localRotation;
                     break;
             }
-        }        
+        }
+
+        cube.transform.parent = transform;
 
         Debug.Log("repositiong cube.name == " + cube.name + " to " + tarPos.ToString() + System.Environment.NewLine +
             "cube.LocalRotation == " + cube.transform.localRotation.ToString() + " or " + cube.transform.localRotation.eulerAngles.ToString());
