@@ -2,24 +2,42 @@
 using System.Collections;
 using System.Collections.Generic;
 
+[RequireComponent(typeof(VRubiksCubeController))] 
 public class VRubiksCubeMonitor : MonoBehaviour
 {
+    public ParticleSystem m_FunkyParticles;
+
     public float m_percentComplete = 0;
-    public int m_stage = 0; // Solved stages    
+
+    public int m_minTurns = 10, m_maxTurns = 20;
+
+    [HideInInspector]
+    public int m_stage = 0, m_turns = 0; // Solved stages    
 
     public bool m_randomizeOnStart = false;
 
-    private List<GameObject> m_cubes, m_cornerCubes, m_edgeCubes; // Does not include centers
+    private VRubiksCubeController m_cubeController;
+
+    private ParticleSystem.EmissionModule m_FunkyParticleEmission;
+    private ParticleSystem.MinMaxCurve m_FunkyParticleEmissionRate;
+
+    private List<GameObject> m_cubes, m_touchPanels; // Do/es not include centers
 
     private GameObject m_whiteCenter, m_blueCenter, m_redCenter, m_orangeCenter, m_greenCenter, m_yellowCenter; // Center TouchPanels
 
     private Dictionary<Vector3, int> m_cubeMap;
-    private Dictionary<int, Vector3> m_mapCube;
+    
     private bool[] m_cubeStates = new bool[20];
 
     // Use this for initialization
     void Start ()
     {
+        m_cubeController = GetComponent<VRubiksCubeController>();
+        if (m_cubeController == null)
+        {
+            Debug.Log("VRubiksCubeController not found!!!");
+        }
+
         //Build cube map
         m_cubeMap = new Dictionary<Vector3, int>();
 
@@ -57,47 +75,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
 
         m_cubeMap.Add(new Vector3(-1.0f, 1.0f, 1.0f), 17); //left top back
         m_cubeMap.Add(new Vector3(0.0f, 1.0f, 1.0f), 18); //middle top back
-        m_cubeMap.Add(new Vector3(1.0f, 1.0f, 1.0f), 19); //right top back
-
-
-        //Build mapCube
-        m_mapCube = new Dictionary<int, Vector3>();
-
-        m_mapCube.Add(0, new Vector3(-1.0f, -1.0f, -1.0f)); //left bottom front
-        m_mapCube.Add(1, new Vector3(0.0f, -1.0f, -1.0f)); //middle bottom front
-        m_mapCube.Add(2, new Vector3(1.0f, -1.0f, -1.0f)); //right bottom front
-
-        m_mapCube.Add(3, new Vector3(-1.0f, -1.0f, 0.0f)); //left bottom middle
-        //m_mapCube.Add(0, new Vector3(0.0f, -1.0f, 0.0f)); //middle bottom middle *center
-        m_mapCube.Add(4, new Vector3(1.0f, -1.0f, 0.0f)); //right bottom middle
-
-        m_mapCube.Add(5, new Vector3(-1.0f, -1.0f, 1.0f)); //left bottom back
-        m_mapCube.Add(6, new Vector3(0.0f, -1.0f, 1.0f)); //middle bottom back
-        m_mapCube.Add(7, new Vector3(1.0f, -1.0f, 1.0f)); //right bottom back
-
-        m_mapCube.Add(8, new Vector3(-1.0f, 0.0f, -1.0f)); //left middle front
-        //m_mapCube.Add(0, new Vector3(0.0f, 0.0f, -1.0f)); //middle middle front *center
-        m_mapCube.Add(9, new Vector3(1.0f, 0.0f, -1.0f)); //right middle front
-
-        //m_mapCube.Add(0, new Vector3(-1.0f, 0.0f, 0.0f)); //left middle middle *center
-        //m_mapCube.Add(0, new Vector3(0.0f, 0.0f, 0.0f)); //middle middle middle *base cube
-        //m_mapCube.Add(0, new Vector3(1.0f, 0.0f, 0.0f)); //right middle middle *center
-
-        m_mapCube.Add(10, new Vector3(-1.0f, 0.0f, 1.0f)); //left middle back 
-        //m_mapCube.Add(0, new Vector3(0.0f, 0.0f, 1.0f)); //middle middle back *center
-        m_mapCube.Add(11, new Vector3(1.0f, 0.0f, 1.0f)); //right middle back
-
-        m_mapCube.Add(12, new Vector3(-1.0f, 1.0f, -1.0f)); //left top front
-        m_mapCube.Add(13, new Vector3(0.0f, 1.0f, -1.0f)); //middle top front
-        m_mapCube.Add(14, new Vector3(1.0f, 1.0f, -1.0f)); //right top front
-
-        m_mapCube.Add(15, new Vector3(-1.0f, 1.0f, 0.0f)); //left top middle
-        //m_mapCube.Add(0, new Vector3(0.0f, 1.0f, 0.0f)); //middle top middle *center
-        m_mapCube.Add(16, new Vector3(1.0f, 1.0f, 0.0f)); //right top middle
-
-        m_mapCube.Add(17, new Vector3(-1.0f, 1.0f, 1.0f)); //left top back
-        m_mapCube.Add(18, new Vector3(0.0f, 1.0f, 1.0f)); //middle top back
-        m_mapCube.Add(19, new Vector3(1.0f, 1.0f, 1.0f)); //right top back
+        m_cubeMap.Add(new Vector3(1.0f, 1.0f, 1.0f), 19); //right top back        
 
         for (int i = 0; i < m_cubeStates.Length; i++)
         {
@@ -106,6 +84,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
 
         // Build cube list
         m_cubes = new List<GameObject>();
+        m_touchPanels = new List<GameObject>();
         GameObject[] gameObjs = FindObjectsOfType<GameObject>();
         for (int i = 0; i < gameObjs.Length; i++)
         {
@@ -122,7 +101,6 @@ public class VRubiksCubeMonitor : MonoBehaviour
                     Debug.Log("center cube found ; name == " + gameObjs[i].name + System.Environment.NewLine +
                         "touch panel name == " + panel.gameObject.name + System.Environment.NewLine +
                         "touch panel transform.up == " + panel.transform.up.ToString());
-
                     */
 
                     switch (panel.gameObject.tag)
@@ -151,499 +129,94 @@ public class VRubiksCubeMonitor : MonoBehaviour
                 }
                 else
                 {
-                    m_cubes.Add(gameObjs[i]);
+                    m_cubes.Add(gameObjs[i]);                    
+                    
+                    Transform[] panels = new Transform[gameObjs[i].transform.childCount];
+                    for (int j = 0; j < panels.Length; j++)
+                    {
+                        panels[j] = gameObjs[i].transform.GetChild(j);
+
+                        if (panels[j] == null)
+                        {
+                            Debug.Log("error adding panels!");
+                        }
+                    }
+
+                    foreach (Transform panel in panels)
+                    {
+                        m_touchPanels.Add(panel.gameObject);
+                    }                                     
                 }
             }
         }
 
-        // Make lists of corner and edge cubes using m_cubes (for randomizing cube)...
-        m_cornerCubes = new List<GameObject>();
-        m_edgeCubes = new List<GameObject>();
-        foreach (GameObject cube in m_cubes)
-        {
-            // Prep to record cube state (there is probably a nicer way to do this...)
-            Vector3 mapInput = Vector3.zero;
-            if (cube.transform.localPosition.x < -0.5f)
-            {
-                mapInput.x = -1.0f;
-            }
-            else if (cube.transform.localPosition.x > 0.5f)
-            {
-                mapInput.x = 1.0f;
-            }
-            else
-            {
-                mapInput.x = 0.0f;
-            }
-
-            if (cube.transform.localPosition.y < -0.5f)
-            {
-                mapInput.y = -1.0f;
-            }
-            else if (cube.transform.localPosition.y > 0.5f)
-            {
-                mapInput.y = 1.0f;
-            }
-            else
-            {
-                mapInput.y = 0.0f;
-            }
-
-            if (cube.transform.localPosition.z < -0.5f)
-            {
-                mapInput.z = -1.0f;
-            }
-            else if (cube.transform.localPosition.z > 0.5f)
-            {
-                mapInput.z = 1.0f;
-            }
-            else
-            {
-                mapInput.z = 0.0f;
-            }
-
-            // Corner or egde
-            int stateIndex = -1;
-            bool stateIndexFound = m_cubeMap.TryGetValue(mapInput, out stateIndex);
-            if (!stateIndexFound)
-            {
-                Debug.Log("cube stateIndex not found while creating corner/edge lists!!!");
-            }
-            else
-            {
-                // Corner cube
-                if (stateIndex == 0 || stateIndex == 2 || stateIndex == 5 || stateIndex == 7 || stateIndex == 12 || stateIndex == 14 || stateIndex == 17 || stateIndex == 19) 
-                {
-                    m_cornerCubes.Add(cube);
-                }
-                // Edge cube
-                else if (stateIndex == 1 || stateIndex == 3 || stateIndex == 4 || stateIndex == 6 || stateIndex == 8 || stateIndex == 9 || stateIndex == 10 || stateIndex == 11 ||
-                    stateIndex == 13 || stateIndex == 15 || stateIndex == 16 || stateIndex == 18) 
-                {
-                    m_edgeCubes.Add(cube);
-                }
-            }
-        }
+        m_FunkyParticleEmission = m_FunkyParticles.emission;
+        m_FunkyParticleEmissionRate = new ParticleSystem.MinMaxCurve(30.0f);
+        m_FunkyParticleEmission.rate = m_FunkyParticleEmissionRate;
 
         /*
         Debug.Log("m_cubes.count == " + m_cubes.Count.ToString() + System.Environment.NewLine +
+            "m_touchPanels.count == " + m_touchPanels.Count.ToString() + System.Environment.NewLine +
             "m_whiteCenter.name == " + m_whiteCenter.name + System.Environment.NewLine +
             "m_blueCenter.name == " + m_blueCenter.name + System.Environment.NewLine +
             "m_redCenter.name == " + m_redCenter.name + System.Environment.NewLine +
             "m_orangeCenter.name == " + m_orangeCenter.name + System.Environment.NewLine +
             "m_greenCenter.name == " + m_greenCenter.name + System.Environment.NewLine +
             "m_yellowCenter.name == " + m_yellowCenter.name + System.Environment.NewLine);
-            */
+        */
 
         if (m_randomizeOnStart)
-        {
+        {            
             RandomizeCube();
-        }
-    }
-
-    public void RandomizeCube ()
-    {
-        //Random.seed = (int)(Time.realtimeSinceStartup + Time.deltaTime * 100.0f);
-        Random.seed = 0;
-
-        List<int> cornerSpots = new List<int>();
-        cornerSpots.Add(0);
-        cornerSpots.Add(2);
-        cornerSpots.Add(5);
-        cornerSpots.Add(7);
-        cornerSpots.Add(12);
-        cornerSpots.Add(14);
-        cornerSpots.Add(17);
-        cornerSpots.Add(19);
-
-        List<int> edgeSpots = new List<int>();
-        edgeSpots.Add(1);
-        edgeSpots.Add(3);
-        edgeSpots.Add(4);
-        edgeSpots.Add(6);
-        edgeSpots.Add(8);
-        edgeSpots.Add(9);
-        edgeSpots.Add(10);
-        edgeSpots.Add(11);
-        edgeSpots.Add(13);
-        edgeSpots.Add(15);
-        edgeSpots.Add(16);
-        edgeSpots.Add(18);
-
-        // Randomize Corner cubes
-        foreach (GameObject cube in m_cornerCubes)
-        {
-            // Pick a new spot for each cube (each spot picked only once)
-            int pick = Random.Range(0, cornerSpots.Count);
-            int spot = cornerSpots[pick];
-            cornerSpots.RemoveAt(pick); 
-
-            Vector3 tarPos;
-            bool foundPos = m_mapCube.TryGetValue(spot, out tarPos);
-            if (!foundPos)
-            {
-                Debug.Log("Error finding new cube pos while randomizing corners...");
-            }
-            else
-            {
-                RepositionCube(cube, tarPos, true);
-            }
-        }
-
-        /*
-        // Randomize Edge cubes
-        foreach (GameObject cube in m_edgeCubes)
-        {
-            // Pick a new spot for each cube (each spot picked only once)
-            int pick = Random.Range(0, edgeSpots.Count);
-            int spot = edgeSpots[pick];
-            edgeSpots.RemoveAt(pick);
-
-            Vector3 tarPos;
-            bool foundPos = m_mapCube.TryGetValue(spot, out tarPos);
-            if (!foundPos)
-            {
-                Debug.Log("Error finding new cube pos while randomizing corners...");
-            }
-            else
-            {
-                RepositionCube(cube, tarPos, false);
-            }
-        }
-        */
-    }
-
-    private void RepositionCube (GameObject cube, Vector3 tarPos, bool corner)
-    {
-        //Debug.Log("spot == " + spot.ToString());
-        // Tried passing spot through as function parameter... did not work as expected; no explanation...
-
-        int spot = -1;
-        bool locFound = m_cubeMap.TryGetValue(tarPos, out spot);
-        if (!locFound)
-        {
-            Debug.Log("could not find loc!!!");
-        }
-
-        // Reposition Cube        
-        cube.transform.localPosition = tarPos;
-                
-        // Store panels in random order
-        GameObject[] panels = new GameObject[cube.transform.childCount];
-        List<int> slots = new List<int>();
-        for (int i = 0; i < cube.transform.childCount; i++)
-        {
-            slots.Add(i);
-        }
-        for (int i = 0; i < cube.transform.childCount; i++)
-        {
-            int pick = Random.Range(0, slots.Count - 1);
-            int slot = slots[pick];
-            slots.RemoveAt(pick);
-
-            panels[slot] = cube.transform.GetChild(i).gameObject;
-        }
-
-        // Use tarPos/spot and panel transform.ups to generate new cube orientation              
-        Quaternion rot = new Quaternion();
-        if (corner)
-        {
-            switch (spot)
-            {
-                case 0:
-                    // left bottom front
-
-                    Debug.Log("CASE 0 (left bottom front)!!!");
-
-                    // I need to align panel.transform.up's with -transform.up, -transform.right, -transform.forward
-
-                    cube.transform.localRotation = Quaternion.Euler(90.0f, 0.0f, 0.0f);
-
-                    //rot = Quaternion.LookRotation(-transform.forward, -transform.up);
-                    //Quaternion curRot = Quaternion.LookRotation(panels[0].transform.up, panels[1].transform.up);
-
-                    // Rotate cube so panelUp[0] is aligned with -transform.up
-                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(-transform.up));     
-                    //rot = Quaternion.FromToRotation(transform.InverseTransformVector(panels[0].transform.up), transform.InverseTransformVector(-transform.up));
-                    //cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[1] is aligned with -transform.right
-                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(-transform.right));
-                    //rot = Quaternion.FromToRotation(transform.InverseTransformVector(panels[1].transform.up), transform.InverseTransformVector(-transform.right));
-                    //cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[2] is aligned with -transform.forward
-                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[2].transform.up), cube.transform.InverseTransformVector(-transform.forward));
-                    //rot = Quaternion.FromToRotation(transform.InverseTransformVector(panels[2].transform.up), transform.InverseTransformVector(-transform.forward));
-                    //cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    break;
-                case 2:
-                    // right bottom front
-
-                    Debug.Log("CASE 2 (right bottom front)!!!");
-
-                    cube.transform.localRotation = Quaternion.Euler(90.0f, 0.0f, 90.0f);
-
-                    // Rotate cube so panelUp[0] is aligned with -transform.up
-                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(-transform.up));
-                    //cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[1] is aligned with transform.right
-                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(transform.right));
-                    //cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[2] is aligned with -transform.forward
-                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[2].transform.up), cube.transform.InverseTransformVector(-transform.forward));
-                    //cube.transform.localRotation = rot * cube.transform.localRotation;
-                    break;
-                case 5:
-                    // left bottom back
-
-                    cube.transform.localRotation = Quaternion.Euler(90.0f, 90.0f, 0.0f);
-
-                    // Rotate cube so panelUp[0] is aligned with -transform.up
-                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(-transform.up));
-                    //cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[1] is aligned with -transform.right
-                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(-transform.right));
-                    //cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[2] is aligned with transform.forward
-                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[2].transform.up), cube.transform.InverseTransformVector(transform.forward));
-                    //cube.transform.localRotation = rot * cube.transform.localRotation;
-                    break;
-                case 7:
-                    // right bottom back
-
-                    cube.transform.localRotation = Quaternion.Euler(90.0f, 180.0f, 0.0f);
-
-                    // Rotate cube so panelUp[0] is aligned with -transform.up
-                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(-transform.up));
-                    //cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[1] is aligned with transform.right
-                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(transform.right));
-                    //cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[2] is aligned with transform.forward
-                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[2].transform.up), cube.transform.InverseTransformVector(transform.forward));
-                    //cube.transform.localRotation = rot * cube.transform.localRotation;
-                    break;
-                case 12:
-                    // left top front
-
-                    cube.transform.localRotation = Quaternion.Euler(-90.0f, -90.0f, 0.0f);
-
-                    // Rotate cube so panelUp[0] is aligned with transform.up
-                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(transform.up));
-                    //cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[1] is aligned with -transform.right
-                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(-transform.right));
-                    //cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[2] is aligned with -transform.forward
-                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[2].transform.up), cube.transform.InverseTransformVector(-transform.forward));
-                    //cube.transform.localRotation = rot * cube.transform.localRotation;
-                    break;
-                case 14:
-                    // right top front
-
-                    cube.transform.localRotation = Quaternion.Euler(-90.0f, -180.0f, 0.0f);
-
-                    // Rotate cube so panelUp[0] is aligned with transform.up
-                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(transform.up));
-                    //cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[1] is aligned with transform.right
-                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(transform.right));
-                    //cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[2] is aligned with -transform.forward
-                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[2].transform.up), cube.transform.InverseTransformVector(-transform.forward));
-                    //cube.transform.localRotation = rot * cube.transform.localRotation;
-                    break;
-                case 17:
-                    // left top back
-
-                    cube.transform.localRotation = Quaternion.Euler(-90.0f, 0.0f, 0.0f);
-
-                    // Rotate cube so panelUp[0] is aligned with transform.up
-                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(transform.up));
-                    //cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[1] is aligned with -transform.right
-                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(-transform.right));
-                    //cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[2] is aligned with transform.forward
-                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[2].transform.up), cube.transform.InverseTransformVector(transform.forward));
-                    //cube.transform.localRotation = rot * cube.transform.localRotation;
-                    break;
-                case 19:
-                    // right top back
-
-                    cube.transform.localRotation = Quaternion.Euler(-90.0f, 90.0f, 0.0f);
-
-                    // Rotate cube so panelUp[0] is aligned with transform.up
-                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(transform.up));
-                    //cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[1] is aligned with transform.right
-                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(transform.right));
-                    //cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[2] is aligned with transform.forward
-                    //rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[2].transform.up), cube.transform.InverseTransformVector(transform.forward));
-                    //cube.transform.localRotation = rot * cube.transform.localRotation;                    
-                    break;
-            }
         }
         else
         {
-            switch (spot)
+            m_FunkyParticleEmissionRate.constantMax = 0.01f;
+            m_FunkyParticleEmission.rate = m_FunkyParticleEmissionRate;
+        }
+    }
+
+    public void RandomizeCube()
+    {        
+        StartCoroutine(Randomizing());        
+    }
+
+    IEnumerator Randomizing()
+    {
+        m_FunkyParticleEmissionRate.constantMax = 30.0f;
+        m_FunkyParticleEmission.rate = m_FunkyParticleEmissionRate;
+        Random.seed = (int)(Time.realtimeSinceStartup * 100.0f);
+        m_cubeController.m_faceRotateSpeed *= 1000.0f;
+
+        int turns = Random.Range(m_minTurns, m_maxTurns);
+        int turns2 = turns;
+
+        while (turns > 0)
+        {
+            int panelI = Random.Range(0, m_touchPanels.Count - 1);
+
+            Vector2 dir = (panelI % 2 == 0) ? new Vector2(1.0f, 0.0f) : new Vector2(0.0f, 1.0f);
+
+            dir *= (((int)Time.time + panelI) % 2 == 0) ? 1.0f : -1.0f;
+
+            m_cubeController.Turn(m_touchPanels[panelI], dir);
+
+            while (m_cubeController.m_rotatingFace)
             {
-                case 1:
-                    // middle bottom front
-
-                    // Rotate cube so panelUp[0] is aligned with -transform.up
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(-transform.up));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[1] is aligned with -transform.forward
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(-transform.forward));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-                    break;                    
-                case 3:
-                    // left bottom middle
-
-                    // Rotate cube so panelUp[0] is aligned with -transform.up
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(-transform.up));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[1] is aligned with -transform.right
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(-transform.right));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-                    break;
-                case 4:
-                    // right bottom middle
-
-                    // Rotate cube so panelUp[0] is aligned with -transform.up
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(-transform.up));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[1] is aligned with transform.right
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(transform.right));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-                    break;
-                case 6:
-                    // middle bottom back
-
-                    // Rotate cube so panelUp[0] is aligned with -transform.up
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(-transform.up));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[1] is aligned with transform.forward
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(transform.forward));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-                    break;
-                case 8:
-                    // left middle front
-
-                    // Rotate cube so panelUp[0] is aligned with -transform.right
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(-transform.right));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[1] is aligned with -transform.forward
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(-transform.forward));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-                    break;
-                case 9:
-                    // right middle front
-
-                    // Rotate cube so panelUp[0] is aligned with transform.right
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(transform.right));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[1] is aligned with -transform.forward
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(-transform.forward));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-                    break;
-                case 10:
-                    // left middle back
-
-                    // Rotate cube so panelUp[0] is aligned with -transform.right
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(-transform.right));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[1] is aligned with transform.forward
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(transform.forward));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-                    break;
-                case 11:
-                    // right middle back
-
-                    // Rotate cube so panelUp[0] is aligned with transform.right
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(transform.right));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[1] is aligned with transform.forward
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(transform.forward));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-                    break;
-                case 13:
-                    // middle top front
-
-                    // Rotate cube so panelUp[0] is aligned with transform.up
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(transform.up));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[1] is aligned with -transform.forward
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(-transform.forward));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-                    break;
-                case 15:
-                    // left top middle
-
-                    // Rotate cube so panelUp[0] is aligned with transform.up
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(transform.up));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[1] is aligned with -transform.right
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(-transform.right));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-                    break;
-                case 16:
-                    // right top middle
-
-                    // Rotate cube so panelUp[0] is aligned with transform.up
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(transform.up));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[1] is aligned with transform.right
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(transform.right));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-                    break;
-                case 18:
-                    // middle top back
-
-                    // Rotate cube so panelUp[0] is aligned with transform.up
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[0].transform.up), cube.transform.InverseTransformVector(transform.up));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-
-                    // Rotate cube so panelUp[1] is aligned with transform.forward
-                    rot = Quaternion.FromToRotation(cube.transform.InverseTransformVector(panels[1].transform.up), cube.transform.InverseTransformVector(transform.forward));
-                    cube.transform.localRotation = rot * cube.transform.localRotation;
-                    break;
+                yield return null;
             }
+
+            turns--;
+            yield return null;
         }
 
-        cube.transform.parent = transform;
+        m_turns -= turns2;
 
-        Debug.Log("repositiong cube.name == " + cube.name + " to " + tarPos.ToString() + System.Environment.NewLine +
-            "cube.LocalRotation == " + cube.transform.localRotation.ToString() + " or " + cube.transform.localRotation.eulerAngles.ToString());
+        m_cubeController.m_faceRotateSpeed /= 1000.0f;
+        m_FunkyParticleEmissionRate.constantMax = 0.01f;
+        m_FunkyParticleEmission.rate = m_FunkyParticleEmissionRate;
+
+        yield return null;
     }
 
     public bool CheckSolved ()
@@ -655,7 +228,6 @@ public class VRubiksCubeMonitor : MonoBehaviour
             bool cubeLocated = true;
 
             // Check panel alignment
-            //Transform[] panels = cube.GetComponentsInChildren<Transform>();
             Transform[] panels = new Transform[cube.transform.childCount];
             for (int i = 0; i < cube.transform.childCount; i++)
             {
@@ -1023,5 +595,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
         }
 
         return true;
-    }
+    }    
 }
+
+

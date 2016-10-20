@@ -1,5 +1,30 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+
+public class LimitedStack<T> : LinkedList<T>
+{
+    private readonly int _maxSize;
+    public LimitedStack(int maxSize)
+    {
+        _maxSize = maxSize;
+    }
+
+    public void Push(T item)
+    {
+        this.AddFirst(item);
+
+        if (this.Count > _maxSize)
+            this.RemoveLast();
+    }
+
+    public T Pop()
+    {
+        var item = this.First.Value;
+        this.RemoveFirst();
+        return item;
+    }
+}
 
 [RequireComponent(typeof(VRubiksCubeController))]
 public class VRubiksCubeUserInput : MonoBehaviour
@@ -12,9 +37,19 @@ public class VRubiksCubeUserInput : MonoBehaviour
 
     private GameObject m_touched;
 
+    private LimitedStack<GameObject> m_touchedStack;   // CHANGE THESE TO A UNDO AND REDO LIMITED STACK AND SWITCH TO CUSTOM DATATYPE FOR USER INPUTS
+    private LimitedStack<Vector2> m_moveStack;
+
+    private int m_touchedArrayIndex = 0, m_lastMoveArrayIndex = 0;
+
+    private bool m_undid = false;
+
 	// Use this for initialization
 	void Start ()
     {
+        m_touchedStack = new LimitedStack<GameObject>(10);
+        m_moveStack = new LimitedStack<Vector2>(10);
+
         m_cubeController = GetComponent<VRubiksCubeController>();
 	}
 	
@@ -79,6 +114,14 @@ public class VRubiksCubeUserInput : MonoBehaviour
                 //Send m_touched and move to VRubiksCubeController
                 m_cubeController.Turn(m_touched, move);
 
+                m_touchedStack.Push(m_touched);
+                m_moveStack.Push(move);
+
+                if (m_undid)
+                {
+                    m_undid = false;
+                }
+
                 //Exit loop
                 break;
             }
@@ -91,5 +134,15 @@ public class VRubiksCubeUserInput : MonoBehaviour
         m_selectHighlight.SetActive(false);
 
         yield return null;
+    }
+
+    public void Undo()
+    {
+        // GOALS: ALOW USER TO UNDO 10ISH TIMES
+    }
+
+    public void Redo()
+    {
+        // GOALS: ALLOW USER TO REDO ALL UNDO'S
     }
 }

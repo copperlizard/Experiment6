@@ -8,11 +8,12 @@ public class VRubiksCubeController : MonoBehaviour
 {
     public float m_cubeRotateSpeed, m_faceRotateSpeed;
 
+    [HideInInspector]
+    public bool m_rotatingCube = false, m_rotatingFace = false;
+
     private VRubiksCubeUserInput m_userInput;
 
     private VRubiksCubeMonitor m_monitor;
-
-    private bool m_rotatingCube = false, m_rotatingFace = false;
 
     private List<GameObject> m_cubes, m_rotationGroup;
 
@@ -54,6 +55,8 @@ public class VRubiksCubeController : MonoBehaviour
 
     public void Turn(GameObject touched, Vector2 move)
     {
+        m_monitor.m_turns++;
+
         // Find move direction... 
         float movedX = Vector2.Dot(move.normalized, Vector2.right);
         float movedY = Vector2.Dot(move.normalized, Vector2.up);
