@@ -2,6 +2,17 @@
 using System.Collections;
 using System.Collections.Generic;
 
+public class UserInput
+{
+    public GameObject m_touched;
+    public Vector2 m_move;
+    public UserInput(GameObject touched, Vector2 move)
+    {
+        m_touched = touched;
+        m_move = move;
+    }
+}
+
 public class LimitedStack<T> : LinkedList<T>
 {
     private readonly int _maxSize;
@@ -37,8 +48,11 @@ public class VRubiksCubeUserInput : MonoBehaviour
 
     private GameObject m_touched;
 
-    private LimitedStack<GameObject> m_touchedStack;   // CHANGE THESE TO A UNDO AND REDO LIMITED STACK AND SWITCH TO CUSTOM DATATYPE FOR USER INPUTS
-    private LimitedStack<Vector2> m_moveStack;
+    //private LimitedStack<GameObject> m_touchedStack;   // CHANGE THESE TO A UNDO AND REDO LIMITED STACK AND SWITCH TO CUSTOM DATATYPE FOR USER INPUTS
+    //private LimitedStack<Vector2> m_moveStack;
+
+    private LimitedStack<UserInput> m_undoStack;
+    private LimitedStack<UserInput> m_redoStack;
 
     private int m_touchedArrayIndex = 0, m_lastMoveArrayIndex = 0;
 
@@ -47,8 +61,11 @@ public class VRubiksCubeUserInput : MonoBehaviour
 	// Use this for initialization
 	void Start ()
     {
-        m_touchedStack = new LimitedStack<GameObject>(10);
-        m_moveStack = new LimitedStack<Vector2>(10);
+        //m_touchedStack = new LimitedStack<GameObject>(10);
+        //m_moveStack = new LimitedStack<Vector2>(10);
+
+        m_undoStack = new LimitedStack<UserInput>(10);
+        m_redoStack = new LimitedStack<UserInput>(10);
 
         m_cubeController = GetComponent<VRubiksCubeController>();
 	}
@@ -114,8 +131,15 @@ public class VRubiksCubeUserInput : MonoBehaviour
                 //Send m_touched and move to VRubiksCubeController
                 m_cubeController.Turn(m_touched, move);
 
-                m_touchedStack.Push(m_touched);
-                m_moveStack.Push(move);
+                //m_touchedStack.Push(m_touched);
+                //m_moveStack.Push(move);
+
+                UserInput cmd = new UserInput(m_touched, move);
+                m_undoStack.Push(cmd);
+                if (m_redoStack.Count > 0)
+                {
+                    m_redoStack.Clear();
+                }
 
                 if (m_undid)
                 {
@@ -138,11 +162,29 @@ public class VRubiksCubeUserInput : MonoBehaviour
 
     public void Undo()
     {
-        // GOALS: ALOW USER TO UNDO 10ISH TIMES
+        if (m_cubeController.m_rotatingFace)
+        {
+            return;
+        }
+        if (m_undoStack.Count > 0)
+        {
+            UserInput cmd = m_undoStack.Pop();
+            m_cubeController.Turn(cmd.m_touched, -cmd.m_move);
+            m_redoStack.Push(cmd);
+        }        
     }
 
     public void Redo()
     {
-        // GOALS: ALLOW USER TO REDO ALL UNDO'S
+        if (m_cubeController.m_rotatingFace)
+        {
+            return;
+        }
+        if (m_redoStack.Count > 0)
+        {
+            UserInput cmd = m_redoStack.Pop();
+            m_undoStack.Push(cmd);
+            m_cubeController.Turn(cmd.m_touched, cmd.m_move);
+        }
     }
 }

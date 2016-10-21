@@ -5,8 +5,6 @@ using System.Collections.Generic;
 [RequireComponent(typeof(VRubiksCubeController))] 
 public class VRubiksCubeMonitor : MonoBehaviour
 {
-    public ParticleSystem m_FunkyParticles;
-
     public float m_percentComplete = 0;
 
     public int m_minTurns = 10, m_maxTurns = 20;
@@ -17,10 +15,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
     public bool m_randomizeOnStart = false;
 
     private VRubiksCubeController m_cubeController;
-
-    private ParticleSystem.EmissionModule m_FunkyParticleEmission;
-    private ParticleSystem.MinMaxCurve m_FunkyParticleEmissionRate;
-
+    
     private List<GameObject> m_cubes, m_touchPanels; // Do/es not include centers
 
     private GameObject m_whiteCenter, m_blueCenter, m_redCenter, m_orangeCenter, m_greenCenter, m_yellowCenter; // Center TouchPanels
@@ -28,6 +23,8 @@ public class VRubiksCubeMonitor : MonoBehaviour
     private Dictionary<Vector3, int> m_cubeMap;
     
     private bool[] m_cubeStates = new bool[20];
+
+    private bool m_randomizing = false;
 
     // Use this for initialization
     void Start ()
@@ -148,11 +145,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
                     }                                     
                 }
             }
-        }
-
-        m_FunkyParticleEmission = m_FunkyParticles.emission;
-        m_FunkyParticleEmissionRate = new ParticleSystem.MinMaxCurve(30.0f);
-        m_FunkyParticleEmission.rate = m_FunkyParticleEmissionRate;
+        }        
 
         /*
         Debug.Log("m_cubes.count == " + m_cubes.Count.ToString() + System.Environment.NewLine +
@@ -168,12 +161,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
         if (m_randomizeOnStart)
         {            
             RandomizeCube();
-        }
-        else
-        {
-            m_FunkyParticleEmissionRate.constantMax = 0.01f;
-            m_FunkyParticleEmission.rate = m_FunkyParticleEmissionRate;
-        }
+        }        
     }
 
     public void RandomizeCube()
@@ -183,8 +171,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
 
     IEnumerator Randomizing()
     {
-        m_FunkyParticleEmissionRate.constantMax = 30.0f;
-        m_FunkyParticleEmission.rate = m_FunkyParticleEmissionRate;
+        m_randomizing = true;        
         Random.seed = (int)(Time.realtimeSinceStartup * 100.0f);
         m_cubeController.m_faceRotateSpeed *= 1000.0f;
 
@@ -213,14 +200,21 @@ public class VRubiksCubeMonitor : MonoBehaviour
         m_turns -= turns2;
 
         m_cubeController.m_faceRotateSpeed /= 1000.0f;
-        m_FunkyParticleEmissionRate.constantMax = 0.01f;
-        m_FunkyParticleEmission.rate = m_FunkyParticleEmissionRate;
+
+        m_randomizing = false;
+
+        CheckSolved();
 
         yield return null;
     }
 
     public bool CheckSolved ()
     {
+        if (m_randomizing)
+        {
+            return false;
+        }
+
         // For each cube, check if child panels are aligned with matching color center panels
         foreach (GameObject cube in m_cubes)
         {
