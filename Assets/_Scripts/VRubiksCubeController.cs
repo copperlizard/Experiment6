@@ -388,8 +388,7 @@ public class VRubiksCubeController : MonoBehaviour
         }
 
         // Check cube status
-        m_monitor.CheckSolved();
-        Debug.Log("m_monitor.m_percentComplete == " + m_monitor.m_percentComplete.ToString() + " ; m_monitor.m_stage == " + m_monitor.m_stage);
+        m_monitor.CheckSolved();        
 
         m_rotatingCube = false;
         yield return null;

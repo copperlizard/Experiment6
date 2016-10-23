@@ -10,7 +10,10 @@ public class VRubiksCubeMonitor : MonoBehaviour
     public int m_minTurns = 10, m_maxTurns = 20;
 
     [HideInInspector]
-    public int m_stage = 0, m_turns = 0; // Solved stages    
+    public int m_stage = 0, m_turns = 0; // Solved stages 
+
+    [HideInInspector]
+    public Dictionary<Vector3, int> m_cubeMap;
 
     public bool m_randomizeOnStart = false;
 
@@ -18,9 +21,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
     
     private List<GameObject> m_cubes, m_touchPanels; // Do/es not include centers
 
-    private GameObject m_whiteCenter, m_blueCenter, m_redCenter, m_orangeCenter, m_greenCenter, m_yellowCenter; // Center TouchPanels
-
-    private Dictionary<Vector3, int> m_cubeMap;
+    private GameObject m_whiteCenter, m_blueCenter, m_redCenter, m_orangeCenter, m_greenCenter, m_yellowCenter; // Center TouchPanels    
     
     private bool[] m_cubeStates = new bool[20];
 
@@ -43,7 +44,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
         m_cubeMap.Add(new Vector3(1.0f, -1.0f, -1.0f), 2); //right bottom front
 
         m_cubeMap.Add(new Vector3(-1.0f, -1.0f, 0.0f), 3); //left bottom middle
-        //m_cubeMap.Add(new Vector3(0.0f, -1.0f, 0.0f), 0); //middle bottom middle *center
+        m_cubeMap.Add(new Vector3(0.0f, -1.0f, 0.0f), 20); //middle bottom middle *center
         m_cubeMap.Add(new Vector3(1.0f, -1.0f, 0.0f), 4); //right bottom middle
 
         m_cubeMap.Add(new Vector3(-1.0f, -1.0f, 1.0f), 5); //left bottom back
@@ -51,15 +52,15 @@ public class VRubiksCubeMonitor : MonoBehaviour
         m_cubeMap.Add(new Vector3(1.0f, -1.0f, 1.0f), 7); //right bottom back
 
         m_cubeMap.Add(new Vector3(-1.0f, 0.0f, -1.0f), 8); //left middle front
-        //m_cubeMap.Add(new Vector3(0.0f, 0.0f, -1.0f), 0); //middle middle front *center
+        m_cubeMap.Add(new Vector3(0.0f, 0.0f, -1.0f), 21); //middle middle front *center
         m_cubeMap.Add(new Vector3(1.0f, 0.0f, -1.0f), 9); //right middle front
 
-        //m_cubeMap.Add(new Vector3(-1.0f, 0.0f, 0.0f), 0); //left middle middle *center
+        m_cubeMap.Add(new Vector3(-1.0f, 0.0f, 0.0f), 22); //left middle middle *center
         //m_cubeMap.Add(new Vector3(0.0f, 0.0f, 0.0f), 0); //middle middle middle *base cube
-        //m_cubeMap.Add(new Vector3(1.0f, 0.0f, 0.0f), 0); //right middle middle *center
+        m_cubeMap.Add(new Vector3(1.0f, 0.0f, 0.0f), 23); //right middle middle *center
 
         m_cubeMap.Add(new Vector3(-1.0f, 0.0f, 1.0f), 10); //left middle back 
-        //m_cubeMap.Add(new Vector3(0.0f, 0.0f, 1.0f), 0); //middle middle back *center
+        m_cubeMap.Add(new Vector3(0.0f, 0.0f, 1.0f), 24); //middle middle back *center
         m_cubeMap.Add(new Vector3(1.0f, 0.0f, 1.0f), 11); //right middle back
 
         m_cubeMap.Add(new Vector3(-1.0f, 1.0f, -1.0f), 12); //left top front
@@ -67,7 +68,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
         m_cubeMap.Add(new Vector3(1.0f, 1.0f, -1.0f), 14); //right top front
 
         m_cubeMap.Add(new Vector3(-1.0f, 1.0f, 0.0f), 15); //left top middle
-        //m_cubeMap.Add(new Vector3(0.0f, 1.0f, 0.0f), 0); //middle top middle *center
+        m_cubeMap.Add(new Vector3(0.0f, 1.0f, 0.0f), 25); //middle top middle *center
         m_cubeMap.Add(new Vector3(1.0f, 1.0f, 0.0f), 16); //right top middle
 
         m_cubeMap.Add(new Vector3(-1.0f, 1.0f, 1.0f), 17); //left top back
@@ -587,6 +588,8 @@ public class VRubiksCubeMonitor : MonoBehaviour
                 }
             }
         }
+
+        Debug.Log("m_percentComplete == " + m_percentComplete.ToString() + " ; m_stage == " + m_stage);
 
         return true;
     }    
