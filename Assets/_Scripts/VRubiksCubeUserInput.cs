@@ -129,7 +129,7 @@ public class VRubiksCubeUserInput : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
     {
-        GetTouchInput();	
+        GetTouchInput();
 	}
 
     private void GetTouchInput ()
