@@ -55,8 +55,6 @@ public class VRubiksCubeController : MonoBehaviour
 
     public void Turn(GameObject touched, Vector2 move)
     {
-        m_monitor.m_turns++;
-
         // Find move direction... 
         float movedX = Vector2.Dot(move.normalized, Vector2.right);
         float movedY = Vector2.Dot(move.normalized, Vector2.up);
@@ -127,6 +125,7 @@ public class VRubiksCubeController : MonoBehaviour
         {
             if (!m_rotatingCube)
             {
+                m_monitor.m_turns++;
                 StartCoroutine(RotateCubeFace(touched, front, top, bottom, left, right, movedLeft, movedRight, movedUp, movedDown));
             }
         }

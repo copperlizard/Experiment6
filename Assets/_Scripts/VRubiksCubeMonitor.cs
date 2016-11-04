@@ -8,12 +8,15 @@ public class VRubiksCubeMonitor : MonoBehaviour
     public float m_percentComplete = 0;
 
     public int m_minTurns = 10, m_maxTurns = 20;
-
+    
     [HideInInspector]
-    public int m_stage = 0, m_turns = 0; // Solved stages 
+    public int m_stage = 0, m_turns = 0, m_cubePar = 0;  
 
     [HideInInspector]
     public Dictionary<Vector3, int> m_cubeMap;
+
+    [HideInInspector]
+    public bool m_cubeSolved = false;
 
     public bool m_randomizeOnStart = false;
 
@@ -166,18 +169,20 @@ public class VRubiksCubeMonitor : MonoBehaviour
     }
 
     public void RandomizeCube()
-    {        
+    {
+        m_cubeSolved = false;        
         StartCoroutine(Randomizing());        
     }
 
     IEnumerator Randomizing()
     {
         m_randomizing = true;        
-        Random.seed = (int)(Time.realtimeSinceStartup * 100.0f);
+        Random.InitState((int)(Time.realtimeSinceStartup * 100.0f));
         m_cubeController.m_faceRotateSpeed *= 1000.0f;
 
         int turns = Random.Range(m_minTurns, m_maxTurns);
-        int turns2 = turns;
+        //int turns2 = turns;
+        m_cubePar = turns;
 
         while (turns > 0)
         {
@@ -198,13 +203,20 @@ public class VRubiksCubeMonitor : MonoBehaviour
             yield return null;
         }
 
-        m_turns -= turns2;
+        //m_turns -= turns2;
+        m_turns -= m_cubePar;
 
         m_cubeController.m_faceRotateSpeed /= 1000.0f;
 
         m_randomizing = false;
 
-        CheckSolved();
+        /*
+        if (CheckSolved())
+        {
+            // Managed to randomly create solved cube ... consider adding a "cube complexity threshold" here if generated cubes seem to simple...
+            RandomizeCube();
+        }
+        */
 
         yield return null;
     }
@@ -317,8 +329,9 @@ public class VRubiksCubeMonitor : MonoBehaviour
                 Debug.Log("cube stateIndex not found!!!");
             }
         }
-        
-        return ReadCubeStates();
+
+        m_cubeSolved = ReadCubeStates();
+        return m_cubeSolved;
     }
 
     private bool ReadCubeStates ()

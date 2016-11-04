@@ -54,9 +54,7 @@
      <Compile Include="Assets\_Scripts\VRubiksCubeController.cs" />
      <Compile Include="Assets\_Scripts\VRubiksCubeMonitor.cs" />
      <Compile Include="Assets\_Scripts\VRubiksCubeUserInput.cs" />
-     <None Include="Assets\_Shaders\PauseReplacementShader.shader" />
-     <None Include="Assets\_Shaders\PausePanelShader.shader" />
-     <None Include="Assets\_Shaders\TestShader.shader" />
+     <None Include="Assets\_Shaders\PauseEffectShader.shader" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>
