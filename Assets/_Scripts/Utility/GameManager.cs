@@ -115,8 +115,11 @@ public class GameManager : MonoBehaviour
         }
 
         float startTime = Time.time;
-        while (!m_cubeMonitor.m_cubeSolved)
-        {            
+        //while (!m_cubeMonitor.m_cubeSolved)
+        while (m_cubeMonitor.m_percentComplete != 1.0f) 
+        {
+            //Debug.Log("tick!");
+                        
             if (!m_isPaused)
             {
                 m_solveTimeElapsed = Time.time - startTime - m_pauseTimeElapsed;
@@ -128,11 +131,14 @@ public class GameManager : MonoBehaviour
             
             yield return null;
         }
+
+        Debug.Log("cube solved!");
         yield return null;
     }
 
     void UpdateProgressText ()
     {
+        
         float timeToDisplay = m_solveTimeElapsed, secsInHour = 3600.0f, secsInMin = 60.0f;
         int hours = 0, mins = 0, secs = 0; // Maybe add decsecs (decimal seconds)...
 
@@ -146,13 +152,13 @@ public class GameManager : MonoBehaviour
             mins++;
             timeToDisplay -= secsInMin;
         }
-        secs = (int)timeToDisplay;
+        secs = (int)timeToDisplay; 
+
+        m_timeText.text = "Time - " + string.Format("{0:00}:{1:00}:{2:00}", hours, mins, secs);
         
-        m_timeText.text = "Time - " + hours.ToString() + ":" + mins.ToString() + ":" + secs.ToString();
+        m_turnsText.text = "Turns - " + m_cubeMonitor.m_turns.ToString() + " / " + m_cubeMonitor.m_cubePar.ToString();
 
-        m_turnsText.text = "Turns - " + m_cubeMonitor.m_turns.ToString() + "/" + m_cubeMonitor.m_cubePar.ToString();
-
-        m_stageText.text = "Stage - " + (m_cubeMonitor.m_stage + 1).ToString() + "/7";
+        m_stageText.text = "Stage - " + (m_cubeMonitor.m_stage + 1).ToString() + " / 7";
     }
 
     private void LearnUpdate ()

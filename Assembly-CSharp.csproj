@@ -45,10 +45,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\GameManager.cs" />
      <Compile Include="Assets\RotationTest.cs" />
      <Compile Include="Assets\_Scripts\GimbalController.cs" />
      <Compile Include="Assets\_Scripts\Utility\DisableScreenRotation.cs" />
+     <Compile Include="Assets\_Scripts\Utility\FPSDisplay.cs" />
+     <Compile Include="Assets\_Scripts\Utility\GameManager.cs" />
      <Compile Include="Assets\_Scripts\Utility\LoadScene.cs" />
      <Compile Include="Assets\_Scripts\Utility\QuitApplication.cs" />
      <Compile Include="Assets\_Scripts\VRubiksCubeController.cs" />

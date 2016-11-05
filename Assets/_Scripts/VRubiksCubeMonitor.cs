@@ -15,8 +15,8 @@ public class VRubiksCubeMonitor : MonoBehaviour
     [HideInInspector]
     public Dictionary<Vector3, int> m_cubeMap;
 
-    [HideInInspector]
-    public bool m_cubeSolved = false;
+    //[HideInInspector]
+    //public bool m_cubeSolved = false;
 
     public bool m_randomizeOnStart = false;
 
@@ -170,7 +170,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
 
     public void RandomizeCube()
     {
-        m_cubeSolved = false;        
+        //m_cubeSolved = false;        
         StartCoroutine(Randomizing());        
     }
 
@@ -330,8 +330,9 @@ public class VRubiksCubeMonitor : MonoBehaviour
             }
         }
 
-        m_cubeSolved = ReadCubeStates();
-        return m_cubeSolved;
+        //m_cubeSolved = ReadCubeStates();
+        //return m_cubeSolved;
+        return ReadCubeStates();
     }
 
     private bool ReadCubeStates ()

@@ -250,7 +250,7 @@ public class VRubiksCubeUserInput : MonoBehaviour
                         "m_touched.transform.parent.name == " + m_touched.transform.parent.name + System.Environment.NewLine +
                         "m_touched.transform.position == " + m_touched.transform.position.ToString() + System.Environment.NewLine +
                         "m_touched.transform.parent.position == " + m_touched.transform.parent.position.ToString() +System.Environment.NewLine +
-                        "transform.parent.InverseTransformPoint(m_touched.transform.parent.position) == " + transform.parent.InverseTransformPoint(m_touched.transform.parent.position).ToString());
+                        "transform.parent.InverseTransformPoint(m_touched.transform.parent.position) == " + transform.parent.InverseTransformPoint(m_touched.transform.parent.position).ToString());                    
                 }
                 else
                 {
@@ -273,10 +273,11 @@ public class VRubiksCubeUserInput : MonoBehaviour
 
     public void Undo()
     {
-        if (m_cubeController.m_rotatingFace)
+        if (m_cubeController.m_rotatingFace || m_cubeController.m_rotatingCube)
         {
             return;
         }
+
         if (m_undoStack.Count > 0)
         {
             UserInput cmd = m_undoStack.Pop();

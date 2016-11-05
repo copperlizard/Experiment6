@@ -21,7 +21,8 @@ public class GimbalController : MonoBehaviour
     {
         GyroInput();
 
-        transform.rotation = Quaternion.LookRotation(Quaternion.Euler(m_desiredTilt, 0.0f, 0.0f) * m_phoneUp);
+        //transform.rotation = Quaternion.LookRotation(Quaternion.Euler(m_desiredTilt, 0.0f, 0.0f) * m_phoneUp);
+        transform.rotation = Quaternion.LookRotation(Quaternion.Euler(m_desiredTilt, 0.0f, 0.0f) * new Vector3(m_phoneUp.x * 1.5f, m_phoneUp.y * 1.5f, m_phoneUp.z).normalized);
     }
 
     public void GyroInput()
