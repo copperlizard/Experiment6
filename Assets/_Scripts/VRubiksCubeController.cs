@@ -9,6 +9,9 @@ public class VRubiksCubeController : MonoBehaviour
     public float m_cubeRotateSpeed, m_faceRotateSpeed;
 
     [HideInInspector]
+    public string m_lastMoveType;
+
+    [HideInInspector]
     public bool m_rotatingCube = false, m_rotatingFace = false;
 
     private VRubiksCubeUserInput m_userInput;
@@ -134,6 +137,7 @@ public class VRubiksCubeController : MonoBehaviour
     IEnumerator RotateWholeCube (bool front, bool top, bool bottom, bool left, bool right, bool movedLeft, bool movedRight, bool movedUp, bool movedDown)
     {
         m_rotatingCube = true;
+        m_lastMoveType = "Reoriented Cube";
 
         // Which direction did user input?
         if (movedLeft)
@@ -403,7 +407,35 @@ public class VRubiksCubeController : MonoBehaviour
                 //float tarCoord = touched.transform.parent.localPosition.y;
                 float tarCoord = (transform.localRotation * touched.transform.parent.localPosition).y;
 
-                //Debug.Log("tarCoords == " + tarCoord.ToString());
+                if (tarCoord >= 0.9f)
+                {
+                    // Up rotation
+                    if (movedLeft)
+                    {
+                        m_lastMoveType = "U";
+                    }
+                    else
+                    {
+                        m_lastMoveType = "Ui";
+                    }
+                }
+                else if (tarCoord <= -0.9f)
+                {
+                    // Bottom rotation
+                    if (movedLeft)
+                    {
+                        m_lastMoveType = "Di";
+                    }
+                    else
+                    {
+                        m_lastMoveType = "D";
+                    }
+                }
+                else
+                {
+                    // Up + Bottom rotation
+                    m_lastMoveType = "M";
+                }
 
                 m_rotationGroup.Clear();
 
@@ -426,6 +458,52 @@ public class VRubiksCubeController : MonoBehaviour
                 float tarCoord = (transform.localRotation * touched.transform.parent.localPosition).z;
 
                 //Debug.Log("tarCoords == " + tarCoord.ToString());
+
+                if (tarCoord >= 0.9f)
+                {
+                    // Back rotation
+                    if (movedLeft && top)
+                    {
+                        m_lastMoveType = "B";
+                    }
+                    else if (movedRight && top)
+                    {
+                        m_lastMoveType = "Bi";
+                    }
+                    else if (movedLeft && bottom)
+                    {
+                        m_lastMoveType = "Bi";
+                    }
+                    else if (movedRight && bottom)
+                    {
+                        m_lastMoveType = "B";
+                    }
+                }
+                else if (tarCoord <= -0.9f)
+                {
+                    // Front rotation
+                    if (movedLeft && top)
+                    {
+                        m_lastMoveType = "Fi";
+                    }
+                    else if (movedRight && top)
+                    {
+                        m_lastMoveType = "F";
+                    }
+                    else if (movedLeft && bottom)
+                    {
+                        m_lastMoveType = "F";
+                    }
+                    else if (movedRight && bottom)
+                    {
+                        m_lastMoveType = "Fi";
+                    }
+                }
+                else
+                {
+                    // Back + Front rotation
+                    m_lastMoveType = "M";
+                }
 
                 m_rotationGroup.Clear();
 
@@ -450,6 +528,36 @@ public class VRubiksCubeController : MonoBehaviour
 
                 //Debug.Log("tarCoords == " + tarCoord.ToString());
 
+                if (tarCoord >= 0.9f)
+                {
+                    // Right rotation
+                    if (movedUp)
+                    {
+                        m_lastMoveType = "R";
+                    }
+                    else
+                    {
+                        m_lastMoveType = "Ri";
+                    }
+                }
+                else if (tarCoord <= -0.9f)
+                {
+                    // Left rotation
+                    if (movedUp)
+                    {
+                        m_lastMoveType = "Li";
+                    }
+                    else
+                    {
+                        m_lastMoveType = "L";
+                    }
+                }
+                else
+                {
+                    // Right + Left rotation
+                    m_lastMoveType = "M";
+                }
+
                 m_rotationGroup.Clear();
 
                 foreach (GameObject cube in m_cubes)
@@ -470,6 +578,52 @@ public class VRubiksCubeController : MonoBehaviour
 
                 //Debug.Log("tarCoords == " + tarCoord.ToString());
 
+                if (tarCoord >= 0.9f)
+                {
+                    // Back rotation
+                    if (movedUp && left)
+                    {
+                        m_lastMoveType = "Bi";
+                    }
+                    else if (movedUp && right)
+                    {
+                        m_lastMoveType = "B";
+                    }
+                    else if (movedDown && left)
+                    {
+                        m_lastMoveType = "B";
+                    }
+                    else if (movedDown && right)
+                    {
+                        m_lastMoveType = "Bi";
+                    }
+                }
+                else if (tarCoord <= -0.9f)
+                {
+                    // Front rotation
+                    if (movedUp && left)
+                    {
+                        m_lastMoveType = "F";
+                    }
+                    else if (movedUp && right)
+                    {
+                        m_lastMoveType = "Fi";
+                    }
+                    else if (movedDown && left)
+                    {
+                        m_lastMoveType = "Fi";
+                    }
+                    else if (movedDown && right)
+                    {
+                        m_lastMoveType = "F";
+                    }
+                }
+                else
+                {
+                    // Back + Front rotation
+                    m_lastMoveType = "M";
+                }
+
                 m_rotationGroup.Clear();
 
                 foreach (GameObject cube in m_cubes)
@@ -483,6 +637,8 @@ public class VRubiksCubeController : MonoBehaviour
                 }
             }
         }
+
+        //Debug.Log("m_lastMoveType == " + m_lastMoveType);
     }
 
     void RotateCubeFaceRotate (Quaternion tarRot)

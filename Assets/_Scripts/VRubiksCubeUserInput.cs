@@ -243,14 +243,14 @@ public class VRubiksCubeUserInput : MonoBehaviour
 
                     Debug.Log("storing user command:" + System.Environment.NewLine +
                         "m_touchedParentLocation == " + cmd.m_touchedParentLocation.ToString() + System.Environment.NewLine +
-                        "m_touchedUp == " + cmd.m_touchedUp.ToString() + System.Environment.NewLine +
-                        "m_move == " + cmd.m_move.ToString() + System.Environment.NewLine + System.Environment.NewLine +
-                        "mapInput == " + mapInput.ToString() + System.Environment.NewLine +
-                        "m_touched.transform.parent.localPosition == " + m_touched.transform.parent.localPosition.ToString() + System.Environment.NewLine +
-                        "m_touched.transform.parent.name == " + m_touched.transform.parent.name + System.Environment.NewLine +
-                        "m_touched.transform.position == " + m_touched.transform.position.ToString() + System.Environment.NewLine +
-                        "m_touched.transform.parent.position == " + m_touched.transform.parent.position.ToString() +System.Environment.NewLine +
-                        "transform.parent.InverseTransformPoint(m_touched.transform.parent.position) == " + transform.parent.InverseTransformPoint(m_touched.transform.parent.position).ToString());                    
+                      /*  "m_touchedUp == " + cmd.m_touchedUp.ToString() + System.Environment.NewLine + */
+                        "m_move == " + cmd.m_move.ToString() //+ System.Environment.NewLine + System.Environment.NewLine +
+                      /*  "mapInput == " + mapInput.ToString() + System.Environment.NewLine + */
+                      /*  "m_touched.transform.parent.localPosition == " + m_touched.transform.parent.localPosition.ToString() + System.Environment.NewLine + */
+                      /*  "m_touched.transform.parent.name == " + m_touched.transform.parent.name + System.Environment.NewLine + */
+                      /*  "m_touched.transform.position == " + m_touched.transform.position.ToString() + System.Environment.NewLine + */
+                      /*  "m_touched.transform.parent.position == " + m_touched.transform.parent.position.ToString() +System.Environment.NewLine + */
+                      /*  "transform.parent.InverseTransformPoint(m_touched.transform.parent.position) == " + transform.parent.InverseTransformPoint(m_touched.transform.parent.position).ToString() */);                    
                 }
                 else
                 {
@@ -283,7 +283,7 @@ public class VRubiksCubeUserInput : MonoBehaviour
             UserInput cmd = m_undoStack.Pop();
 
             Debug.Log("cmd to undo:" + System.Environment.NewLine + "m_touchedParentLocation == " + cmd.m_touchedParentLocation.ToString() + System.Environment.NewLine + 
-                "m_touchedUp == " + cmd.m_touchedUp.ToString() + System.Environment.NewLine +
+                /* "m_touchedUp == " + cmd.m_touchedUp.ToString() + System.Environment.NewLine + */
                 "m_move == " + cmd.m_move.ToString());
 
             GameObject toTouch = null;

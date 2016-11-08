@@ -14,11 +14,11 @@ public class VRubiksCubeMonitor : MonoBehaviour
 
     [HideInInspector]
     public Dictionary<Vector3, int> m_cubeMap;
-
-    //[HideInInspector]
-    //public bool m_cubeSolved = false;
-
+    
     public bool m_randomizeOnStart = false;
+
+    [HideInInspector]
+    public bool m_randomizing = false;
 
     private VRubiksCubeController m_cubeController;
     
@@ -28,7 +28,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
     
     private bool[] m_cubeStates = new bool[20];
 
-    private bool m_randomizing = false;
+    
 
     // Use this for initialization
     void Start ()
@@ -170,13 +170,13 @@ public class VRubiksCubeMonitor : MonoBehaviour
 
     public void RandomizeCube()
     {
-        //m_cubeSolved = false;        
+        //m_cubeSolved = false; 
+        m_randomizing = true;
         StartCoroutine(Randomizing());        
     }
 
     IEnumerator Randomizing()
-    {
-        m_randomizing = true;        
+    {             
         Random.InitState((int)(Time.realtimeSinceStartup * 100.0f));
         m_cubeController.m_faceRotateSpeed *= 1000.0f;
 
@@ -210,13 +210,13 @@ public class VRubiksCubeMonitor : MonoBehaviour
 
         m_randomizing = false;
 
-        /*
+        
         if (CheckSolved())
         {
             // Managed to randomly create solved cube ... consider adding a "cube complexity threshold" here if generated cubes seem to simple...
             RandomizeCube();
         }
-        */
+        
 
         yield return null;
     }
@@ -603,9 +603,9 @@ public class VRubiksCubeMonitor : MonoBehaviour
             }
         }
 
-        Debug.Log("m_percentComplete == " + m_percentComplete.ToString() + " ; m_stage == " + m_stage);
+        //Debug.Log("m_percentComplete == " + m_percentComplete.ToString() + " ; m_stage == " + m_stage);
 
-        return true;
+        return false;
     }    
 }
 

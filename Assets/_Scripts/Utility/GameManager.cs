@@ -9,13 +9,16 @@ public class GameManager : MonoBehaviour
     public GameMode m_mode;
 
     public GameObject m_cube, m_pausePanel;
-    public Text m_timeText, m_turnsText, m_stageText;
+    public Text m_timeText, m_turnsText, m_stageText, m_lastMoveText;
 
     public Shader m_pauseReplacementShader;
 
     public bool m_isPaused = false;
     
     private VRubiksCubeMonitor m_cubeMonitor;
+    private VRubiksCubeController m_cubeController;
+
+    private string m_diplayedMove;
 
     private float m_solveTimeElapsed = 0.0f, m_pauseTimeElapsed = 0.0f;
 
@@ -29,10 +32,16 @@ public class GameManager : MonoBehaviour
         else
         {
             m_cubeMonitor = m_cube.GetComponent<VRubiksCubeMonitor>();
+            m_cubeController = m_cube.GetComponent<VRubiksCubeController>();
             
             if (m_cubeMonitor == null)
             {
                 Debug.Log("m_cubeMonitor not found!");
+            }
+
+            if (m_cubeController == null)
+            {
+                Debug.Log("m_cubeController not found!");
             }
         }
 
@@ -54,6 +63,11 @@ public class GameManager : MonoBehaviour
         if (m_stageText == null)
         {
             Debug.Log("m_stageText not assigned!");
+        }
+
+        if (m_lastMoveText == null)
+        {
+            Debug.Log("m_lastMoveText not assigned!");
         }
 
         switch (m_mode)
@@ -137,8 +151,7 @@ public class GameManager : MonoBehaviour
     }
 
     void UpdateProgressText ()
-    {
-        
+    {        
         float timeToDisplay = m_solveTimeElapsed, secsInHour = 3600.0f, secsInMin = 60.0f;
         int hours = 0, mins = 0, secs = 0; // Maybe add decsecs (decimal seconds)...
 
@@ -159,6 +172,24 @@ public class GameManager : MonoBehaviour
         m_turnsText.text = "Turns - " + m_cubeMonitor.m_turns.ToString() + " / " + m_cubeMonitor.m_cubePar.ToString();
 
         m_stageText.text = "Stage - " + (m_cubeMonitor.m_stage + 1).ToString() + " / 7";
+
+        // Display last move text when not randomizing, fade out with time
+        if (m_cubeController.m_lastMoveType != "" && !m_cubeMonitor.m_randomizing)
+        {
+            m_lastMoveText.text = m_cubeController.m_lastMoveType;
+            m_cubeController.m_lastMoveType = "";
+            m_lastMoveText.color = new Color(m_lastMoveText.color.r, m_lastMoveText.color.g, m_lastMoveText.color.b, 1.0f);
+        }
+        else if (m_cubeMonitor.m_randomizing)
+        {
+            m_lastMoveText.text = m_cubeController.m_lastMoveType;
+            m_cubeController.m_lastMoveType = "";
+            m_lastMoveText.color = new Color(m_lastMoveText.color.r, m_lastMoveText.color.g, m_lastMoveText.color.b, 0.0f);
+        }
+        else
+        {
+            m_lastMoveText.color = new Color(m_lastMoveText.color.r, m_lastMoveText.color.g, m_lastMoveText.color.b, Mathf.Lerp(m_lastMoveText.color.a, 0.0f, 1.0f * Time.deltaTime));
+        }
     }
 
     private void LearnUpdate ()
