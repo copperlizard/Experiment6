@@ -165,6 +165,11 @@ public class VRubiksCubeMonitor : MonoBehaviour
         if (m_randomizeOnStart)
         {            
             RandomizeCube();
+        }
+        else
+        {
+            // Update cube state variables
+            CheckSolved();
         }        
     }
 
