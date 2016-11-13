@@ -9,13 +9,24 @@ using System.Collections;
 public struct Record
 {
     public float time;
-    public int turns, par;
+    public int turns;
+    public int par;
 }
 
 [System.Serializable]
 public class Records
 {
     public Record[] m_record = new Record[10];
+
+    public Records ()
+    {
+        for (int i = 0; i < m_record.Length; i++)
+        {
+            m_record[i].time = 300.0f + (30.0f * i);
+            m_record[i].turns = 60 + (10 * i);
+            m_record[i].par = 15;
+        }
+    }
 }
 
 public enum GameMode { LEARN, TIMED, TURNS };
@@ -36,9 +47,11 @@ public class GameManager : MonoBehaviour
     private VRubiksCubeUserInput m_cubeInput;
     private GimbalController m_gimbalController;
 
+    private Records m_recs = new Records();
+
     private string m_diplayedMove;
 
-    private float m_solveTimeElapsed = 667.0f, m_pauseTimeElapsed = 0.0f;
+    private float m_solveTimeElapsed = 0.0f, m_pauseTimeElapsed = 0.0f;
 
     private bool m_modeComplete = false;
 
@@ -279,7 +292,7 @@ public class GameManager : MonoBehaviour
 
         Text[] panelText = m_recordsPanel.GetComponentsInChildren<Text>();
         
-        panelText[1].text = LoadSaveRecords();
+        panelText[1].text = BuildRecordsString();
         
         yield return null;
     }
@@ -339,234 +352,256 @@ public class GameManager : MonoBehaviour
         m_cubeInput.enabled = true;
     }
 
-    private string LoadSaveRecords ()
+    private void LoadRecords ()
     {
         FileStream file;
-        Records recs = new Records();
-        BinaryFormatter bf = new BinaryFormatter();        
+        BinaryFormatter bf = new BinaryFormatter();
+
         switch (m_mode)
         {
             case GameMode.LEARN:
                 if (File.Exists(Application.persistentDataPath + "/LearnRecords.dat"))
                 {
                     file = File.Open(Application.persistentDataPath + "/LearnRecords.dat", FileMode.Open);
-                    recs = (Records)bf.Deserialize(file);                    
+                    m_recs = (Records)bf.Deserialize(file);
                 }
                 else
                 {
                     file = File.Create(Application.persistentDataPath + "/LearnRecords.dat");
-                    for (int i = 0; i < recs.m_record.Length; i++)
-                    {
-                        recs.m_record[i].time = 99999.0f;
-                        recs.m_record[i].turns = 999;
-                        recs.m_record[i].par = 999;
-                    }
-                }                
+                }
                 break;
             case GameMode.TIMED:
                 if (File.Exists(Application.persistentDataPath + "/TimedRecords.dat"))
                 {
                     file = File.Open(Application.persistentDataPath + "/TimedRecords.dat", FileMode.Open);
-                    recs = (Records)bf.Deserialize(file);                    
+                    m_recs = (Records)bf.Deserialize(file);                    
                 }
                 else
                 {
                     file = File.Create(Application.persistentDataPath + "/TimedRecords.dat");
-                    for (int i = 0; i < recs.m_record.Length; i++)
-                    {
-                        recs.m_record[i].time = 99999.0f;
-                        recs.m_record[i].turns = 999;
-                        recs.m_record[i].par = 999;
-                    }
-                }                
+                }
                 break;
             case GameMode.TURNS:
                 if (File.Exists(Application.persistentDataPath + "/TurnsRecords.dat"))
                 {
                     file = File.Open(Application.persistentDataPath + "/TurnsRecords.dat", FileMode.Open);
-                    recs = (Records)bf.Deserialize(file);                    
+                    m_recs = (Records)bf.Deserialize(file);
                 }
                 else
                 {
                     file = File.Create(Application.persistentDataPath + "/TurnsRecords.dat");
-                    for (int i = 0; i < recs.m_record.Length; i++)
-                    {
-                        recs.m_record[i].time = 99999.0f;
-                        recs.m_record[i].turns = 999;
-                        recs.m_record[i].par = 999;
-                    }
-                }                
+                }
                 break;
             default:
                 file = File.Create(Application.persistentDataPath + "/LearnRecords.dat");
-                for (int i = 0; i < recs.m_record.Length; i++)
-                {
-                    recs.m_record[i].time = 99999.0f;
-                    recs.m_record[i].turns = 999;
-                    recs.m_record[i].par = 999;
-                }
                 break;
-        }       
+        }
 
-        // Set display text
-        string toDisplay = "";
+        file.Close();
+    }
+
+    private void SaveRecords ()
+    {
+        FileStream file;
+        BinaryFormatter bf = new BinaryFormatter();
 
         switch (m_mode)
         {
             case GameMode.LEARN:
-                for (int i = 0; i < recs.m_record.Length; i++)
+                if (File.Exists(Application.persistentDataPath + "/LearnRecords.dat"))
                 {
-                    if (m_solveTimeElapsed < recs.m_record[i].time || (m_solveTimeElapsed == recs.m_record[i].time && m_cubeMonitor.m_cubePar >= recs.m_record[i].par))
-                    {
-                        for (int j = 1; j <= recs.m_record.Length - (i + 1); j++)
-                        {
-                            //Debug.Log("j == " + j.ToString());
-                            recs.m_record[recs.m_record.Length - j] = recs.m_record[(recs.m_record.Length - j) - 1];
-                        }
-
-                        Record newRec;
-                        newRec.time = m_solveTimeElapsed;
-                        newRec.par = m_cubeMonitor.m_cubePar;
-                        newRec.turns = m_cubeMonitor.m_turns;
-                        recs.m_record[i] = newRec;
-                        break;
-                    }
+                    file = File.Open(Application.persistentDataPath + "/LearnRecords.dat", FileMode.Open);                    
                 }
-
-                // #1 - 00:00:00.00 - 000 / 00
-                for (int i = 0; i < recs.m_record.Length; i++)
+                else
                 {
-                    toDisplay += "#" + (i + 1).ToString() + " - ";
-
-                    int hours = 0, mins = 0, secs = 0, decsecs = 0;
-                    float recTime = recs.m_record[i].time, secsInHour = 3600.0f, secsInMin = 60.0f;
-                    while (recTime >= secsInHour)
-                    {
-                        hours++;
-                        recTime -= secsInHour;
-                    }
-                    while (recTime >= secsInMin)
-                    {
-                        mins++;
-                        recTime -= secsInMin;
-                    }
-                    secs = (int)recTime;
-
-                    decsecs = (int)(recTime * 100.0f);
-
-                    toDisplay += string.Format("{0:00}:{1:00}:{2:00}.{3:00}", hours, mins, secs, decsecs) + " - ";
-                    toDisplay += recs.m_record[i].turns.ToString() + " / " + recs.m_record[i].par.ToString();
-                    toDisplay += System.Environment.NewLine;
+                    file = File.Create(Application.persistentDataPath + "/LearnRecords.dat");
                 }
                 break;
             case GameMode.TIMED:
-
-                Debug.Log("recs.m_record.Length == " + recs.m_record.Length);
-
-                for (int i = 0; i < recs.m_record.Length; i++)
+                if (File.Exists(Application.persistentDataPath + "/TimedRecords.dat"))
                 {
-                    Debug.Log("i == " + i.ToString());
-
-                    if (m_solveTimeElapsed < recs.m_record[i].time || (m_solveTimeElapsed == recs.m_record[i].time && m_cubeMonitor.m_cubePar >= recs.m_record[i].par))
-                    {
-                        for (int j = 1; j <= recs.m_record.Length - (i + 1); j++)
-                        {
-                            Debug.Log("j == " + j.ToString());
-                            recs.m_record[recs.m_record.Length - j] = recs.m_record[(recs.m_record.Length - j) - 1];
-                        }
-
-                        Record newRec;
-                        newRec.time = m_solveTimeElapsed;
-                        newRec.par = m_cubeMonitor.m_cubePar;
-                        newRec.turns = m_cubeMonitor.m_turns;
-                        recs.m_record[i] = newRec;
-                        break;
-                    }
+                    file = File.Open(Application.persistentDataPath + "/TimedRecords.dat", FileMode.Open);
                 }
-
-                // #1 - 00:00:00.00 - 000 / 00
-                for (int i = 0; i < recs.m_record.Length; i++)
+                else
                 {
-                    toDisplay += "#" + (i + 1).ToString() + " - ";
-
-                    int hours = 0, mins = 0, secs = 0, decsecs = 0;
-                    float recTime = recs.m_record[i].time, secsInHour = 3600.0f, secsInMin = 60.0f;
-                    while (recTime >= secsInHour)
-                    {
-                        hours++;
-                        recTime -= secsInHour;
-                    }
-                    while (recTime >= secsInMin)
-                    {
-                        mins++;
-                        recTime -= secsInMin;
-                    }
-                    secs = (int)recTime;
-
-                    decsecs = (int)(recTime * 100.0f);
-
-                    toDisplay += string.Format("{0:00}:{1:00}:{2:00}.{3:00}", hours, mins, secs, decsecs) + " - ";
-                    toDisplay += recs.m_record[i].turns.ToString() + " / " + recs.m_record[i].par.ToString();
-                    toDisplay += System.Environment.NewLine;
+                    file = File.Create(Application.persistentDataPath + "/TimedRecords.dat");
                 }
                 break;
             case GameMode.TURNS:
-                for (int i = 0; i < recs.m_record.Length; i++)
+                if (File.Exists(Application.persistentDataPath + "/TurnsRecords.dat"))
                 {
-                    if (m_cubeMonitor.m_turns < recs.m_record[i].turns || (m_cubeMonitor.m_turns == recs.m_record[i].turns && m_cubeMonitor.m_cubePar >= recs.m_record[i].par))
+                    file = File.Open(Application.persistentDataPath + "/TurnsRecords.dat", FileMode.Open);                    
+                }
+                else
+                {
+                    file = File.Create(Application.persistentDataPath + "/TurnsRecords.dat");
+                }
+                break;
+            default:
+                file = File.Create(Application.persistentDataPath + "/LearnRecords.dat");
+                break;
+        }
+
+        bf.Serialize(file, m_recs);
+        file.Close();
+    }
+
+    private void UpdateRecords ()
+    {
+        switch (m_mode)
+        {
+            case GameMode.LEARN:
+                for (int i = 0; i < m_recs.m_record.Length; i++)
+                {
+                    //|| (m_solveTimeElapsed == m_recs.m_record[i].time && m_cubeMonitor.m_cubePar >= m_recs.m_record[i].par)
+                    if (m_solveTimeElapsed < m_recs.m_record[i].time)
                     {
-                        for (int j = 1; j <= recs.m_record.Length - (i + 1); j++)
+                        for (int j = 1; j <= m_recs.m_record.Length - (i + 1); j++)
                         {
                             //Debug.Log("j == " + j.ToString());
-                            recs.m_record[recs.m_record.Length - j] = recs.m_record[(recs.m_record.Length - j) - 1];
+                            m_recs.m_record[m_recs.m_record.Length - j] = m_recs.m_record[(m_recs.m_record.Length - j) - 1];
                         }
 
-                        Record newRec;
-                        newRec.time = m_solveTimeElapsed;
-                        newRec.par = m_cubeMonitor.m_cubePar;
-                        newRec.turns = m_cubeMonitor.m_turns;
-                        recs.m_record[i] = newRec;
+                        m_recs.m_record[i].time = m_solveTimeElapsed;
+                        m_recs.m_record[i].par = m_cubeMonitor.m_cubePar;
+                        m_recs.m_record[i].turns = m_cubeMonitor.m_turns;
+                        SaveRecords();
                         break;
                     }
                 }
-
-                // #1 - 000 / 00 - 00:00:00.00
-                for (int i = 0; i < recs.m_record.Length; i++)
+                break;
+            case GameMode.TIMED:
+                for (int i = 0; i < m_recs.m_record.Length; i++)
                 {
-                    toDisplay += "#" + (i + 1).ToString() + " - ";
+                    //Debug.Log("recs.m_record[" + i.ToString() + "].time == " + m_recs.m_record[i].time.ToString());
 
-                    int hours = 0, mins = 0, secs = 0, decsecs = 0; // Maybe add decsecs (decimal seconds)...
-                    float recTime = recs.m_record[i].time, secsInHour = 3600.0f, secsInMin = 60.0f;
-                    while (recTime >= secsInHour)
+                    //|| (m_solveTimeElapsed == recs.m_record[i].time && m_cubeMonitor.m_cubePar > recs.m_record[i].par)
+                    if (m_solveTimeElapsed < m_recs.m_record[i].time)
                     {
-                        hours++;
-                        recTime -= secsInHour;
-                    }
-                    while (recTime >= secsInMin)
-                    {
-                        mins++;
-                        recTime -= secsInMin;
-                    }
-                    secs = (int)recTime;
+                        //Debug.Log("m_solveTimeElapsed < recs.m_record[" + i.ToString() + "].time == " + (m_solveTimeElapsed < m_recs.m_record[i].time).ToString());
+                        //Debug.Log(m_solveTimeElapsed.ToString() + " < " + m_recs.m_record[i].time.ToString() + " == " + (m_solveTimeElapsed < m_recs.m_record[i].time).ToString());
+                        
+                        for (int j = 1; j <= m_recs.m_record.Length - (i + 1); j++)
+                        {
+                            //Debug.Log("recs.m_record[" + (m_recs.m_record.Length - j).ToString() + "] = recs.m_record[" + ((m_recs.m_record.Length - j) - 1).ToString() + "]");
 
-                    decsecs = (int)(recTime * 100.0f);
-                    
-                    toDisplay += recs.m_record[i].turns.ToString() + " / " + recs.m_record[i].par.ToString() + " - ";
-                    toDisplay += string.Format("{0:00}:{1:00}:{2:00}.{3:00}", hours, mins, secs, decsecs);
-                    toDisplay += System.Environment.NewLine;
+                            m_recs.m_record[m_recs.m_record.Length - j].time = m_recs.m_record[(m_recs.m_record.Length - j) - 1].time;
+                            m_recs.m_record[m_recs.m_record.Length - j].par = m_recs.m_record[(m_recs.m_record.Length - j) - 1].par;
+                            m_recs.m_record[m_recs.m_record.Length - j].turns = m_recs.m_record[(m_recs.m_record.Length - j) - 1].turns;
+                        }
+
+                        m_recs.m_record[i].time = m_solveTimeElapsed;
+                        m_recs.m_record[i].par = m_cubeMonitor.m_cubePar;
+                        m_recs.m_record[i].turns = m_cubeMonitor.m_turns;
+                        SaveRecords();
+                        break;
+                    }
+                }
+                break;
+            case GameMode.TURNS:
+                for (int i = 0; i < m_recs.m_record.Length; i++)
+                {
+                    //|| (m_cubeMonitor.m_turns == m_recs.m_record[i].turns && m_cubeMonitor.m_cubePar >= m_recs.m_record[i].par)
+                    if (m_cubeMonitor.m_turns < m_recs.m_record[i].turns)
+                    {
+                        for (int j = 1; j <= m_recs.m_record.Length - (i + 1); j++)
+                        {
+                            //Debug.Log("j == " + j.ToString());
+                            m_recs.m_record[m_recs.m_record.Length - j] = m_recs.m_record[(m_recs.m_record.Length - j) - 1];
+                        }
+
+                        m_recs.m_record[i].time = m_solveTimeElapsed;
+                        m_recs.m_record[i].par = m_cubeMonitor.m_cubePar;
+                        m_recs.m_record[i].turns = m_cubeMonitor.m_turns;
+                        SaveRecords();
+                        break;
+                    }
                 }
                 break;
             default:
                 break;
         }
-        
-        
-        
-        //Debug.Log("toDisplay == " + toDisplay);
+    }
 
-        bf.Serialize(file, recs);
-        file.Close();
+    private string BuildRecordsString ()
+    {
+        LoadRecords();  // Load saved records
 
-        return toDisplay;
-    }    
+        /*
+        Debug.Log(System.Environment.NewLine + "loaded records...");
+        for (int i = 0; i < m_recs.m_record.Length; i++)
+        {
+            Debug.Log("recs.m_record[" + i.ToString() + "].time == " + m_recs.m_record[i].time.ToString());
+        }
+        */
+
+        UpdateRecords();  // Check if new record set; saves records if changed      
+
+        /*
+        Debug.Log(System.Environment.NewLine + "updated records...");
+        for (int i = 0; i < m_recs.m_record.Length; i++)
+        {
+            Debug.Log("recs.m_record[" + i.ToString() + "].time == " + m_recs.m_record[i].time.ToString());
+        }
+        */
+
+        string RecordsString = "";
+        if (m_mode == GameMode.LEARN || m_mode == GameMode.TIMED)
+        {
+            // #1 - 00:00:00.00 - 000 / 00
+            for (int i = 0; i < m_recs.m_record.Length; i++)
+            {
+                RecordsString += "#" + (i + 1).ToString() + " - ";
+
+                int hours = 0, mins = 0, secs = 0, decsecs = 0;
+                float recTime = m_recs.m_record[i].time, secsInHour = 3600.0f, secsInMin = 60.0f;
+                while (recTime >= secsInHour)
+                {
+                    hours++;
+                    recTime -= secsInHour;
+                }
+                while (recTime >= secsInMin)
+                {
+                    mins++;
+                    recTime -= secsInMin;
+                }
+                secs = (int)recTime;
+
+                decsecs = (int)(recTime * 100.0f);
+
+                RecordsString += string.Format("{0:00}:{1:00}:{2:00}.{3:00}", hours, mins, secs, decsecs) + " - ";
+                RecordsString += m_recs.m_record[i].turns.ToString() + " / " + m_recs.m_record[i].par.ToString();
+                RecordsString += System.Environment.NewLine;
+            }
+        }
+        else if (m_mode == GameMode.TURNS)
+        {
+            // #1 - 000 / 00 - 00:00:00.00
+            for (int i = 0; i < m_recs.m_record.Length; i++)
+            {
+                RecordsString += "#" + (i + 1).ToString() + " - ";
+
+                int hours = 0, mins = 0, secs = 0, decsecs = 0; // Maybe add decsecs (decimal seconds)...
+                float recTime = m_recs.m_record[i].time, secsInHour = 3600.0f, secsInMin = 60.0f;
+                while (recTime >= secsInHour)
+                {
+                    hours++;
+                    recTime -= secsInHour;
+                }
+                while (recTime >= secsInMin)
+                {
+                    mins++;
+                    recTime -= secsInMin;
+                }
+                secs = (int)recTime;
+
+                decsecs = (int)(recTime * 100.0f);
+
+                RecordsString += m_recs.m_record[i].turns.ToString() + " / " + m_recs.m_record[i].par.ToString() + " - ";
+                RecordsString += string.Format("{0:00}:{1:00}:{2:00}.{3:00}", hours, mins, secs, decsecs);
+                RecordsString += System.Environment.NewLine;
+            }
+        }       
+        return RecordsString;
+    }
 }
