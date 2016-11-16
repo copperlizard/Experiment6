@@ -23,7 +23,7 @@ public class Records
         for (int i = 0; i < m_record.Length; i++)
         {
             m_record[i].time = 300.0f + (30.0f * i);
-            m_record[i].turns = 60 + (10 * i);
+            m_record[i].turns = 100 + (10 * i);
             m_record[i].par = 15;
         }
     }
@@ -251,11 +251,11 @@ public class GameManager : MonoBehaviour
     {
         if (m_cubeMonitor.m_percentComplete <= 1.0f)
         {
-            return;
+            // Update helpers...
         }
         else
         {
-
+            StartCoroutine(TimedComplete());
         }
     }
 
@@ -263,7 +263,7 @@ public class GameManager : MonoBehaviour
     {
         if (m_cubeMonitor.m_percentComplete < 1.0f)
         {
-            return;
+            // Do nothing
         }
         else if (!m_modeComplete)
         {
@@ -308,14 +308,7 @@ public class GameManager : MonoBehaviour
 
     private void TurnsUpdate ()
     {
-        if (m_cubeMonitor.m_percentComplete <= 1.0f)
-        {
-            return;
-        }
-        else
-        {
-
-        }
+        TimedUpdate();
     }
 
     // Toggles game pause state
@@ -567,7 +560,7 @@ public class GameManager : MonoBehaviour
                 }
                 secs = (int)recTime;
 
-                decsecs = (int)(recTime * 100.0f);
+                decsecs = (int)((recTime - secs) * 100.0f);
 
                 RecordsString += string.Format("{0:00}:{1:00}:{2:00}.{3:00}", hours, mins, secs, decsecs) + " - ";
                 RecordsString += m_recs.m_record[i].turns.ToString() + " / " + m_recs.m_record[i].par.ToString();
@@ -595,7 +588,7 @@ public class GameManager : MonoBehaviour
                 }
                 secs = (int)recTime;
 
-                decsecs = (int)(recTime * 100.0f);
+                decsecs = (int)((recTime - secs) * 100.0f);
 
                 RecordsString += m_recs.m_record[i].turns.ToString() + " / " + m_recs.m_record[i].par.ToString() + " - ";
                 RecordsString += string.Format("{0:00}:{1:00}:{2:00}.{3:00}", hours, mins, secs, decsecs);

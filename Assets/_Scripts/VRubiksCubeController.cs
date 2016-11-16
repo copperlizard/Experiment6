@@ -23,7 +23,7 @@ public class VRubiksCubeController : MonoBehaviour
     private GameObject m_faceRotator;
 
 	// Use this for initialization
-	void Start ()
+	void Awake ()
     {
         m_userInput = GetComponent<VRubiksCubeUserInput>();
 

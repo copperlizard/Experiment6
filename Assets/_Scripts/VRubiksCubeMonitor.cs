@@ -222,6 +222,11 @@ public class VRubiksCubeMonitor : MonoBehaviour
             RandomizeCube();
         }
         
+        if (m_percentComplete > 0.6f) // Maybe adjust this later!!!
+        {
+            // Managed to randomly create a very simple cube...
+            RandomizeCube();
+        }
 
         yield return null;
     }
