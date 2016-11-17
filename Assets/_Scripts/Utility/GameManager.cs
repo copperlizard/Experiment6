@@ -41,6 +41,8 @@ public class GameManager : MonoBehaviour
     public Shader m_pauseReplacementShader;
 
     public bool m_isPaused = false;
+
+    public VRubiksCubeHelper m_helper;
     
     private VRubiksCubeMonitor m_cubeMonitor;
     private VRubiksCubeController m_cubeController;
@@ -130,6 +132,12 @@ public class GameManager : MonoBehaviour
             case GameMode.LEARN:
                 m_turnsText.color = m_turnsText.color * 0.5f;
                 m_timeText.color = m_timeText.color * 0.5f;
+
+                if (m_helper == null)
+                {
+                    Debug.Log("m_helper not assigned!");
+                }
+
                 break;
             case GameMode.TIMED:
                 m_turnsText.color = m_turnsText.color * 0.5f;
@@ -252,6 +260,7 @@ public class GameManager : MonoBehaviour
         if (m_cubeMonitor.m_percentComplete <= 1.0f)
         {
             // Update helpers...
+            m_helper.HelperUpdate();
         }
         else
         {
