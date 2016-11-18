@@ -7,6 +7,9 @@ public class VRubiksCubeHelper : MonoBehaviour
 
     public Shader m_helpReplacementShader;
 
+    [HideInInspector]
+    public bool m_gameIsPaused = false;
+
     private VRubiksCubeMonitor m_cubeMonitor;
     private VRubiksCubeUserInput m_cubeInput;
 
@@ -40,13 +43,16 @@ public class VRubiksCubeHelper : MonoBehaviour
             Debug.Log("m_helperPanel not assigned");
         }
 	}
-	
-    // Called by game manager
-	public void HelperUpdate ()
-    {
 
+    void Update ()
+    {
+        if (m_gameIsPaused && m_isHelping)
+        {
+            StopHelping();
+        }
     }
 
+    // Called by button
     public void Help ()
     {
         if (m_isHelping)
@@ -77,7 +83,11 @@ public class VRubiksCubeHelper : MonoBehaviour
         }
         else
         {
-            Camera.main.ResetReplacementShader();
+            if (!m_gameIsPaused)
+            {
+                Camera.main.ResetReplacementShader();
+            }
+            
             m_isHelping = false;
             m_cubeInput.enabled = true;
             m_undoRedoPanel.SetActive(true);
