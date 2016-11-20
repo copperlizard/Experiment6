@@ -137,7 +137,11 @@ public class VRubiksCubeController : MonoBehaviour
     IEnumerator RotateWholeCube (bool front, bool top, bool bottom, bool left, bool right, bool movedLeft, bool movedRight, bool movedUp, bool movedDown)
     {
         m_rotatingCube = true;
-        m_lastMoveType = "Reoriented Cube";
+
+        if (movedLeft || movedRight || movedUp || movedDown)
+        {
+            m_lastMoveType = "Reoriented Cube";
+        }
 
         // Which direction did user input?
         if (movedLeft)
