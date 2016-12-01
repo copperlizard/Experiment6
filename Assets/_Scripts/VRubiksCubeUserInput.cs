@@ -67,47 +67,6 @@ public class VRubiksCubeUserInput : MonoBehaviour
 	// Use this for initialization
 	void Start ()
     {
-        /*
-        //Build cube map
-        m_mapCube = new Dictionary<int, Vector3>();
-
-        m_mapCube.Add(0, new Vector3(-1.0f, -1.0f, -1.0f)); //left bottom front
-        m_mapCube.Add(1, new Vector3(0.0f, -1.0f, -1.0f)); //middle bottom front
-        m_mapCube.Add(2, new Vector3(1.0f, -1.0f, -1.0f)); //right bottom front
-
-        m_mapCube.Add(3, new Vector3(-1.0f, -1.0f, 0.0f)); //left bottom middle
-        m_mapCube.Add(20, new Vector3(0.0f, -1.0f, 0.0f)); //middle bottom middle *center
-        m_mapCube.Add(4, new Vector3(1.0f, -1.0f, 0.0f)); //right bottom middle
-
-        m_mapCube.Add(5, new Vector3(-1.0f, -1.0f, 1.0f)); //left bottom back
-        m_mapCube.Add(6, new Vector3(0.0f, -1.0f, 1.0f)); //middle bottom back
-        m_mapCube.Add(7, new Vector3(1.0f, -1.0f, 1.0f)); //right bottom back
-
-        m_mapCube.Add(8, new Vector3(-1.0f, 0.0f, -1.0f)); //left middle front
-        m_mapCube.Add(21, new Vector3(0.0f, 0.0f, -1.0f)); //middle middle front *center
-        m_mapCube.Add(9, new Vector3(1.0f, 0.0f, -1.0f)); //right middle front
-
-        m_mapCube.Add(22, new Vector3(-1.0f, 0.0f, 0.0f)); //left middle middle *center
-        //m_mapCube.Add(0, new Vector3(0.0f, 0.0f, 0.0f)); //middle middle middle *base cube
-        m_mapCube.Add(23, new Vector3(1.0f, 0.0f, 0.0f)); //right middle middle *center
-
-        m_mapCube.Add(10, new Vector3(-1.0f, 0.0f, 1.0f)); //left middle back 
-        m_mapCube.Add(24, new Vector3(0.0f, 0.0f, 1.0f)); //middle middle back *center
-        m_mapCube.Add(11, new Vector3(1.0f, 0.0f, 1.0f)); //right middle back
-
-        m_mapCube.Add(12, new Vector3(-1.0f, 1.0f, -1.0f)); //left top front
-        m_mapCube.Add(13, new Vector3(0.0f, 1.0f, -1.0f)); //middle top front
-        m_mapCube.Add(14, new Vector3(1.0f, 1.0f, -1.0f)); //right top front
-
-        m_mapCube.Add(15, new Vector3(-1.0f, 1.0f, 0.0f)); //left top middle
-        m_mapCube.Add(25, new Vector3(0.0f, 1.0f, 0.0f)); //middle top middle *center
-        m_mapCube.Add(16, new Vector3(1.0f, 1.0f, 0.0f)); //right top middle
-
-        m_mapCube.Add(17, new Vector3(-1.0f, 1.0f, 1.0f)); //left top back
-        m_mapCube.Add(18, new Vector3(0.0f, 1.0f, 1.0f)); //middle top back
-        m_mapCube.Add(19, new Vector3(1.0f, 1.0f, 1.0f)); //right top back   
-        */
-
         // Build cube list
         m_cubes = new List<GameObject>();        
         GameObject[] gameObjs = FindObjectsOfType<GameObject>();
@@ -241,16 +200,16 @@ public class VRubiksCubeUserInput : MonoBehaviour
                         m_redoStack.Clear();
                     }
 
-                    Debug.Log("storing user command:" + System.Environment.NewLine +
-                        "m_touchedParentLocation == " + cmd.m_touchedParentLocation.ToString() + System.Environment.NewLine +
-                      /*  "m_touchedUp == " + cmd.m_touchedUp.ToString() + System.Environment.NewLine + */
-                        "m_move == " + cmd.m_move.ToString() //+ System.Environment.NewLine + System.Environment.NewLine +
-                      /*  "mapInput == " + mapInput.ToString() + System.Environment.NewLine + */
-                      /*  "m_touched.transform.parent.localPosition == " + m_touched.transform.parent.localPosition.ToString() + System.Environment.NewLine + */
-                      /*  "m_touched.transform.parent.name == " + m_touched.transform.parent.name + System.Environment.NewLine + */
-                      /*  "m_touched.transform.position == " + m_touched.transform.position.ToString() + System.Environment.NewLine + */
-                      /*  "m_touched.transform.parent.position == " + m_touched.transform.parent.position.ToString() +System.Environment.NewLine + */
-                      /*  "transform.parent.InverseTransformPoint(m_touched.transform.parent.position) == " + transform.parent.InverseTransformPoint(m_touched.transform.parent.position).ToString() */);                    
+                    //Debug.Log("storing user command:" + System.Environment.NewLine +
+                    //    "m_touchedParentLocation == " + cmd.m_touchedParentLocation.ToString() + System.Environment.NewLine +
+                    /*  "m_touchedUp == " + cmd.m_touchedUp.ToString() + System.Environment.NewLine + */
+                    //    "m_move == " + cmd.m_move.ToString() //+ System.Environment.NewLine + System.Environment.NewLine +
+                    /*  "mapInput == " + mapInput.ToString() + System.Environment.NewLine + */
+                    /*  "m_touched.transform.parent.localPosition == " + m_touched.transform.parent.localPosition.ToString() + System.Environment.NewLine + */
+                    /*  "m_touched.transform.parent.name == " + m_touched.transform.parent.name + System.Environment.NewLine + */
+                    /*  "m_touched.transform.position == " + m_touched.transform.position.ToString() + System.Environment.NewLine + */
+                    /*  "m_touched.transform.parent.position == " + m_touched.transform.parent.position.ToString() +System.Environment.NewLine + */
+                    /*  "transform.parent.InverseTransformPoint(m_touched.transform.parent.position) == " + transform.parent.InverseTransformPoint(m_touched.transform.parent.position).ToString() );*/
                 }
                 else
                 {
@@ -282,9 +241,9 @@ public class VRubiksCubeUserInput : MonoBehaviour
         {
             UserInput cmd = m_undoStack.Pop();
 
-            Debug.Log("cmd to undo:" + System.Environment.NewLine + "m_touchedParentLocation == " + cmd.m_touchedParentLocation.ToString() + System.Environment.NewLine + 
+            //Debug.Log("cmd to undo:" + System.Environment.NewLine + "m_touchedParentLocation == " + cmd.m_touchedParentLocation.ToString() + System.Environment.NewLine + 
                 /* "m_touchedUp == " + cmd.m_touchedUp.ToString() + System.Environment.NewLine + */
-                "m_move == " + cmd.m_move.ToString());
+                //"m_move == " + cmd.m_move.ToString());
 
             GameObject toTouch = null;
             foreach (GameObject cube in m_cubes)
@@ -337,15 +296,15 @@ public class VRubiksCubeUserInput : MonoBehaviour
                 {
                     if (cubeLocation == cmd.m_touchedParentLocation)
                     {
-                        Debug.Log("found cube location: " + cubeLocation.ToString() + " ; cube name: " + cube.name);
+                        //Debug.Log("found cube location: " + cubeLocation.ToString() + " ; cube name: " + cube.name);
 
                         // Check panels
                         for (int i = 0; i < cube.transform.childCount; i++)
                         {
-                            Debug.Log("this panel up == " + cube.transform.InverseTransformDirection(cube.transform.GetChild(i).up).ToString());
+                            //Debug.Log("this panel up == " + cube.transform.InverseTransformDirection(cube.transform.GetChild(i).up).ToString());
                             if (Vector3.Dot(transform.parent.InverseTransformDirection(cube.transform.GetChild(i).up), cmd.m_touchedUp) > 0.9f)
                             {
-                                Debug.Log("found matching panel!");
+                                //Debug.Log("found matching panel!");
 
                                 toTouch = cube.transform.GetChild(i).gameObject;
                                 break;
@@ -354,7 +313,7 @@ public class VRubiksCubeUserInput : MonoBehaviour
 
                         if (toTouch == null)
                         {                            
-                            Debug.Log("matching panel not found!");
+                            //Debug.Log("matching panel not found!");
 
                             m_undoStack.Push(cmd);
                             return;
@@ -363,7 +322,7 @@ public class VRubiksCubeUserInput : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log("cubeLocationFound not found!!!");
+                    //Debug.Log("cubeLocationFound not found!!!");
 
                     m_undoStack.Push(cmd);
                     return;
@@ -451,7 +410,7 @@ public class VRubiksCubeUserInput : MonoBehaviour
 
                         if (toTouch == null)
                         {
-                            Debug.Log("matching panel not found!");
+                            //Debug.Log("matching panel not found!");
 
                             m_redoStack.Push(cmd);
                             return;
@@ -460,7 +419,7 @@ public class VRubiksCubeUserInput : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log("cubeLocationFound not found!!!");
+                    //Debug.Log("cubeLocationFound not found!!!");
 
                     m_redoStack.Push(cmd);
                     return;

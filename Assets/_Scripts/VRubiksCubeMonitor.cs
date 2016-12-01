@@ -383,14 +383,14 @@ public class VRubiksCubeMonitor : MonoBehaviour
                         m_stage = 3;
                     }
 
-                    if (m_cubeStates[13] && m_cubeStates[15] && m_cubeStates[16] && m_cubeStates[18]) // Other cross complete
+                    if (m_cubeStates[12] && m_cubeStates[14] && m_cubeStates[17] && m_cubeStates[19]) // Third layer corners
                     {
                         if (4 > m_stage)
                         {
                             m_stage = 4;
                         }
 
-                        if (m_cubeStates[12] && m_cubeStates[14] && m_cubeStates[17] && m_cubeStates[19]) // Third layer complete
+                        if (m_cubeStates[13] && m_cubeStates[15] && m_cubeStates[16] && m_cubeStates[18]) // Other cross complete
                         {
                             if (5 > m_stage)
                             {
@@ -425,14 +425,14 @@ public class VRubiksCubeMonitor : MonoBehaviour
                         m_stage = 3;
                     }
 
-                    if (m_cubeStates[1] && m_cubeStates[3] && m_cubeStates[4] && m_cubeStates[6]) // Other cross complete
+                    if (m_cubeStates[0] && m_cubeStates[2] && m_cubeStates[5] && m_cubeStates[7]) // Third layer corners
                     {
                         if (4 > m_stage)
                         {
                             m_stage = 4;
                         }
 
-                        if (m_cubeStates[0] && m_cubeStates[2] && m_cubeStates[5] && m_cubeStates[7]) // Third layer complete
+                        if (m_cubeStates[1] && m_cubeStates[3] && m_cubeStates[4] && m_cubeStates[6]) // Other cross complete
                         {
                             if (5 > m_stage)
                             {
@@ -467,14 +467,14 @@ public class VRubiksCubeMonitor : MonoBehaviour
                         m_stage = 3;
                     }
 
-                    if (m_cubeStates[4] && m_cubeStates[9] && m_cubeStates[11] && m_cubeStates[16]) // Other cross complete
+                    if (m_cubeStates[2] && m_cubeStates[7] && m_cubeStates[14] && m_cubeStates[19]) // Third layer corners
                     {
                         if (4 > m_stage)
                         {
                             m_stage = 4;
                         }
 
-                        if (m_cubeStates[2] && m_cubeStates[7] && m_cubeStates[14] && m_cubeStates[19]) // Third layer complete
+                        if (m_cubeStates[4] && m_cubeStates[9] && m_cubeStates[11] && m_cubeStates[16]) // Other cross complete
                         {
                             if (5 > m_stage)
                             {
@@ -509,14 +509,14 @@ public class VRubiksCubeMonitor : MonoBehaviour
                         m_stage = 3;
                     }
 
-                    if (m_cubeStates[3] && m_cubeStates[8] && m_cubeStates[10] && m_cubeStates[15]) // Other cross complete
+                    if (m_cubeStates[0] && m_cubeStates[5] && m_cubeStates[12] && m_cubeStates[17]) // Third layer corners
                     {
                         if (4 > m_stage)
                         {
                             m_stage = 4;
                         }
 
-                        if (m_cubeStates[0] && m_cubeStates[5] && m_cubeStates[12] && m_cubeStates[17]) // Third layer complete
+                        if (m_cubeStates[3] && m_cubeStates[8] && m_cubeStates[10] && m_cubeStates[15]) // Other cross complete
                         {
                             if (5 > m_stage)
                             {
@@ -551,14 +551,14 @@ public class VRubiksCubeMonitor : MonoBehaviour
                         m_stage = 3;
                     }
 
-                    if (m_cubeStates[6] && m_cubeStates[10] && m_cubeStates[11] && m_cubeStates[18]) // Other cross complete
+                    if (m_cubeStates[5] && m_cubeStates[7] && m_cubeStates[17] && m_cubeStates[19]) // Third layer corners
                     {
                         if (4 > m_stage)
                         {
                             m_stage = 4;
                         }
 
-                        if (m_cubeStates[5] && m_cubeStates[7] && m_cubeStates[17] && m_cubeStates[19]) // Third layer complete
+                        if (m_cubeStates[6] && m_cubeStates[10] && m_cubeStates[11] && m_cubeStates[18]) // Other cross complete
                         {
                             if (5 > m_stage)
                             {
@@ -593,14 +593,14 @@ public class VRubiksCubeMonitor : MonoBehaviour
                         m_stage = 3;
                     }
 
-                    if (m_cubeStates[1] && m_cubeStates[8] && m_cubeStates[9] && m_cubeStates[13]) // Other cross complete
+                    if (m_cubeStates[0] && m_cubeStates[2] && m_cubeStates[12] && m_cubeStates[14]) // Third layer corners
                     {
                         if (4 > m_stage)
                         {
                             m_stage = 4;
                         }
 
-                        if (m_cubeStates[0] && m_cubeStates[2] && m_cubeStates[12] && m_cubeStates[14]) // Third layer complete
+                        if (m_cubeStates[1] && m_cubeStates[8] && m_cubeStates[9] && m_cubeStates[13]) // Other cross complete
                         {
                             if (5 > m_stage)
                             {

@@ -46,7 +46,7 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\RotationTest.cs" />
-     <Compile Include="Assets\VRubiksCubeHelper.cs" />
+     <Compile Include="Assets\_Scripts\ControlsMenu.cs" />
      <Compile Include="Assets\_Scripts\GimbalController.cs" />
      <Compile Include="Assets\_Scripts\Utility\DisableScreenRotation.cs" />
      <Compile Include="Assets\_Scripts\Utility\FPSDisplay.cs" />
@@ -54,6 +54,7 @@
      <Compile Include="Assets\_Scripts\Utility\LoadScene.cs" />
      <Compile Include="Assets\_Scripts\Utility\QuitApplication.cs" />
      <Compile Include="Assets\_Scripts\VRubiksCubeController.cs" />
+     <Compile Include="Assets\_Scripts\VRubiksCubeHelper.cs" />
      <Compile Include="Assets\_Scripts\VRubiksCubeMonitor.cs" />
      <Compile Include="Assets\_Scripts\VRubiksCubeUserInput.cs" />
      <None Include="Assets\_Shaders\PauseEffectShader.shader" />

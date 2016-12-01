@@ -13,6 +13,8 @@ public class VRubiksCubeHelper : MonoBehaviour
     private VRubiksCubeMonitor m_cubeMonitor;
     private VRubiksCubeUserInput m_cubeInput;
 
+    private int m_stageMax = 0;
+
     private bool m_isHelping = false;
 
 	// Use this for initialization
@@ -62,7 +64,7 @@ public class VRubiksCubeHelper : MonoBehaviour
         }
         else
         {
-            Debug.Log("Helping!");
+            //Debug.Log("Helping!");
 
             m_isHelping = true;
             m_cubeInput.enabled = false;
@@ -71,6 +73,11 @@ public class VRubiksCubeHelper : MonoBehaviour
             if (m_helpReplacementShader != null)
             {
                 Camera.main.SetReplacementShader(m_helpReplacementShader, "RenderType");
+            }
+
+            if (m_cubeMonitor.m_stage > m_stageMax)
+            {
+                m_stageMax = m_cubeMonitor.m_stage;
             }
         }
     }
