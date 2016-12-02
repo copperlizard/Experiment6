@@ -7,7 +7,7 @@ public class GimbalController : MonoBehaviour
 
     private Vector3 m_phoneUp, m_lastPhoneUp;
 
-    private float m_gyroPollFreq = 60.0f, m_gyroPollPer = 1.0f / 60.0f, m_gyroSmoothing = 1.0f;
+    private float m_gyroPollFreq = 60.0f, m_gyroPollPer = 1.0f / 60.0f, m_gyroSmoothing = 1.0f, m_accelerometerSmoothing = 0.3f;
 
     private bool m_useGyro = true;
 
@@ -60,7 +60,13 @@ public class GimbalController : MonoBehaviour
         }
         else
         {
+            Input.gyro.enabled = false;
 
+            float prefAccelerometerSmoothing = PlayerPrefs.GetFloat("AccelerometerSmoothing", -1.0f);
+            if (prefAccelerometerSmoothing != -1.0f)
+            {
+                m_accelerometerSmoothing = prefAccelerometerSmoothing;
+            }
         }
     }
 
