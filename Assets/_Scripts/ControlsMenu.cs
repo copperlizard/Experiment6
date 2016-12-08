@@ -47,6 +47,14 @@ public class ControlsMenu : MonoBehaviour
 
     private void LoadPlayerPrefs ()
     {
+        float prefHomeTilt = PlayerPrefs.GetFloat("DesiredTilt", -45.0f);
+        if (prefHomeTilt != -45.0f)
+        {
+            Debug.Log("loaded home tilt pref!");
+
+            m_homeTiltSlider.value = prefHomeTilt / 90.0f;
+        }
+
         // Gyro or accelerometer?
         int prefUseGyro = PlayerPrefs.GetInt("UseGyro", -1);
         if (prefUseGyro != -1)
@@ -55,10 +63,12 @@ public class ControlsMenu : MonoBehaviour
         }
 
         // Set desired gyro update rate
-        float prefGyroPollFreq = PlayerPrefs.GetFloat("GyroPollFreq", 0.0f);
-        if (prefGyroPollFreq != 0.0f)
+        float prefGyroPollFreq = PlayerPrefs.GetFloat("GyroPollFreq", -1.0f);
+        if (prefGyroPollFreq != -1.0f)
         {
-            m_gyroPollRateSlider.value = prefGyroPollFreq / 60.0f;            
+            //Debug.Log("prefGyroPollFreq == " + prefGyroPollFreq.ToString());
+
+            m_gyroPollRateSlider.value = prefGyroPollFreq;           
         }        
 
         float prefGyroSmoothing = PlayerPrefs.GetFloat("GyroSmoothing", -1.0f);
@@ -76,15 +86,13 @@ public class ControlsMenu : MonoBehaviour
 		
 	public void ToggleGyro ()
     {
-        Debug.Log("ToggleGyro()!");
-
 	    if (m_gyroToggle.isOn)
         {
-            Debug.Log("toggle is on!");
+            //Debug.Log("toggle is on!");
 
             if (m_gyroOn == false)
             {
-                Debug.Log("Setting gyro on! changing text colors...");
+                //Debug.Log("Setting gyro on! changing text colors...");
 
                 m_gyroOn = true;
                 PlayerPrefs.SetInt("UseGyro", 1);
@@ -110,11 +118,11 @@ public class ControlsMenu : MonoBehaviour
         }
         else
         {
-            Debug.Log("toggle is off!");
+            //Debug.Log("toggle is off!");
 
             if (m_gyroOn == true)
             {
-                Debug.Log("Setting gyro off! changing text colors...");
+                //Debug.Log("Setting gyro off! changing text colors...");
 
                 m_gyroOn = false;
                 PlayerPrefs.SetInt("UseGyro", 0);
@@ -142,17 +150,23 @@ public class ControlsMenu : MonoBehaviour
 
     public void ResetControls ()
     {
-        m_homeTiltSlider.value = 0.5f;
+        m_homeTiltSlider.value = 0.5f;       
         m_gyroToggle.isOn = true;
         m_gyroSmoothingSlider.value = 0.0f;
         m_gyroPollRateSlider.value = 1.0f;
         m_accelerometerSmoothingSlider.value = 0.3f;
         ToggleGyro();
+
+        /*
+        Debug.Log("m_homeTiltSlider.value == " + m_homeTiltSlider.value.ToString() + System.Environment.NewLine +
+            "m_gyroSmoothingSlider.value == " + m_gyroSmoothingSlider.value.ToString() + System.Environment.NewLine +
+            "m_gyroPollRateSlider.value == " + m_gyroPollRateSlider.value.ToString() + System.Environment.NewLine +
+            "m_accelerometerSmoothingSlider.value == " + m_accelerometerSmoothingSlider.value.ToString()); */
     }
 
     public void SetHomeTilt ()
     {
-        Debug.Log("setting home tilt to " + (m_homeTiltSlider.value * 90.0f).ToString());
+        //Debug.Log("setting home tilt to " + (m_homeTiltSlider.value * 90.0f).ToString());
 
         PlayerPrefs.SetFloat("DesiredTilt", m_homeTiltSlider.value * 90.0f);
     }
@@ -164,6 +178,8 @@ public class ControlsMenu : MonoBehaviour
 
     public void SetGyroSmoothing ()
     {
+        //Debug.Log("setting gyrosmoothing to " + m_gyroSmoothingSlider.value.ToString());
+
         PlayerPrefs.SetFloat("GyroSmoothing", m_gyroSmoothingSlider.value);
     }
 

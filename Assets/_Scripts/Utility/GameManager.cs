@@ -334,7 +334,12 @@ public class GameManager : MonoBehaviour
             m_cubeInput.enabled = false;
             m_undoRedoPanel.SetActive(false);
             m_pausePanel.SetActive(true);
-            m_helper.m_gameIsPaused = true;
+
+            if (m_helper != null)
+            {
+                m_helper.m_gameIsPaused = true;
+            }
+            
             if (m_pauseReplacementShader != null)
             {
                 Camera.main.SetReplacementShader(m_pauseReplacementShader, "RenderType");
@@ -352,7 +357,12 @@ public class GameManager : MonoBehaviour
 
         Camera.main.ResetReplacementShader();
         m_pausePanel.SetActive(false);
-        m_helper.m_gameIsPaused = false;
+
+        if (m_helper != null)
+        {
+            m_helper.m_gameIsPaused = false;
+        }
+        
         m_undoRedoPanel.SetActive(true);
         m_isPaused = false;
         m_cubeInput.enabled = true;
