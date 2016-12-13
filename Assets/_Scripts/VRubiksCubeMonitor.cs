@@ -616,7 +616,272 @@ public class VRubiksCubeMonitor : MonoBehaviour
         //Debug.Log("m_percentComplete == " + m_percentComplete.ToString() + " ; m_stage == " + m_stage);
 
         return false;
-    }    
+    }
+    
+    public void SolveCube ()
+    {
+        while (!SolveCubeStage1())
+        {
+            Debug.Log("solving stage1!");
+        }
+    }   
+    
+    public bool SolveCubeStage1 () // recursive...
+    {
+        // Wait for last controller input to be processed
+        if (m_cubeController.m_rotatingFace || m_cubeController.m_rotatingCube)
+        {
+            return false;
+        }
+
+        // Find "most complete" cross (do this every step incase you get lucky...)
+        int U = 0, D = 0, L = 0, R = 0, F = 0, B = 0;
+        if (m_cubeStates[1])
+        {
+            D++;
+            F++;
+        }
+        if (m_cubeStates[3])
+        {
+            D++;
+            L++;
+        }
+        if (m_cubeStates[4])
+        {
+            D++;
+            R++;
+        }
+        if (m_cubeStates[6])
+        {
+            D++;
+            B++;
+        }
+        if (m_cubeStates[8])
+        {
+            L++;
+            F++;
+        }
+        if (m_cubeStates[9])
+        {
+            R++;
+            F++;
+        }
+        if (m_cubeStates[10])
+        {
+            L++;
+            B++;
+        }
+        if (m_cubeStates[11])
+        {
+            R++;
+            B++;
+        }
+        if (m_cubeStates[13])
+        {
+            U++;
+            F++;
+        }
+        if (m_cubeStates[15])
+        {
+            U++;
+            L++;
+        }
+        if (m_cubeStates[16])
+        {
+            U++;
+            R++;
+        }
+        if (m_cubeStates[18])
+        {
+            U++;
+            B++;
+        }
+
+        // Orient cube so cross is on top (if neccessary)
+        if (U >= L && U >= R && U >= F && U >= B && U >= D)
+        {
+            // Already on top
+        }
+        else if (L >= U && L >= R && L >= F && L >= B && L >= D)
+        {
+            // Touch left center and swipe up
+            if (Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.right) >= 0.9f)
+            {
+                m_cubeController.Turn(m_whiteCenter, new Vector2(0.0f, 300.0f));
+            }
+            else if (Vector3.Dot(m_redCenter.transform.up, -transform.parent.right) >= 0.9f)
+            {
+                m_cubeController.Turn(m_redCenter, new Vector2(0.0f, 300.0f));
+            }
+            else if (Vector3.Dot(m_orangeCenter.transform.up, -transform.parent.right) >= 0.9f)
+            {
+                m_cubeController.Turn(m_orangeCenter, new Vector2(0.0f, 300.0f));
+            }
+            else if (Vector3.Dot(m_blueCenter.transform.up, -transform.parent.right) >= 0.9f)
+            {
+                m_cubeController.Turn(m_blueCenter, new Vector2(0.0f, 300.0f));
+            }
+            else if (Vector3.Dot(m_greenCenter.transform.up, -transform.parent.right) >= 0.9f)
+            {
+                m_cubeController.Turn(m_greenCenter, new Vector2(0.0f, 300.0f));
+            }
+            else if(Vector3.Dot(m_yellowCenter.transform.up, -transform.parent.right) >= 0.9f)
+            {
+                m_cubeController.Turn(m_yellowCenter, new Vector2(0.0f, 300.0f));
+            }
+
+            return false; // Recurse
+        }
+        else if (R >= U && R >= L && R >= F && R >= B && R >= D)
+        {
+            // Touch right center and swipe up
+            if (Vector3.Dot(m_whiteCenter.transform.up, transform.parent.right) >= 0.9f)
+            {
+                m_cubeController.Turn(m_whiteCenter, new Vector2(0.0f, 300.0f));
+            }
+            else if (Vector3.Dot(m_redCenter.transform.up, transform.parent.right) >= 0.9f)
+            {
+                m_cubeController.Turn(m_redCenter, new Vector2(0.0f, 300.0f));
+            }
+            else if (Vector3.Dot(m_orangeCenter.transform.up, -transform.parent.right) >= 0.9f)
+            {
+                m_cubeController.Turn(m_orangeCenter, new Vector2(0.0f, 300.0f));
+            }
+            else if (Vector3.Dot(m_blueCenter.transform.up, transform.parent.right) >= 0.9f)
+            {
+                m_cubeController.Turn(m_blueCenter, new Vector2(0.0f, 300.0f));
+            }
+            else if (Vector3.Dot(m_greenCenter.transform.up, transform.parent.right) >= 0.9f)
+            {
+                m_cubeController.Turn(m_greenCenter, new Vector2(0.0f, 300.0f));
+            }
+            else if (Vector3.Dot(m_yellowCenter.transform.up, transform.parent.right) >= 0.9f)
+            {
+                m_cubeController.Turn(m_yellowCenter, new Vector2(0.0f, 300.0f));
+            }
+
+            return false; // Recurse
+        }        
+        else if (F >= U && F >= R && F >= L && F >= B && F >= D)
+        {
+            // Touch front center and swipe up
+            if (Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.forward) >= 0.9f)
+            {
+                m_cubeController.Turn(m_whiteCenter, new Vector2(0.0f, 300.0f));
+            }
+            else if (Vector3.Dot(m_redCenter.transform.up, -transform.parent.forward) >= 0.9f)
+            {
+                m_cubeController.Turn(m_redCenter, new Vector2(0.0f, 300.0f));
+            }
+            else if (Vector3.Dot(m_orangeCenter.transform.up, -transform.parent.forward) >= 0.9f)
+            {
+                m_cubeController.Turn(m_orangeCenter, new Vector2(0.0f, 300.0f));
+            }
+            else if (Vector3.Dot(m_blueCenter.transform.up, -transform.parent.forward) >= 0.9f)
+            {
+                m_cubeController.Turn(m_blueCenter, new Vector2(0.0f, 300.0f));
+            }
+            else if (Vector3.Dot(m_greenCenter.transform.up, -transform.parent.forward) >= 0.9f)
+            {
+                m_cubeController.Turn(m_greenCenter, new Vector2(0.0f, 300.0f));
+            }
+            else if (Vector3.Dot(m_yellowCenter.transform.up, -transform.parent.forward) >= 0.9f)
+            {
+                m_cubeController.Turn(m_yellowCenter, new Vector2(0.0f, 300.0f));
+            }
+
+            return false; // Recurse
+        }
+        else if (B >= U && B >= R && B >= L && B >= F && F >= D)
+        {
+            // Touch front center and swipe down
+            if (Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.forward) >= 0.9f)
+            {
+                m_cubeController.Turn(m_whiteCenter, new Vector2(0.0f, -300.0f));
+            }
+            else if (Vector3.Dot(m_redCenter.transform.up, -transform.parent.forward) >= 0.9f)
+            {
+                m_cubeController.Turn(m_redCenter, new Vector2(0.0f, -300.0f));
+            }
+            else if (Vector3.Dot(m_orangeCenter.transform.up, -transform.parent.forward) >= 0.9f)
+            {
+                m_cubeController.Turn(m_orangeCenter, new Vector2(0.0f, -300.0f));
+            }
+            else if (Vector3.Dot(m_blueCenter.transform.up, -transform.parent.forward) >= 0.9f)
+            {
+                m_cubeController.Turn(m_blueCenter, new Vector2(0.0f, -300.0f));
+            }
+            else if (Vector3.Dot(m_greenCenter.transform.up, -transform.parent.forward) >= 0.9f)
+            {
+                m_cubeController.Turn(m_greenCenter, new Vector2(0.0f, -300.0f));
+            }
+            else if (Vector3.Dot(m_yellowCenter.transform.up, -transform.parent.forward) >= 0.9f)
+            {
+                m_cubeController.Turn(m_yellowCenter, new Vector2(0.0f, -300.0f));
+            }
+
+            return false; // Recurse
+
+        }
+        else if (D >= U && D >= R && D >= L && D >= F && D >= B)
+        {
+            // Touch front center and swipe up 
+            if (Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.forward) >= 0.9f)
+            {
+                m_cubeController.Turn(m_whiteCenter, new Vector2(0.0f, 300.0f));
+            }
+            else if (Vector3.Dot(m_redCenter.transform.up, -transform.parent.forward) >= 0.9f)
+            {
+                m_cubeController.Turn(m_redCenter, new Vector2(0.0f, 300.0f));
+            }
+            else if (Vector3.Dot(m_orangeCenter.transform.up, -transform.parent.forward) >= 0.9f)
+            {
+                m_cubeController.Turn(m_orangeCenter, new Vector2(0.0f, 300.0f));
+            }
+            else if (Vector3.Dot(m_blueCenter.transform.up, -transform.parent.forward) >= 0.9f)
+            {
+                m_cubeController.Turn(m_blueCenter, new Vector2(0.0f, 300.0f));
+            }
+            else if (Vector3.Dot(m_greenCenter.transform.up, -transform.parent.forward) >= 0.9f)
+            {
+                m_cubeController.Turn(m_greenCenter, new Vector2(0.0f, 300.0f));
+            }
+            else if (Vector3.Dot(m_yellowCenter.transform.up, -transform.parent.forward) >= 0.9f)
+            {
+                m_cubeController.Turn(m_yellowCenter, new Vector2(0.0f, 300.0f));
+            }
+
+            return false; // Recurse
+        }
+        else
+        {
+            Debug.Log("Failed to find most complete cross!");
+        }
+
+        // Complete cross (if neccessary)
+        return SolveStage1Cross();
+    }
+    
+    private bool SolveStage1Cross ()
+    {
+        if (m_cubeStates[13] && m_cubeStates[15] && m_cubeStates[16] && m_cubeStates[18]) // Top Cross complete
+        {
+            return true;
+        }
+        else
+        {
+            // make sure [16] cubeState is false
+        }
+
+        return false;
+    } 
 }
 
 
+// Check bottom up
+//if ([1] && [3] && [4] && [6]) // Bottom Cross complete
+//if ([13] && [15] && [16] && [18]) // Top Cross complete
+//if ([3] && [8] && [10] && [15]) // Left Cross complete
+//if ([4] && [9] && [11] && [16]) // Right Cross complete
+//if ([1] && [8] && [9] && [13]) // Front Cross complete
+//if ([6] && [10] && [11] && [18]) // Back Cross complete

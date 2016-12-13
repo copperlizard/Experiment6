@@ -230,6 +230,7 @@ public class VRubiksCubeController : MonoBehaviour
         }
 
         m_rotatingCube = false;
+        m_monitor.CheckSolved();
         yield return null;
     }
         
@@ -393,11 +394,12 @@ public class VRubiksCubeController : MonoBehaviour
                 } while (m_rotatingFace);
             }
         }
+        
+        m_rotatingCube = false;
 
         // Check cube status
-        m_monitor.CheckSolved();        
+        m_monitor.CheckSolved();
 
-        m_rotatingCube = false;
         yield return null;
     }
 

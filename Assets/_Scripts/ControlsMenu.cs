@@ -6,11 +6,11 @@ public class ControlsMenu : MonoBehaviour
 {
     public Text m_homeTiltText, m_gyroSmoothingText, m_gyroPollRateText, m_accelerometerSmoothingText;
 
-    public Slider m_homeTiltSlider, m_gyroSmoothingSlider, m_gyroPollRateSlider, m_accelerometerSmoothingSlider;
+    public Slider m_homeTiltSlider, m_tiltAmplificationSlider, m_gyroSmoothingSlider, m_gyroPollRateSlider, m_accelerometerSmoothingSlider;
 
     public Toggle m_gyroToggle;
 
-    private bool m_gyroOn = false;
+    private bool m_gyroOn = true;
 
 	// Use this for initialization
 	void Awake ()
@@ -23,6 +23,16 @@ public class ControlsMenu : MonoBehaviour
         if (m_accelerometerSmoothingText == null)
         {
             Debug.Log("m_accelerometerSmoothingText not assigned!");
+        }
+
+        if (m_homeTiltSlider == null)
+        {
+            Debug.Log("m_homeTiltSlider not assigned!");
+        }
+
+        if (m_tiltAmplificationSlider == null)
+        {
+            Debug.Log("m_tiltAmplificationSlider not assigned!");
         }
 
         if (m_gyroSmoothingSlider == null)
@@ -50,9 +60,13 @@ public class ControlsMenu : MonoBehaviour
         float prefHomeTilt = PlayerPrefs.GetFloat("DesiredTilt", -45.0f);
         if (prefHomeTilt != -45.0f)
         {
-            Debug.Log("loaded home tilt pref!");
-
             m_homeTiltSlider.value = prefHomeTilt / 90.0f;
+        }
+
+        float prefTiltAmplification = PlayerPrefs.GetFloat("TiltAmplification", -1.0f);
+        if (prefTiltAmplification != -1.0f)
+        {
+            m_tiltAmplificationSlider.value = prefTiltAmplification;
         }
 
         // Gyro or accelerometer?
@@ -66,8 +80,6 @@ public class ControlsMenu : MonoBehaviour
         float prefGyroPollFreq = PlayerPrefs.GetFloat("GyroPollFreq", -1.0f);
         if (prefGyroPollFreq != -1.0f)
         {
-            //Debug.Log("prefGyroPollFreq == " + prefGyroPollFreq.ToString());
-
             m_gyroPollRateSlider.value = prefGyroPollFreq;           
         }        
 
@@ -150,7 +162,8 @@ public class ControlsMenu : MonoBehaviour
 
     public void ResetControls ()
     {
-        m_homeTiltSlider.value = 0.5f;       
+        m_homeTiltSlider.value = 0.5f;
+        m_tiltAmplificationSlider.value = 0.5f;       
         m_gyroToggle.isOn = true;
         m_gyroSmoothingSlider.value = 0.0f;
         m_gyroPollRateSlider.value = 1.0f;
@@ -169,6 +182,11 @@ public class ControlsMenu : MonoBehaviour
         //Debug.Log("setting home tilt to " + (m_homeTiltSlider.value * 90.0f).ToString());
 
         PlayerPrefs.SetFloat("DesiredTilt", m_homeTiltSlider.value * 90.0f);
+    }
+
+    public void SetTiltAmplification ()
+    {
+        PlayerPrefs.SetFloat("TiltAmplification", m_tiltAmplificationSlider.value);
     }
 
     public void SetGyroPollRate ()
