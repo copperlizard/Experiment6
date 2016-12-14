@@ -101,4 +101,10 @@ public class VRubiksCubeHelper : MonoBehaviour
             m_helperPanel.SetActive(false);
         }
     }
+
+    public void StartSolve ()
+    {
+        StopHelping();
+        m_cubeMonitor.SolveCube();
+    }
 }

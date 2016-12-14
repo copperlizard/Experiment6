@@ -286,46 +286,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
                 }
             }
 
-            // Prep to record cube state (there is probably a nicer way to do this...)
-            Vector3 mapInput = Vector3.zero;
-            if (cube.transform.localPosition.x < -0.5f)
-            {
-                mapInput.x = -1.0f;
-            }
-            else if (cube.transform.localPosition.x > 0.5f)
-            {
-                mapInput.x = 1.0f;
-            }
-            else
-            {
-                mapInput.x = 0.0f;
-            }
-
-            if (cube.transform.localPosition.y < -0.5f)
-            {
-                mapInput.y = -1.0f;
-            }
-            else if (cube.transform.localPosition.y > 0.5f)
-            {
-                mapInput.y = 1.0f;
-            }
-            else
-            {
-                mapInput.y = 0.0f;
-            }
-
-            if (cube.transform.localPosition.z < -0.5f)
-            {
-                mapInput.z = -1.0f;
-            }
-            else if (cube.transform.localPosition.z > 0.5f)
-            {
-                mapInput.z = 1.0f;
-            }
-            else
-            {
-                mapInput.z = 0.0f;
-            }
+            Vector3 mapInput = PrepareMapInput(cube);            
 
             // Store cube state/s
             int stateIndex = -1;
@@ -343,6 +304,59 @@ public class VRubiksCubeMonitor : MonoBehaviour
         //m_cubeSolved = ReadCubeStates();
         //return m_cubeSolved;
         return ReadCubeStates();
+    }
+
+    private Vector3 PrepareMapInput (GameObject cube)
+    {
+        // Prep to record cube state (there is probably a nicer way to do this...)
+        //Vector3 mapInput = Vector3.zero;
+        Vector3 mapInput = transform.localRotation * cube.transform.localPosition;
+        //if (cube.transform.localPosition.x < -0.5f)
+        if (mapInput.x < -0.5f)
+        {
+            mapInput.x = -1.0f;
+        }
+        //else if (cube.transform.localPosition.x > 0.5f)
+        else if (mapInput.x > 0.5f)
+        {
+            mapInput.x = 1.0f;
+        }
+        else
+        {
+            mapInput.x = 0.0f;
+        }
+
+        //if (cube.transform.localPosition.y < -0.5f)
+        if (mapInput.y < -0.5f)
+        {
+            mapInput.y = -1.0f;
+        }
+        //else if (cube.transform.localPosition.y > 0.5f)
+        else if (mapInput.y > 0.5f)
+        {
+            mapInput.y = 1.0f;
+        }
+        else
+        {
+            mapInput.y = 0.0f;
+        }
+
+        //if (cube.transform.localPosition.z < -0.5f)
+        if (mapInput.z < -0.5f)
+        {
+            mapInput.z = -1.0f;
+        }
+        //else if (cube.transform.localPosition.z > 0.5f)
+        else if (mapInput.z > 0.5f)
+        {
+            mapInput.z = 1.0f;
+        }
+        else
+        {
+            mapInput.z = 0.0f;
+        }
+
+        return mapInput;
     }
 
     private bool ReadCubeStates ()
@@ -620,11 +634,24 @@ public class VRubiksCubeMonitor : MonoBehaviour
     
     public void SolveCube ()
     {
+        Debug.Log("Solving Cube!");
+
+        StartCoroutine(SolveCubeCoRoutine());        
+    }  
+    
+    IEnumerator SolveCubeCoRoutine ()
+    {
+        CheckSolved();
+
+        Debug.Log("solving stage1!");
         while (!SolveCubeStage1())
-        {
-            Debug.Log("solving stage1!");
+        {            
+            yield return null;
         }
-    }   
+        Debug.Log("done solving stage1!");
+
+        yield return null;
+    } 
     
     public bool SolveCubeStage1 () // recursive...
     {
@@ -697,13 +724,18 @@ public class VRubiksCubeMonitor : MonoBehaviour
             B++;
         }
 
+        Debug.Log("U == " + U.ToString() + " ; D == " + D.ToString() + " ; L == " + L.ToString() + " ; R == " + R.ToString() + " ; F == " + F.ToString() + " ; B == " + B.ToString());
+
         // Orient cube so cross is on top (if neccessary)
-        if (U >= L && U >= R && U >= F && U >= B && U >= D)
+        if (U >= L && U >= R && U >= F && U >= B && U >= D && U != 0)
         {
             // Already on top
+            Debug.Log("Already on top!");
         }
-        else if (L >= U && L >= R && L >= F && L >= B && L >= D)
+        else if (L >= U && L >= R && L >= F && L >= B && L >= D && L != 0)
         {
+            Debug.Log("Left face cross is most complete!");
+            
             // Touch left center and swipe up
             if (Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.right) >= 0.9f)
             {
@@ -728,12 +760,14 @@ public class VRubiksCubeMonitor : MonoBehaviour
             else if(Vector3.Dot(m_yellowCenter.transform.up, -transform.parent.right) >= 0.9f)
             {
                 m_cubeController.Turn(m_yellowCenter, new Vector2(0.0f, 300.0f));
-            }
+            }            
 
-            return false; // Recurse
+            //return false; // Recurse
         }
-        else if (R >= U && R >= L && R >= F && R >= B && R >= D)
+        else if (R >= U && R >= L && R >= F && R >= B && R >= D && R != 0)
         {
+            Debug.Log("Right face cross is most complete!");
+            
             // Touch right center and swipe up
             if (Vector3.Dot(m_whiteCenter.transform.up, transform.parent.right) >= 0.9f)
             {
@@ -758,12 +792,14 @@ public class VRubiksCubeMonitor : MonoBehaviour
             else if (Vector3.Dot(m_yellowCenter.transform.up, transform.parent.right) >= 0.9f)
             {
                 m_cubeController.Turn(m_yellowCenter, new Vector2(0.0f, 300.0f));
-            }
+            }            
 
-            return false; // Recurse
+            //return false; // Recurse
         }        
-        else if (F >= U && F >= R && F >= L && F >= B && F >= D)
+        else if (F >= U && F >= R && F >= L && F >= B && F >= D && F != 0)
         {
+            Debug.Log("Front face cross is most complete!");
+            
             // Touch front center and swipe up
             if (Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.forward) >= 0.9f)
             {
@@ -788,12 +824,14 @@ public class VRubiksCubeMonitor : MonoBehaviour
             else if (Vector3.Dot(m_yellowCenter.transform.up, -transform.parent.forward) >= 0.9f)
             {
                 m_cubeController.Turn(m_yellowCenter, new Vector2(0.0f, 300.0f));
-            }
+            }            
 
-            return false; // Recurse
+            //return false; // Recurse
         }
-        else if (B >= U && B >= R && B >= L && B >= F && F >= D)
+        else if (B >= U && B >= R && B >= L && B >= F && F >= D && B != 0)
         {
+            Debug.Log("Back face cross is most complete!");
+            
             // Touch front center and swipe down
             if (Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.forward) >= 0.9f)
             {
@@ -818,13 +856,15 @@ public class VRubiksCubeMonitor : MonoBehaviour
             else if (Vector3.Dot(m_yellowCenter.transform.up, -transform.parent.forward) >= 0.9f)
             {
                 m_cubeController.Turn(m_yellowCenter, new Vector2(0.0f, -300.0f));
-            }
+            }            
 
-            return false; // Recurse
+            //return false; // Recurse
 
         }
-        else if (D >= U && D >= R && D >= L && D >= F && D >= B)
+        else if (D >= U && D >= R && D >= L && D >= F && D >= B && D != 0)
         {
+            Debug.Log("Down face cross is most complete!");
+            
             // Touch front center and swipe up 
             if (Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.forward) >= 0.9f)
             {
@@ -850,16 +890,55 @@ public class VRubiksCubeMonitor : MonoBehaviour
             {
                 m_cubeController.Turn(m_yellowCenter, new Vector2(0.0f, 300.0f));
             }
-
-            return false; // Recurse
+            
+            //return false; // Recurse
         }
         else
         {
             Debug.Log("Failed to find most complete cross!");
-        }
+
+            Stage1Flail();
+
+            return false;
+        }        
 
         // Complete cross (if neccessary)
         return SolveStage1Cross();
+    }
+
+    private int m_flails = 0;
+    private bool m_flailed = false;
+    private void Stage1Flail ()
+    {
+        if (!m_flailed)
+        {
+            m_cubeController.Turn((m_flails % 2 == 0) ? m_whiteCenter : m_redCenter, (m_flails % 2 == 0) ? new Vector2(0.0f, 300.0f): new Vector2(300.0f, 0.0f));
+            m_flails++;
+        }
+        else
+        {
+            foreach (GameObject cube in m_cubes)
+            {
+                Vector3 mapInput = PrepareMapInput(cube);
+
+                // Store cube state/s
+                int stateIndex = -1;
+                bool stateIndexFound = m_cubeMap.TryGetValue(mapInput, out stateIndex);
+                if (stateIndexFound)
+                {
+                    if (stateIndex == 14)
+                    {
+                        m_cubeController.Turn(cube.transform.GetChild(0).gameObject, new Vector2(0.0f, 300.0f));
+                    }
+                }
+                else
+                {
+                    Debug.Log("cube stateIndex not found!!!");
+                }
+            }
+        }
+        
+        m_flailed = !m_flailed;
     }
     
     private bool SolveStage1Cross ()
@@ -871,10 +950,79 @@ public class VRubiksCubeMonitor : MonoBehaviour
         else
         {
             // make sure [16] cubeState is false
+
+            if (!m_cubeStates[16])
+            {
+                // turns...
+
+                return true;
+            }
+            else if (!m_cubeStates[13])
+            {
+                // rotate cube counter clockwise
+                                
+                if (Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.forward) >= 0.9f)
+                {
+                    m_cubeController.Turn(m_whiteCenter, new Vector2 (300.0f, 0.0f));
+                }
+                else if (Vector3.Dot(m_blueCenter.transform.up, -transform.parent.forward) >= 0.9f)
+                {
+                    m_cubeController.Turn(m_blueCenter, new Vector2(300.0f, 0.0f));
+                }
+                else if (Vector3.Dot(m_redCenter.transform.up, -transform.parent.forward) >= 0.9f)
+                {
+                    m_cubeController.Turn(m_redCenter, new Vector2(300.0f, 0.0f));
+                }
+                else if (Vector3.Dot(m_orangeCenter.transform.up, -transform.parent.forward) >= 0.9f)
+                {
+                    m_cubeController.Turn(m_orangeCenter, new Vector2(300.0f, 0.0f));
+                }
+                else if (Vector3.Dot(m_greenCenter.transform.up, -transform.parent.forward) >= 0.9f)
+                {
+                    m_cubeController.Turn(m_greenCenter, new Vector2(300.0f, 0.0f));
+                }
+                else //if (Vector3.Dot(m_yellowCenter.transform.up, -transform.parent.forward) >= 0.9f)
+                {
+                    m_cubeController.Turn(m_yellowCenter, new Vector2(300.0f, 0.0f));
+                }
+
+                return false; // recurse
+            }
+            else
+            {
+                // rotate cube clockwise
+
+                if (Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.forward) >= 0.9f)
+                {
+                    m_cubeController.Turn(m_whiteCenter, new Vector2(-300.0f, 0.0f));
+                }
+                else if (Vector3.Dot(m_blueCenter.transform.up, -transform.parent.forward) >= 0.9f)
+                {
+                    m_cubeController.Turn(m_blueCenter, new Vector2(-300.0f, 0.0f));
+                }
+                else if (Vector3.Dot(m_redCenter.transform.up, -transform.parent.forward) >= 0.9f)
+                {
+                    m_cubeController.Turn(m_redCenter, new Vector2(-300.0f, 0.0f));
+                }
+                else if (Vector3.Dot(m_orangeCenter.transform.up, -transform.parent.forward) >= 0.9f)
+                {
+                    m_cubeController.Turn(m_orangeCenter, new Vector2(-300.0f, 0.0f));
+                }
+                else if (Vector3.Dot(m_greenCenter.transform.up, -transform.parent.forward) >= 0.9f)
+                {
+                    m_cubeController.Turn(m_greenCenter, new Vector2(-300.0f, 0.0f));
+                }
+                else //if (Vector3.Dot(m_yellowCenter.transform.up, -transform.parent.forward) >= 0.9f)
+                {
+                    m_cubeController.Turn(m_yellowCenter, new Vector2(-300.0f, 0.0f));
+                }
+
+                return false; //recurse
+            }
         }
 
-        return false;
-    } 
+        //return false;
+    }
 }
 
 
