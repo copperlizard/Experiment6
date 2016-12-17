@@ -59,10 +59,9 @@ public class VRubiksCubeController : MonoBehaviour
     public void Turn(GameObject touched, Vector2 move)
     {
         // DEBUG
-        Vector3 mapInput = transform.localRotation * touched.transform.localPosition;
-        Debug.Log("touched mapInput == " + mapInput.ToString() + " ; parent name == " + touched.transform.parent.gameObject.name);
-
-
+        //Vector3 mapInput = transform.localRotation * touched.transform.localPosition;
+        //Debug.Log("touched mapInput == " + mapInput.ToString() + " ; parent name == " + touched.transform.parent.gameObject.name);
+        
         // Find move direction... 
         float movedX = Vector2.Dot(move.normalized, Vector2.right);
         float movedY = Vector2.Dot(move.normalized, Vector2.up);

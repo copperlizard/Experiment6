@@ -28,7 +28,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
     
     private bool[] m_cubeStates = new bool[20];
 
-    
+    private bool m_executingMoves = false; // Set when executing move set with coroutine
 
     // Use this for initialization
     void Start ()
@@ -231,6 +231,59 @@ public class VRubiksCubeMonitor : MonoBehaviour
         yield return null;
     }
 
+    private Vector3 PrepareMapInput(GameObject cube)
+    {
+        // Prep to record cube state (there is probably a nicer way to do this...)
+        //Vector3 mapInput = Vector3.zero;
+        Vector3 mapInput = transform.localRotation * cube.transform.localPosition;
+        //if (cube.transform.localPosition.x < -0.5f)
+        if (mapInput.x < -0.5f)
+        {
+            mapInput.x = -1.0f;
+        }
+        //else if (cube.transform.localPosition.x > 0.5f)
+        else if (mapInput.x > 0.5f)
+        {
+            mapInput.x = 1.0f;
+        }
+        else
+        {
+            mapInput.x = 0.0f;
+        }
+
+        //if (cube.transform.localPosition.y < -0.5f)
+        if (mapInput.y < -0.5f)
+        {
+            mapInput.y = -1.0f;
+        }
+        //else if (cube.transform.localPosition.y > 0.5f)
+        else if (mapInput.y > 0.5f)
+        {
+            mapInput.y = 1.0f;
+        }
+        else
+        {
+            mapInput.y = 0.0f;
+        }
+
+        //if (cube.transform.localPosition.z < -0.5f)
+        if (mapInput.z < -0.5f)
+        {
+            mapInput.z = -1.0f;
+        }
+        //else if (cube.transform.localPosition.z > 0.5f)
+        else if (mapInput.z > 0.5f)
+        {
+            mapInput.z = 1.0f;
+        }
+        else
+        {
+            mapInput.z = 0.0f;
+        }
+
+        return mapInput;
+    }
+
     public bool CheckSolved ()
     {
         if (m_randomizing)
@@ -304,60 +357,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
         //m_cubeSolved = ReadCubeStates();
         //return m_cubeSolved;
         return ReadCubeStates();
-    }
-
-    private Vector3 PrepareMapInput (GameObject cube)
-    {
-        // Prep to record cube state (there is probably a nicer way to do this...)
-        //Vector3 mapInput = Vector3.zero;
-        Vector3 mapInput = transform.localRotation * cube.transform.localPosition;
-        //if (cube.transform.localPosition.x < -0.5f)
-        if (mapInput.x < -0.5f)
-        {
-            mapInput.x = -1.0f;
-        }
-        //else if (cube.transform.localPosition.x > 0.5f)
-        else if (mapInput.x > 0.5f)
-        {
-            mapInput.x = 1.0f;
-        }
-        else
-        {
-            mapInput.x = 0.0f;
-        }
-
-        //if (cube.transform.localPosition.y < -0.5f)
-        if (mapInput.y < -0.5f)
-        {
-            mapInput.y = -1.0f;
-        }
-        //else if (cube.transform.localPosition.y > 0.5f)
-        else if (mapInput.y > 0.5f)
-        {
-            mapInput.y = 1.0f;
-        }
-        else
-        {
-            mapInput.y = 0.0f;
-        }
-
-        //if (cube.transform.localPosition.z < -0.5f)
-        if (mapInput.z < -0.5f)
-        {
-            mapInput.z = -1.0f;
-        }
-        //else if (cube.transform.localPosition.z > 0.5f)
-        else if (mapInput.z > 0.5f)
-        {
-            mapInput.z = 1.0f;
-        }
-        else
-        {
-            mapInput.z = 0.0f;
-        }
-
-        return mapInput;
-    }
+    }    
 
     private bool ReadCubeStates ()
     {
@@ -637,26 +637,88 @@ public class VRubiksCubeMonitor : MonoBehaviour
         Debug.Log("Solving Cube!");
 
         StartCoroutine(SolveCubeCoRoutine());        
-    }  
-    
-    IEnumerator SolveCubeCoRoutine ()
+    }
+
+    IEnumerator SolveCubeCoRoutine()
     {
         CheckSolved();
 
         Debug.Log("solving stage1!");
         while (!SolveCubeStage1())
-        {            
+        {
             yield return null;
         }
         Debug.Log("done solving stage1!");
 
+
+        Debug.Log("done solving cube!");
         yield return null;
-    } 
-    
-    public bool SolveCubeStage1 () // recursive...
+    }
+
+    IEnumerator ExecuteMoves (UserInput[] moves) 
+    {
+        m_executingMoves = true;
+
+        Debug.Log("hello?");
+
+        foreach (UserInput move in moves)
+        {
+            while (m_cubeController.m_rotatingFace || m_cubeController.m_rotatingCube) //wait for last move to finish
+            {
+                Debug.Log("finishing move!");
+                yield return null;
+            }
+
+            Debug.Log("executing move -> loc == " + move.m_touchedParentLocation.ToString() + " ; up == " + move.m_touchedUp.ToString() + " ; dir == " + move.m_move);
+
+            foreach (GameObject cube in m_cubes)
+            {
+                Vector3 mapInput = PrepareMapInput(cube);
+
+                int stateIndex = -1;
+                bool stateIndexFound = m_cubeMap.TryGetValue(mapInput, out stateIndex);
+                if (stateIndexFound)
+                {
+                    if (stateIndex == move.m_touchedParentLocation)
+                    {
+                        // Correct cube
+                        GameObject tarPanel = null;
+                        for (int i = 0; i < cube.transform.childCount; i++)
+                        {
+                            if (Vector3.Dot(cube.transform.GetChild(i).transform.up, move.m_touchedUp) >= 0.9f)
+                            {
+                                tarPanel = cube.transform.GetChild(i).gameObject;
+                            }                            
+                        }
+
+                        if (tarPanel != null)
+                        {
+                            Debug.Log("TURN!");
+                            m_cubeController.Turn(tarPanel, move.m_move); 
+                        }
+                        else
+                        {
+                            Debug.Log("could not find tarPanel!");
+                        }
+
+                        break;
+                    }
+                }
+                else
+                {
+                    Debug.Log("cube stateIndex not found!!!");
+                }
+            }
+        }
+        
+        m_executingMoves = false;
+        yield return null;
+    }
+        
+    private bool SolveCubeStage1 () 
     {
         // Wait for last controller input to be processed
-        if (m_cubeController.m_rotatingFace || m_cubeController.m_rotatingCube)
+        if (m_cubeController.m_rotatingFace || m_cubeController.m_rotatingCube || m_executingMoves)
         {
             return false;
         }
@@ -724,7 +786,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
             B++;
         }
 
-        Debug.Log("U == " + U.ToString() + " ; D == " + D.ToString() + " ; L == " + L.ToString() + " ; R == " + R.ToString() + " ; F == " + F.ToString() + " ; B == " + B.ToString());
+        //Debug.Log("U == " + U.ToString() + " ; D == " + D.ToString() + " ; L == " + L.ToString() + " ; R == " + R.ToString() + " ; F == " + F.ToString() + " ; B == " + B.ToString());
 
         // Orient cube so cross is on top (if neccessary)
         if (U >= L && U >= R && U >= F && U >= B && U >= D && U != 0)
@@ -920,8 +982,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
             foreach (GameObject cube in m_cubes)
             {
                 Vector3 mapInput = PrepareMapInput(cube);
-
-                // Store cube state/s
+                                
                 int stateIndex = -1;
                 bool stateIndexFound = m_cubeMap.TryGetValue(mapInput, out stateIndex);
                 if (stateIndexFound)
@@ -943,24 +1004,236 @@ public class VRubiksCubeMonitor : MonoBehaviour
     
     private bool SolveStage1Cross ()
     {
+        Debug.Log("SolvingStage1Cross()");
+
         if (m_cubeStates[13] && m_cubeStates[15] && m_cubeStates[16] && m_cubeStates[18]) // Top Cross complete
         {
             return true;
         }
         else
         {
-            // make sure [16] cubeState is false
-
-            if (!m_cubeStates[16])
+            if (!m_cubeStates[16]) // Solve top right edge
             {
-                // turns...
+                // Determine Target panels colors
+                bool white = false, blue = false, red = false, orange = false, green = false, yellow = false;
+                
+                if (Vector3.Dot(m_whiteCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_whiteCenter.transform.up, transform.parent.right) >= 0.9f)
+                {
+                    white = true;
+                }
 
-                return true;
-            }
-            else if (!m_cubeStates[13])
-            {
-                // rotate cube counter clockwise
+                if (Vector3.Dot(m_blueCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_blueCenter.transform.up, transform.parent.right) >= 0.9f)
+                {
+                    blue = true;
+                }
+
+                if (Vector3.Dot(m_redCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_redCenter.transform.up, transform.parent.right) >= 0.9f)
+                {
+                    red = true;
+                }
+
+                if (Vector3.Dot(m_orangeCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_orangeCenter.transform.up, transform.parent.right) >= 0.9f)
+                {
+                    orange = true;
+                }
+
+                if (Vector3.Dot(m_greenCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_greenCenter.transform.up, transform.parent.right) >= 0.9f)
+                {
+                    green = true;
+                }
+
+                if (Vector3.Dot(m_yellowCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_yellowCenter.transform.up, transform.parent.right) >= 0.9f)
+                {
+                    yellow = true;
+                }
+
+                string tarCubeName = "";
+                if (white && blue)
+                {
+                    tarCubeName = "WB-Edge_Cube";
+                }
+                else if (white && red)
+                {
+                    tarCubeName = "WR-Edge_Cube";
+                }
+                else if (white && orange)
+                {
+                    tarCubeName = "WO-Edge_Cube";
+                }
+                else if (white && green)
+                {
+                    tarCubeName = "WG-Edge_Cube";
+                }
+                else if (yellow && blue)
+                {
+                    tarCubeName = "YB-Edge_Cube";
+                }
+                else if (yellow && red)
+                {
+                    tarCubeName = "YR-Edge_Cube";
+                }
+                else if (yellow && orange)
+                {
+                    tarCubeName = "YO-Edge_Cube";
+                }
+                else if (yellow && green)
+                {
+                    tarCubeName = "YG-Edge_Cube";
+                }
+                else if (orange && blue)
+                {
+                    tarCubeName = "BO-Edge_Cube";
+                }
+                else if (blue && red)
+                {
+                    tarCubeName = "RB-Edge_Cube";
+                }
+                else if (red && green)
+                {
+                    tarCubeName = "GR-Edge_Cube";
+                }
+                else if (green && orange)
+                {
+                    tarCubeName = "OG-Edge_Cube";
+                }
+                else
+                {
+                    Debug.Log("Error Identifying target edge cube for solving stage1 cross!");
+                }
+
+                GameObject tarEdgeCube = null;
+                foreach(GameObject cube in m_cubes)
+                {
+                    if (cube.name == tarCubeName)
+                    {
+                        Debug.Log("tarEdgeCube found!");
+                        tarEdgeCube = cube;
+                    }
+                }
+
+                if (tarEdgeCube != null)
+                {
+                    Vector3 mapInput = PrepareMapInput(tarEdgeCube);
+
+                    int stateIndex = -1;
+                    bool stateIndexFound = m_cubeMap.TryGetValue(mapInput, out stateIndex);
+                    if (stateIndexFound)
+                    {
+                        // DO A TURN/s BASED ON CURRENT STATE INDEX
+
+                        switch(stateIndex)
+                        {
+                            case 13: // top front edge
+
+                                // F -> F -> D -> R -> R
+                                UserInput[] moves13 = new UserInput[5];
+
+                                moves13[0].m_touchedParentLocation = 13;
+                                moves13[0].m_touchedUp = Vector3.up; // MIGHT NEED TO CHANGE THIS!!!
+                                moves13[0].m_move = new Vector2(300.0f, 0.0f);
+
+                                moves13[1].m_touchedParentLocation = 13;
+                                moves13[1].m_touchedUp = Vector3.up; // MIGHT NEED TO CHANGE THIS!!!
+                                moves13[1].m_move = new Vector2(300.0f, 0.0f);
+
+                                moves13[2].m_touchedParentLocation = 1;
+                                moves13[2].m_touchedUp = -Vector3.forward; // MIGHT NEED TO CHANGE THIS!!!
+                                moves13[2].m_move = new Vector2(300.0f, 0.0f);
+
+                                moves13[3].m_touchedParentLocation = 16;
+                                moves13[3].m_touchedUp = Vector3.up; // MIGHT NEED TO CHANGE THIS!!!
+                                moves13[3].m_move = new Vector2(0.0f, 300.0f);
+
+                                moves13[4].m_touchedParentLocation = 16;
+                                moves13[4].m_touchedUp = Vector3.up; // MIGHT NEED TO CHANGE THIS!!!
+                                moves13[4].m_move = new Vector2(0.0f, 300.0f);
                                 
+                                StartCoroutine(ExecuteMoves(moves13));
+                                break;
+
+                            case 15: // top left edge
+
+                                // L -> L -> D -> D -> R -> R
+                                UserInput[] moves15 = new UserInput[6];
+
+                                moves15[0].m_touchedParentLocation = 15;
+                                moves15[0].m_touchedUp = Vector3.up; // MIGHT NEED TO CHANGE THIS!!!
+                                moves15[0].m_move = new Vector2(0.0f, 300.0f);
+
+                                moves15[1].m_touchedParentLocation = 15;
+                                moves15[1].m_touchedUp = Vector3.up; // MIGHT NEED TO CHANGE THIS!!!
+                                moves15[1].m_move = new Vector2(0.0f, 300.0f);
+
+                                moves15[2].m_touchedParentLocation = 1;
+                                moves15[2].m_touchedUp = -Vector3.forward; // MIGHT NEED TO CHANGE THIS!!!
+                                moves15[2].m_move = new Vector2(300.0f, 0.0f);
+
+                                moves15[3].m_touchedParentLocation = 1;
+                                moves15[3].m_touchedUp = -Vector3.forward; // MIGHT NEED TO CHANGE THIS!!!
+                                moves15[3].m_move = new Vector2(300.0f, 0.0f);
+
+                                moves15[4].m_touchedParentLocation = 16;
+                                moves15[4].m_touchedUp = Vector3.up; // MIGHT NEED TO CHANGE THIS!!!
+                                moves15[4].m_move = new Vector2(0.0f, 300.0f);
+
+                                moves15[5].m_touchedParentLocation = 16;
+                                moves15[5].m_touchedUp = Vector3.up; // MIGHT NEED TO CHANGE THIS!!!
+                                moves15[5].m_move = new Vector2(0.0f, 300.0f);
+                                
+                                StartCoroutine(ExecuteMoves(moves15));
+                                break;
+
+                            case 18: // top back edge
+
+                                // B -> B -> Di -> R -> R
+                                UserInput[] moves18 = new UserInput[5];
+
+                                moves18[0].m_touchedParentLocation = 18;
+                                moves18[0].m_touchedUp = Vector3.up; // MIGHT NEED TO CHANGE THIS!!!
+                                moves18[0].m_move = new Vector2(300.0f, 0.0f);
+
+                                moves18[1].m_touchedParentLocation = 18;
+                                moves18[1].m_touchedUp = Vector3.up; // MIGHT NEED TO CHANGE THIS!!!
+                                moves18[1].m_move = new Vector2(300.0f, 0.0f);
+
+                                moves18[2].m_touchedParentLocation = 1;
+                                moves18[2].m_touchedUp = -Vector3.forward; // MIGHT NEED TO CHANGE THIS!!!
+                                moves18[2].m_move = new Vector2(-300.0f, 0.0f);
+
+                                moves18[3].m_touchedParentLocation = 16;
+                                moves18[3].m_touchedUp = Vector3.up; // MIGHT NEED TO CHANGE THIS!!!
+                                moves18[3].m_move = new Vector2(0.0f, 300.0f);
+
+                                moves18[4].m_touchedParentLocation = 16;
+                                moves18[4].m_touchedUp = Vector3.up; // MIGHT NEED TO CHANGE THIS!!!
+                                moves18[4].m_move = new Vector2(0.0f, 300.0f);                                
+
+                                StartCoroutine(ExecuteMoves(moves18));
+                                break;
+
+                            default:
+                                Debug.Log("tarEdgeCube found in un-accounted position!");
+                                return true; // END RECURSION!!!                                
+                        }
+
+                        return false;
+                    }
+                    else
+                    {
+                        Debug.Log("tarEdgeCube stateIndex not found!!!");
+
+                        return true; // END RECURSION!!!
+                    }
+                }
+                else
+                {
+                    Debug.Log("Error finding target edge cube in m_cubes!");
+
+                    return true; // END RECURSION!!!
+                }
+            }
+            else if (!m_cubeStates[13]) // rotate cube counter clockwise
+            {                   
                 if (Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.forward) >= 0.9f)
                 {
                     m_cubeController.Turn(m_whiteCenter, new Vector2 (300.0f, 0.0f));
@@ -988,10 +1261,8 @@ public class VRubiksCubeMonitor : MonoBehaviour
 
                 return false; // recurse
             }
-            else
+            else // rotate cube clockwise
             {
-                // rotate cube clockwise
-
                 if (Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.forward) >= 0.9f)
                 {
                     m_cubeController.Turn(m_whiteCenter, new Vector2(-300.0f, 0.0f));
@@ -1020,8 +1291,6 @@ public class VRubiksCubeMonitor : MonoBehaviour
                 return false; //recurse
             }
         }
-
-        //return false;
     }
 }
 
