@@ -656,16 +656,13 @@ public class VRubiksCubeMonitor : MonoBehaviour
     }
 
     IEnumerator ExecuteMoves (UserInput[] moves) 
-    {
+    {        
         m_executingMoves = true;
-
-        Debug.Log("hello?");
-
+        
         foreach (UserInput move in moves)
         {
             while (m_cubeController.m_rotatingFace || m_cubeController.m_rotatingCube) //wait for last move to finish
-            {
-                Debug.Log("finishing move!");
+            {   
                 yield return null;
             }
 
@@ -693,7 +690,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
 
                         if (tarPanel != null)
                         {
-                            Debug.Log("TURN!");
+                            //Debug.Log("TURN!");
                             m_cubeController.Turn(tarPanel, move.m_move); 
                         }
                         else
@@ -709,7 +706,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
                     Debug.Log("cube stateIndex not found!!!");
                 }
             }
-        }
+        }        
         
         m_executingMoves = false;
         yield return null;
@@ -792,11 +789,11 @@ public class VRubiksCubeMonitor : MonoBehaviour
         if (U >= L && U >= R && U >= F && U >= B && U >= D && U != 0)
         {
             // Already on top
-            Debug.Log("Already on top!");
+            //Debug.Log("Already on top!");
         }
         else if (L >= U && L >= R && L >= F && L >= B && L >= D && L != 0)
         {
-            Debug.Log("Left face cross is most complete!");
+            //Debug.Log("Left face cross is most complete!");
             
             // Touch left center and swipe up
             if (Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.right) >= 0.9f)
@@ -822,13 +819,11 @@ public class VRubiksCubeMonitor : MonoBehaviour
             else if(Vector3.Dot(m_yellowCenter.transform.up, -transform.parent.right) >= 0.9f)
             {
                 m_cubeController.Turn(m_yellowCenter, new Vector2(0.0f, 300.0f));
-            }            
-
-            //return false; // Recurse
+            }
         }
         else if (R >= U && R >= L && R >= F && R >= B && R >= D && R != 0)
         {
-            Debug.Log("Right face cross is most complete!");
+            //Debug.Log("Right face cross is most complete!");
             
             // Touch right center and swipe up
             if (Vector3.Dot(m_whiteCenter.transform.up, transform.parent.right) >= 0.9f)
@@ -854,13 +849,11 @@ public class VRubiksCubeMonitor : MonoBehaviour
             else if (Vector3.Dot(m_yellowCenter.transform.up, transform.parent.right) >= 0.9f)
             {
                 m_cubeController.Turn(m_yellowCenter, new Vector2(0.0f, 300.0f));
-            }            
-
-            //return false; // Recurse
+            }
         }        
         else if (F >= U && F >= R && F >= L && F >= B && F >= D && F != 0)
         {
-            Debug.Log("Front face cross is most complete!");
+            //Debug.Log("Front face cross is most complete!");
             
             // Touch front center and swipe up
             if (Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.forward) >= 0.9f)
@@ -886,13 +879,11 @@ public class VRubiksCubeMonitor : MonoBehaviour
             else if (Vector3.Dot(m_yellowCenter.transform.up, -transform.parent.forward) >= 0.9f)
             {
                 m_cubeController.Turn(m_yellowCenter, new Vector2(0.0f, 300.0f));
-            }            
-
-            //return false; // Recurse
+            }
         }
         else if (B >= U && B >= R && B >= L && B >= F && F >= D && B != 0)
         {
-            Debug.Log("Back face cross is most complete!");
+            //Debug.Log("Back face cross is most complete!");
             
             // Touch front center and swipe down
             if (Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.forward) >= 0.9f)
@@ -918,14 +909,11 @@ public class VRubiksCubeMonitor : MonoBehaviour
             else if (Vector3.Dot(m_yellowCenter.transform.up, -transform.parent.forward) >= 0.9f)
             {
                 m_cubeController.Turn(m_yellowCenter, new Vector2(0.0f, -300.0f));
-            }            
-
-            //return false; // Recurse
-
+            }
         }
         else if (D >= U && D >= R && D >= L && D >= F && D >= B && D != 0)
         {
-            Debug.Log("Down face cross is most complete!");
+            //Debug.Log("Down face cross is most complete!");
             
             // Touch front center and swipe up 
             if (Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.forward) >= 0.9f)
@@ -952,54 +940,14 @@ public class VRubiksCubeMonitor : MonoBehaviour
             {
                 m_cubeController.Turn(m_yellowCenter, new Vector2(0.0f, 300.0f));
             }
-            
-            //return false; // Recurse
         }
         else
         {
-            Debug.Log("Failed to find most complete cross!");
-
-            Stage1Flail();
-
-            return false;
+            Debug.Log("Failed to find most complete cross!");                  
         }        
 
-        // Complete cross (if neccessary)
+        // Complete cross 
         return SolveStage1Cross();
-    }
-
-    private int m_flails = 0;
-    private bool m_flailed = false;
-    private void Stage1Flail ()
-    {
-        if (!m_flailed)
-        {
-            m_cubeController.Turn((m_flails % 2 == 0) ? m_whiteCenter : m_redCenter, (m_flails % 2 == 0) ? new Vector2(0.0f, 300.0f): new Vector2(300.0f, 0.0f));
-            m_flails++;
-        }
-        else
-        {
-            foreach (GameObject cube in m_cubes)
-            {
-                Vector3 mapInput = PrepareMapInput(cube);
-                                
-                int stateIndex = -1;
-                bool stateIndexFound = m_cubeMap.TryGetValue(mapInput, out stateIndex);
-                if (stateIndexFound)
-                {
-                    if (stateIndex == 14)
-                    {
-                        m_cubeController.Turn(cube.transform.GetChild(0).gameObject, new Vector2(0.0f, 300.0f));
-                    }
-                }
-                else
-                {
-                    Debug.Log("cube stateIndex not found!!!");
-                }
-            }
-        }
-        
-        m_flailed = !m_flailed;
     }
     
     private bool SolveStage1Cross ()
@@ -1106,7 +1054,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
                 {
                     if (cube.name == tarCubeName)
                     {
-                        Debug.Log("tarEdgeCube found!");
+                        Debug.Log("tarEdgeCube found! name == " + cube.name);
                         tarEdgeCube = cube;
                     }
                 }
@@ -1120,33 +1068,35 @@ public class VRubiksCubeMonitor : MonoBehaviour
                     if (stateIndexFound)
                     {
                         // DO A TURN/s BASED ON CURRENT STATE INDEX
+                        Debug.Log("stateIndex == " + stateIndex.ToString());
 
                         switch(stateIndex)
                         {
+                            case 16: // top right edge
+
+                                // Ri -> F -> Di -> Fi -> R -> R
+                                UserInput[] moves16 = new UserInput[6];
+
+                                moves16[0] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
+                                moves16[1] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
+                                moves16[2] = new UserInput(1, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                                moves16[3] = new UserInput(13, transform.parent.up, new Vector2(-300.0f, 0.0f));
+                                moves16[4] = new UserInput(16, transform.parent.up, new Vector3(0.0f, 300.0f));
+                                moves16[5] = new UserInput(16, transform.parent.up, new Vector3(0.0f, 300.0f));
+
+                                StartCoroutine(ExecuteMoves(moves16));
+                                break;
+
                             case 13: // top front edge
 
                                 // F -> F -> D -> R -> R
                                 UserInput[] moves13 = new UserInput[5];
-
-                                moves13[0].m_touchedParentLocation = 13;
-                                moves13[0].m_touchedUp = Vector3.up; // MIGHT NEED TO CHANGE THIS!!!
-                                moves13[0].m_move = new Vector2(300.0f, 0.0f);
-
-                                moves13[1].m_touchedParentLocation = 13;
-                                moves13[1].m_touchedUp = Vector3.up; // MIGHT NEED TO CHANGE THIS!!!
-                                moves13[1].m_move = new Vector2(300.0f, 0.0f);
-
-                                moves13[2].m_touchedParentLocation = 1;
-                                moves13[2].m_touchedUp = -Vector3.forward; // MIGHT NEED TO CHANGE THIS!!!
-                                moves13[2].m_move = new Vector2(300.0f, 0.0f);
-
-                                moves13[3].m_touchedParentLocation = 16;
-                                moves13[3].m_touchedUp = Vector3.up; // MIGHT NEED TO CHANGE THIS!!!
-                                moves13[3].m_move = new Vector2(0.0f, 300.0f);
-
-                                moves13[4].m_touchedParentLocation = 16;
-                                moves13[4].m_touchedUp = Vector3.up; // MIGHT NEED TO CHANGE THIS!!!
-                                moves13[4].m_move = new Vector2(0.0f, 300.0f);
+                                
+                                moves13[0] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
+                                moves13[1] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
+                                moves13[2] = new UserInput(1, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                                moves13[3] = new UserInput(16, transform.parent.up, new Vector3(0.0f, 300.0f));
+                                moves13[4] = new UserInput(16, transform.parent.up, new Vector3(0.0f, 300.0f));
                                 
                                 StartCoroutine(ExecuteMoves(moves13));
                                 break;
@@ -1156,29 +1106,12 @@ public class VRubiksCubeMonitor : MonoBehaviour
                                 // L -> L -> D -> D -> R -> R
                                 UserInput[] moves15 = new UserInput[6];
 
-                                moves15[0].m_touchedParentLocation = 15;
-                                moves15[0].m_touchedUp = Vector3.up; // MIGHT NEED TO CHANGE THIS!!!
-                                moves15[0].m_move = new Vector2(0.0f, 300.0f);
-
-                                moves15[1].m_touchedParentLocation = 15;
-                                moves15[1].m_touchedUp = Vector3.up; // MIGHT NEED TO CHANGE THIS!!!
-                                moves15[1].m_move = new Vector2(0.0f, 300.0f);
-
-                                moves15[2].m_touchedParentLocation = 1;
-                                moves15[2].m_touchedUp = -Vector3.forward; // MIGHT NEED TO CHANGE THIS!!!
-                                moves15[2].m_move = new Vector2(300.0f, 0.0f);
-
-                                moves15[3].m_touchedParentLocation = 1;
-                                moves15[3].m_touchedUp = -Vector3.forward; // MIGHT NEED TO CHANGE THIS!!!
-                                moves15[3].m_move = new Vector2(300.0f, 0.0f);
-
-                                moves15[4].m_touchedParentLocation = 16;
-                                moves15[4].m_touchedUp = Vector3.up; // MIGHT NEED TO CHANGE THIS!!!
-                                moves15[4].m_move = new Vector2(0.0f, 300.0f);
-
-                                moves15[5].m_touchedParentLocation = 16;
-                                moves15[5].m_touchedUp = Vector3.up; // MIGHT NEED TO CHANGE THIS!!!
-                                moves15[5].m_move = new Vector2(0.0f, 300.0f);
+                                moves15[0] = new UserInput(15, transform.parent.up, new Vector2(0.0f, 300.0f));
+                                moves15[1] = new UserInput(15, transform.parent.up, new Vector2(0.0f, 300.0f));
+                                moves15[2] = new UserInput(1, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                                moves15[3] = new UserInput(1, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                                moves15[4] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                                moves15[5] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
                                 
                                 StartCoroutine(ExecuteMoves(moves15));
                                 break;
@@ -1188,31 +1121,122 @@ public class VRubiksCubeMonitor : MonoBehaviour
                                 // B -> B -> Di -> R -> R
                                 UserInput[] moves18 = new UserInput[5];
 
-                                moves18[0].m_touchedParentLocation = 18;
-                                moves18[0].m_touchedUp = Vector3.up; // MIGHT NEED TO CHANGE THIS!!!
-                                moves18[0].m_move = new Vector2(300.0f, 0.0f);
-
-                                moves18[1].m_touchedParentLocation = 18;
-                                moves18[1].m_touchedUp = Vector3.up; // MIGHT NEED TO CHANGE THIS!!!
-                                moves18[1].m_move = new Vector2(300.0f, 0.0f);
-
-                                moves18[2].m_touchedParentLocation = 1;
-                                moves18[2].m_touchedUp = -Vector3.forward; // MIGHT NEED TO CHANGE THIS!!!
-                                moves18[2].m_move = new Vector2(-300.0f, 0.0f);
-
-                                moves18[3].m_touchedParentLocation = 16;
-                                moves18[3].m_touchedUp = Vector3.up; // MIGHT NEED TO CHANGE THIS!!!
-                                moves18[3].m_move = new Vector2(0.0f, 300.0f);
-
-                                moves18[4].m_touchedParentLocation = 16;
-                                moves18[4].m_touchedUp = Vector3.up; // MIGHT NEED TO CHANGE THIS!!!
-                                moves18[4].m_move = new Vector2(0.0f, 300.0f);                                
-
+                                moves18[0] = new UserInput(18, transform.parent.up, new Vector2(300.0f, 0.0f));
+                                moves18[1] = new UserInput(18, transform.parent.up, new Vector2(300.0f, 0.0f));
+                                moves18[2] = new UserInput(1, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                                moves18[3] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                                moves18[4] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                                
                                 StartCoroutine(ExecuteMoves(moves18));
                                 break;
 
+                            case 8: // left middle front edge
+
+                                // Fi -> D -> F -> R -> R
+                                UserInput[] moves8 = new UserInput[5];
+
+                                moves8[0] = new UserInput(8, -transform.parent.right, new Vector2(0.0f, -300.0f));
+                                moves8[1] = new UserInput(1, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                                moves8[2] = new UserInput(8, -transform.parent.right, new Vector2(0.0f, 300.0f));
+                                moves8[3] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                                moves8[4] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                                
+                                StartCoroutine(ExecuteMoves(moves8));
+                                break;
+
+                            case 9: // right middle front edge
+
+                                // R
+                                UserInput[] moves9 = new UserInput[1];
+
+                                moves9[0] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                                
+                                StartCoroutine(ExecuteMoves(moves9));
+                                break;
+
+                            case 10: // left middle back edge
+
+                                // Bi -> Di -> B -> R -> R
+                                UserInput[] moves10 = new UserInput[5];
+
+                                moves10[0] = new UserInput(18, transform.parent.up, new Vector2(-300.0f, 0.0f));
+                                moves10[1] = new UserInput(1, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                                moves10[2] = new UserInput(18, transform.parent.up, new Vector2(300.0f, 0.0f));
+                                moves10[3] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                                moves10[4] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                                
+                                StartCoroutine(ExecuteMoves(moves10));
+                                break;
+
+                            case 11: // right middle back edge
+
+                                // Ri
+                                UserInput[] moves11 = new UserInput[1];
+
+                                moves11[0] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
+
+                                // Bi -> Di -> B -> R -> R
+                                //UserInput[] moves11 = new UserInput[5];
+
+                                //moves11[0] = new UserInput(18, transform.parent.up, new Vector2(-300.0f, 0.0f));
+                                //moves11[1] = new UserInput(1, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                                //moves11[2] = new UserInput(18, transform.parent.up, new Vector2(300.0f, 0.0f));
+                                //moves11[3] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                                //moves11[4] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                                
+                                StartCoroutine(ExecuteMoves(moves11));
+                                break;
+
+                            case 1: // middle bottom front edge
+
+                                // D -> R -> R
+                                UserInput[] moves1 = new UserInput[3];
+
+                                moves1[0] = new UserInput(1, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                                moves1[1] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                                moves1[2] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                                
+                                StartCoroutine(ExecuteMoves(moves1));
+                                break;
+
+                            case 3: // left bottom middle edge
+
+                                // D -> D -> R -> R
+                                UserInput[] moves3 = new UserInput[4];
+
+                                moves3[0] = new UserInput(1, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                                moves3[1] = new UserInput(1, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                                moves3[2] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                                moves3[3] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                                
+                                StartCoroutine(ExecuteMoves(moves3));
+                                break;
+
+                            case 4: // right bottom middle edge
+
+                                // R -> R
+                                UserInput[] moves4 = new UserInput[2];
+
+                                moves4[0] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                                moves4[1] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                                
+                                StartCoroutine(ExecuteMoves(moves4));
+                                break;
+
+                            case 6: //middle bottom back edge
+
+                                // Di -> R -> R
+                                UserInput[] moves6 = new UserInput[3];
+
+                                moves6[0] = new UserInput(1, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                                moves6[1] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                                moves6[2] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                                
+                                StartCoroutine(ExecuteMoves(moves6));
+                                break;
+
                             default:
-                                Debug.Log("tarEdgeCube found in un-accounted position!");
+                                Debug.Log("tarEdgeCube found in un-accounted position! ");
                                 return true; // END RECURSION!!!                                
                         }
 
