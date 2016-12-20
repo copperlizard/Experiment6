@@ -650,6 +650,12 @@ public class VRubiksCubeMonitor : MonoBehaviour
         }
         Debug.Log("done solving stage1!");
 
+        Debug.Log("solving stage2!");
+        while (!SolveCubeStage2())
+        {
+            yield return null;
+        }
+        Debug.Log("done solving stage2!");
 
         Debug.Log("done solving cube!");
         yield return null;
@@ -1174,15 +1180,6 @@ public class VRubiksCubeMonitor : MonoBehaviour
                                 UserInput[] moves11 = new UserInput[1];
 
                                 moves11[0] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
-
-                                // Bi -> Di -> B -> R -> R
-                                //UserInput[] moves11 = new UserInput[5];
-
-                                //moves11[0] = new UserInput(18, transform.parent.up, new Vector2(-300.0f, 0.0f));
-                                //moves11[1] = new UserInput(1, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
-                                //moves11[2] = new UserInput(18, transform.parent.up, new Vector2(300.0f, 0.0f));
-                                //moves11[3] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
-                                //moves11[4] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
                                 
                                 StartCoroutine(ExecuteMoves(moves11));
                                 break;
@@ -1316,13 +1313,206 @@ public class VRubiksCubeMonitor : MonoBehaviour
             }
         }
     }
+
+    private bool SolveCubeStage2 ()
+    {
+        int dir = 1;
+        if (m_cubeStates[14] && m_cubeStates[12] && m_cubeStates[17] && m_cubeStates[19])
+        {
+            return true;
+        }
+        //Ensure 14 is false
+        else if (!m_cubeStates[14])
+        {
+            //Do stuff
+
+            // Determine Target panels colors
+            bool white = false, blue = false, red = false, orange = false, green = false, yellow = false;
+
+            if (Vector3.Dot(m_whiteCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_whiteCenter.transform.up, transform.parent.right) >= 0.9f || Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.forward) >= 0.9f)
+            {
+                white = true;
+            }
+
+            if (Vector3.Dot(m_blueCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_blueCenter.transform.up, transform.parent.right) >= 0.9f || Vector3.Dot(m_blueCenter.transform.up, -transform.parent.forward) >= 0.9f)
+            {
+                blue = true;
+            }
+
+            if (Vector3.Dot(m_redCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_redCenter.transform.up, transform.parent.right) >= 0.9f || Vector3.Dot(m_redCenter.transform.up, -transform.parent.forward) >= 0.9f)
+            {
+                red = true;
+            }
+
+            if (Vector3.Dot(m_orangeCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_orangeCenter.transform.up, transform.parent.right) >= 0.9f || Vector3.Dot(m_orangeCenter.transform.up, -transform.parent.forward) >= 0.9f)
+            {
+                orange = true;
+            }
+
+            if (Vector3.Dot(m_greenCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_greenCenter.transform.up, transform.parent.right) >= 0.9f || Vector3.Dot(m_greenCenter.transform.up, -transform.parent.forward) >= 0.9f)
+            {
+                green = true;
+            }
+
+            if (Vector3.Dot(m_yellowCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_yellowCenter.transform.up, transform.parent.right) >= 0.9f || Vector3.Dot(m_yellowCenter.transform.up, -transform.parent.forward) >= 0.9f)
+            {
+                yellow = true;
+            }
+
+            string tarCubeName = "";
+            if (white && blue && orange)
+            {
+                tarCubeName = "WBO-Corner_Cube";
+            }
+            else if (white && orange && green)
+            {
+                tarCubeName = "WOG-Corner_Cube";
+            }
+            else if (white && green && red)
+            {
+                tarCubeName = "WGR-Corner_Cube";
+            }
+            else if (white && red && blue)
+            {
+                tarCubeName = "WBR-Corner_Cube";
+            }
+            else if (yellow && blue && orange)
+            {
+                tarCubeName = "YBO-Corner_Cube";
+            }
+            else if (yellow && orange && green)
+            {
+                tarCubeName = "YGO-Corner_Cube";
+            }
+            else if (yellow && green && red)
+            {
+                tarCubeName = "YRG-Corner_Cube";
+            }
+            else if (yellow && red && blue)
+            {
+                tarCubeName = "YBR-Corner_Cube";
+            }
+            else
+            {
+                Debug.Log("Error Identifying target edge cube for solving stage2!");
+            }
+
+            GameObject tarEdgeCube = null;
+            foreach (GameObject cube in m_cubes)
+            {
+                if (cube.name == tarCubeName)
+                {
+                    Debug.Log("tarEdgeCube found! name == " + cube.name);
+                    tarEdgeCube = cube;
+                }
+            }
+
+            if (tarEdgeCube != null)
+            {
+                Vector3 mapInput = PrepareMapInput(tarEdgeCube);
+
+                int stateIndex = -1;
+                bool stateIndexFound = m_cubeMap.TryGetValue(mapInput, out stateIndex);
+                if (stateIndexFound)
+                {
+                    // DO A TURN/s BASED ON CURRENT STATE INDEX
+                    Debug.Log("stateIndex == " + stateIndex.ToString());
+
+                    switch (stateIndex)
+                    {
+                        case 0: // bottom front left
+
+                            // Ri -> Di -> R
+
+                            break;
+
+                        case 2: // bottom front right
+
+                            // D -> Ri -> Di -> R
+
+                            break;
+
+                        case 5: // bottom back left
+
+                            // Ri -> D -> D -> R
+
+                            break;
+
+                        case 7: // bottom back right
+
+                            // D -> Ri -> Di -> Di -> R
+
+                            break;
+
+                        case 12: // top front left 
+
+                            // L -> Di -> Li
+
+                            break;
+
+                        case 14: // top front right (correct position but wront orientation)
+
+                            // Ri -> Di -> R -> Ri -> Di -> R -> D
+
+                            break;
+
+                        case 17: // top back left
+
+                            // Li -> D -> L
+
+                            break;
+
+                        case 19: // top back right
+
+                            // R -> Di -> Ri 
+
+                            break;
+
+                        default:
+                            Debug.Log("tarEdgeCube found in un-accounted position! ");
+                            return true; // END RECURSION!!!      
+                    }
+                }
+            }
+
+            return false; // RECURSE!!!
+        }
+        //else if (!m_cubeStates[12] || !m_cubeStates[17])
+        //{
+            //dir = 1
+        //}
+        else if (!m_cubeStates[19])
+        {
+            dir = -1;
+        }
+
+        // Touch front center and swipe left or right
+        float swipe = 300.0f * dir;
+        if (Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.forward) >= 0.9f)
+        {
+            m_cubeController.Turn(m_whiteCenter, new Vector2(swipe, 0.0f));
+        }
+        else if (Vector3.Dot(m_redCenter.transform.up, -transform.parent.forward) >= 0.9f)
+        {
+            m_cubeController.Turn(m_redCenter, new Vector2(swipe, 0.0f));
+        }
+        else if (Vector3.Dot(m_orangeCenter.transform.up, -transform.parent.forward) >= 0.9f)
+        {
+            m_cubeController.Turn(m_orangeCenter, new Vector2(swipe, 0.0f));
+        }
+        else if (Vector3.Dot(m_blueCenter.transform.up, -transform.parent.forward) >= 0.9f)
+        {
+            m_cubeController.Turn(m_blueCenter, new Vector2(swipe, 0.0f));
+        }
+        else if (Vector3.Dot(m_greenCenter.transform.up, -transform.parent.forward) >= 0.9f)
+        {
+            m_cubeController.Turn(m_greenCenter, new Vector2(swipe, 0.0f));
+        }
+        else if (Vector3.Dot(m_yellowCenter.transform.up, -transform.parent.forward) >= 0.9f)
+        {
+            m_cubeController.Turn(m_yellowCenter, new Vector2(swipe, 0.0f));
+        }
+
+        return false; // RECURSE!!!
+    }
 }
-
-
-// Check bottom up
-//if ([1] && [3] && [4] && [6]) // Bottom Cross complete
-//if ([13] && [15] && [16] && [18]) // Top Cross complete
-//if ([3] && [8] && [10] && [15]) // Left Cross complete
-//if ([4] && [9] && [11] && [16]) // Right Cross complete
-//if ([1] && [8] && [9] && [13]) // Front Cross complete
-//if ([6] && [10] && [11] && [18]) // Back Cross complete
