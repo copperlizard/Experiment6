@@ -1220,212 +1220,8 @@ public class VRubiksCubeMonitor : MonoBehaviour
         }
         //Ensure 14 is false
         else if (!m_cubeStates[14])
-        {   
-            // Determine Target panels colors
-            bool white = false, blue = false, red = false, orange = false, green = false, yellow = false;
-            if (Vector3.Dot(m_whiteCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_whiteCenter.transform.up, transform.parent.right) >= 0.9f || Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.forward) >= 0.9f)
-            {
-                white = true;
-            }
-
-            if (Vector3.Dot(m_blueCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_blueCenter.transform.up, transform.parent.right) >= 0.9f || Vector3.Dot(m_blueCenter.transform.up, -transform.parent.forward) >= 0.9f)
-            {
-                blue = true;
-            }
-
-            if (Vector3.Dot(m_redCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_redCenter.transform.up, transform.parent.right) >= 0.9f || Vector3.Dot(m_redCenter.transform.up, -transform.parent.forward) >= 0.9f)
-            {
-                red = true;
-            }
-
-            if (Vector3.Dot(m_orangeCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_orangeCenter.transform.up, transform.parent.right) >= 0.9f || Vector3.Dot(m_orangeCenter.transform.up, -transform.parent.forward) >= 0.9f)
-            {
-                orange = true;
-            }
-
-            if (Vector3.Dot(m_greenCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_greenCenter.transform.up, transform.parent.right) >= 0.9f || Vector3.Dot(m_greenCenter.transform.up, -transform.parent.forward) >= 0.9f)
-            {
-                green = true;
-            }
-
-            if (Vector3.Dot(m_yellowCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_yellowCenter.transform.up, transform.parent.right) >= 0.9f || Vector3.Dot(m_yellowCenter.transform.up, -transform.parent.forward) >= 0.9f)
-            {
-                yellow = true;
-            }
-
-            string tarCubeName = "";
-            if (white && blue && orange)
-            {
-                tarCubeName = "WBO-Corner_Cube";
-            }
-            else if (white && orange && green)
-            {
-                tarCubeName = "WOG-Corner_Cube";
-            }
-            else if (white && green && red)
-            {
-                tarCubeName = "WGR-Corner_Cube";
-            }
-            else if (white && red && blue)
-            {
-                tarCubeName = "WBR-Corner_Cube";
-            }
-            else if (yellow && blue && orange)
-            {
-                tarCubeName = "YBO-Corner_Cube";
-            }
-            else if (yellow && orange && green)
-            {
-                tarCubeName = "YGO-Corner_Cube";
-            }
-            else if (yellow && green && red)
-            {
-                tarCubeName = "YRG-Corner_Cube";
-            }
-            else if (yellow && red && blue)
-            {
-                tarCubeName = "YBR-Corner_Cube";
-            }
-            else
-            {
-                Debug.Log("Error Identifying target edge cube for solving stage2!");
-            }
-
-            GameObject tarEdgeCube = null;
-            foreach (GameObject cube in m_cubes)
-            {
-                if (cube.name == tarCubeName)
-                {
-                    //Debug.Log("tarEdgeCube found! name == " + cube.name);
-                    tarEdgeCube = cube;
-                }
-            }
-
-            if (tarEdgeCube != null)
-            {
-                Vector3 mapInput = PrepareMapInput(tarEdgeCube);
-
-                int stateIndex = -1;
-                bool stateIndexFound = m_cubeMap.TryGetValue(mapInput, out stateIndex);
-                if (stateIndexFound)
-                {
-                    //Debug.Log("stateIndex == " + stateIndex.ToString());
-                    
-                    // DO A TURN/s BASED ON CURRENT STATE INDEX
-                    switch (stateIndex)
-                    {
-                        case 0: // bottom front left
-
-                            // Ri -> D -> R
-                            UserInput[] moves0 = new UserInput[3];
-
-                            moves0[0] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
-                            moves0[1] = new UserInput(1, -transform.parent.forward, new Vector2(300.0f, 0.0f));
-                            moves0[2] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
-
-                            StartCoroutine(ExecuteMoves(moves0));                                                        
-                            break;
-
-                        case 2: // bottom front right
-
-                            // Di -> Ri -> D -> R
-                            UserInput[] moves2 = new UserInput[4];
-
-                            moves2[0] = new UserInput(1, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
-                            moves2[1] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
-                            moves2[2] = new UserInput(1, -transform.parent.forward, new Vector2(300.0f, 0.0f));
-                            moves2[3] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
-
-                            StartCoroutine(ExecuteMoves(moves2));
-                            break;
-
-                        case 5: // bottom back left
-
-                            // Ri -> D -> D -> R
-                            UserInput[] moves5 = new UserInput[4];
-
-                            moves5[0] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
-                            moves5[1] = new UserInput(1, -transform.parent.forward, new Vector2(300.0f, 0.0f));
-                            moves5[2] = new UserInput(1, -transform.parent.forward, new Vector2(300.0f, 0.0f));
-                            moves5[3] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
-
-                            StartCoroutine(ExecuteMoves(moves5));
-                            break;
-
-                        case 7: // bottom back right
-
-                            // D -> Ri -> Di -> Di -> R
-                            UserInput[] moves7 = new UserInput[5];
-
-                            moves7[0] = new UserInput(1, -transform.parent.forward, new Vector2(300.0f, 0.0f));
-                            moves7[1] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
-                            moves7[2] = new UserInput(1, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
-                            moves7[3] = new UserInput(1, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
-                            moves7[4] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
-
-                            StartCoroutine(ExecuteMoves(moves7)); 
-                            break;
-
-                        case 12: // top front left 
-
-                            // L -> D -> Li
-                            UserInput[] moves12 = new UserInput[3];
-
-                            moves12[0] = new UserInput(15, transform.parent.up, new Vector2(0.0f, -300.0f));
-                            moves12[1] = new UserInput(1, -transform.parent.forward, new Vector2(300.0f, 0.0f));
-                            moves12[2] = new UserInput(15, transform.parent.up, new Vector2(0.0f, 300.0f));
-
-                            StartCoroutine(ExecuteMoves(moves12));
-                            break;
-
-                        case 14: // top front right (correct position but wrong orientation)
-
-                            // Ri -> Di -> R  -> D -> Ri -> Di -> R 
-                            UserInput[] moves14 = new UserInput[7];
-
-                            moves14[0] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f)); 
-                            moves14[1] = new UserInput(1, -transform.parent.forward, new Vector2(-300.0f, 0.0f)); 
-                            moves14[2] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
-                            moves14[3] = new UserInput(1, -transform.parent.forward, new Vector2(300.0f, 0.0f));
-                            moves14[4] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
-                            moves14[5] = new UserInput(1, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
-                            moves14[6] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
-                            
-                            StartCoroutine(ExecuteMoves(moves14));
-                            break;
-
-                        case 17: // top back left
-
-                            // Li -> Di -> L
-                            UserInput[] moves17 = new UserInput[3];
-
-                            moves17[0] = new UserInput(15, transform.parent.up, new Vector2(0.0f, 300.0f));
-                            moves17[1] = new UserInput(1, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
-                            moves17[2] = new UserInput(15, transform.parent.up, new Vector2(0.0f, -300.0f));
-
-                            StartCoroutine(ExecuteMoves(moves17));
-                            break;
-
-                        case 19: // top back right
-
-                            // R -> D -> Ri 
-                            UserInput[] moves19 = new UserInput[3];
-
-                            moves19[0] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
-                            moves19[1] = new UserInput(1, -transform.parent.forward, new Vector2(300.0f, 0.0f));
-                            moves19[2] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
-
-                            StartCoroutine(ExecuteMoves(moves19));
-                            break;
-
-                        default:
-                            Debug.Log("tarEdgeCube found in un-accounted position! ");
-                            return true; // END RECURSION!!!      
-                    }
-
-                    return false; // RECURSE!!!
-                }
-            }
+        {
+            SolveCubeStage2Moves();
         }
         //else if (!m_cubeStates[12] || !m_cubeStates[17])
         //{
@@ -1443,6 +1239,217 @@ public class VRubiksCubeMonitor : MonoBehaviour
         return false; // RECURSE!!!
     }
 
+    private bool SolveCubeStage2Moves ()
+    {
+        // Determine Target panels colors
+        bool white = false, blue = false, red = false, orange = false, green = false, yellow = false;
+        if (Vector3.Dot(m_whiteCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_whiteCenter.transform.up, transform.parent.right) >= 0.9f || Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.forward) >= 0.9f)
+        {
+            white = true;
+        }
+
+        if (Vector3.Dot(m_blueCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_blueCenter.transform.up, transform.parent.right) >= 0.9f || Vector3.Dot(m_blueCenter.transform.up, -transform.parent.forward) >= 0.9f)
+        {
+            blue = true;
+        }
+
+        if (Vector3.Dot(m_redCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_redCenter.transform.up, transform.parent.right) >= 0.9f || Vector3.Dot(m_redCenter.transform.up, -transform.parent.forward) >= 0.9f)
+        {
+            red = true;
+        }
+
+        if (Vector3.Dot(m_orangeCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_orangeCenter.transform.up, transform.parent.right) >= 0.9f || Vector3.Dot(m_orangeCenter.transform.up, -transform.parent.forward) >= 0.9f)
+        {
+            orange = true;
+        }
+
+        if (Vector3.Dot(m_greenCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_greenCenter.transform.up, transform.parent.right) >= 0.9f || Vector3.Dot(m_greenCenter.transform.up, -transform.parent.forward) >= 0.9f)
+        {
+            green = true;
+        }
+
+        if (Vector3.Dot(m_yellowCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_yellowCenter.transform.up, transform.parent.right) >= 0.9f || Vector3.Dot(m_yellowCenter.transform.up, -transform.parent.forward) >= 0.9f)
+        {
+            yellow = true;
+        }
+
+        string tarCubeName = "";
+        if (white && blue && orange)
+        {
+            tarCubeName = "WBO-Corner_Cube";
+        }
+        else if (white && orange && green)
+        {
+            tarCubeName = "WOG-Corner_Cube";
+        }
+        else if (white && green && red)
+        {
+            tarCubeName = "WGR-Corner_Cube";
+        }
+        else if (white && red && blue)
+        {
+            tarCubeName = "WBR-Corner_Cube";
+        }
+        else if (yellow && blue && orange)
+        {
+            tarCubeName = "YBO-Corner_Cube";
+        }
+        else if (yellow && orange && green)
+        {
+            tarCubeName = "YGO-Corner_Cube";
+        }
+        else if (yellow && green && red)
+        {
+            tarCubeName = "YRG-Corner_Cube";
+        }
+        else if (yellow && red && blue)
+        {
+            tarCubeName = "YBR-Corner_Cube";
+        }
+        else
+        {
+            Debug.Log("Error Identifying target edge cube for solving stage2!");
+        }
+
+        GameObject tarEdgeCube = null;
+        foreach (GameObject cube in m_cubes)
+        {
+            if (cube.name == tarCubeName)
+            {
+                //Debug.Log("tarEdgeCube found! name == " + cube.name);
+                tarEdgeCube = cube;
+            }
+        }
+
+        if (tarEdgeCube != null)
+        {
+            Vector3 mapInput = PrepareMapInput(tarEdgeCube);
+
+            int stateIndex = -1;
+            bool stateIndexFound = m_cubeMap.TryGetValue(mapInput, out stateIndex);
+            if (stateIndexFound)
+            {
+                //Debug.Log("stateIndex == " + stateIndex.ToString());
+
+                // DO A TURN/s BASED ON CURRENT STATE INDEX
+                switch (stateIndex)
+                {
+                    case 0: // bottom front left
+
+                        // Ri -> D -> R
+                        UserInput[] moves0 = new UserInput[3];
+
+                        moves0[0] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
+                        moves0[1] = new UserInput(1, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                        moves0[2] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+
+                        StartCoroutine(ExecuteMoves(moves0));
+                        break;
+
+                    case 2: // bottom front right
+
+                        // Di -> Ri -> D -> R
+                        UserInput[] moves2 = new UserInput[4];
+
+                        moves2[0] = new UserInput(1, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                        moves2[1] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
+                        moves2[2] = new UserInput(1, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                        moves2[3] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+
+                        StartCoroutine(ExecuteMoves(moves2));
+                        break;
+
+                    case 5: // bottom back left
+
+                        // Ri -> D -> D -> R
+                        UserInput[] moves5 = new UserInput[4];
+
+                        moves5[0] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
+                        moves5[1] = new UserInput(1, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                        moves5[2] = new UserInput(1, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                        moves5[3] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+
+                        StartCoroutine(ExecuteMoves(moves5));
+                        break;
+
+                    case 7: // bottom back right
+
+                        // D -> Ri -> Di -> Di -> R
+                        UserInput[] moves7 = new UserInput[5];
+
+                        moves7[0] = new UserInput(1, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                        moves7[1] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
+                        moves7[2] = new UserInput(1, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                        moves7[3] = new UserInput(1, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                        moves7[4] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+
+                        StartCoroutine(ExecuteMoves(moves7));
+                        break;
+
+                    case 12: // top front left 
+
+                        // L -> D -> Li
+                        UserInput[] moves12 = new UserInput[3];
+
+                        moves12[0] = new UserInput(15, transform.parent.up, new Vector2(0.0f, -300.0f));
+                        moves12[1] = new UserInput(1, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                        moves12[2] = new UserInput(15, transform.parent.up, new Vector2(0.0f, 300.0f));
+
+                        StartCoroutine(ExecuteMoves(moves12));
+                        break;
+
+                    case 14: // top front right (correct position but wrong orientation)
+
+                        // Ri -> Di -> R  -> D -> Ri -> Di -> R 
+                        UserInput[] moves14 = new UserInput[7];
+
+                        moves14[0] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
+                        moves14[1] = new UserInput(1, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                        moves14[2] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                        moves14[3] = new UserInput(1, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                        moves14[4] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
+                        moves14[5] = new UserInput(1, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                        moves14[6] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+
+                        StartCoroutine(ExecuteMoves(moves14));
+                        break;
+
+                    case 17: // top back left
+
+                        // Li -> Di -> L
+                        UserInput[] moves17 = new UserInput[3];
+
+                        moves17[0] = new UserInput(15, transform.parent.up, new Vector2(0.0f, 300.0f));
+                        moves17[1] = new UserInput(1, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                        moves17[2] = new UserInput(15, transform.parent.up, new Vector2(0.0f, -300.0f));
+
+                        StartCoroutine(ExecuteMoves(moves17));
+                        break;
+
+                    case 19: // top back right
+
+                        // R -> D -> Ri 
+                        UserInput[] moves19 = new UserInput[3];
+
+                        moves19[0] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                        moves19[1] = new UserInput(1, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                        moves19[2] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
+
+                        StartCoroutine(ExecuteMoves(moves19));
+                        break;
+
+                    default:
+                        Debug.Log("tarEdgeCube found in un-accounted position! ");
+                        return true; // END RECURSION!!!      
+                }
+
+                return false; // RECURSE!!!
+            }
+        }
+
+        return false;
+    }
+
     private bool SolveCubeStage3()
     {
         // Wait for last controller input to be processed
@@ -1457,14 +1464,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
         }
         else if (!m_cubeStates[8] || !m_cubeStates[9])
         {
-            if (!m_cubeStates[8])
-            {
-                SolveCubeStage3Pos8();
-            }
-            else
-            {
-                SolveCubeStage3Pos9();
-            }
+            SolveCubeStage3Moves();
             return false;
         }
         else if (m_cubeStates[8] && m_cubeStates[9] && !m_cubeStates[11])
@@ -1479,39 +1479,73 @@ public class VRubiksCubeMonitor : MonoBehaviour
         return false;
     }
 
-    private bool SolveCubeStage3Pos8 ()
+    private bool SolveCubeStage3Moves ()
     {
         // Determine Target panels colors
         bool white = false, blue = false, red = false, orange = false, green = false, yellow = false;
-
-        if (Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.right) >= 0.9f)
+        if (!m_cubeStates[8])
         {
-            white = true;
+            if (Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.right) >= 0.9f)
+            {
+                white = true;
+            }
+
+            if (Vector3.Dot(m_blueCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_blueCenter.transform.up, -transform.parent.right) >= 0.9f)
+            {
+                blue = true;
+            }
+
+            if (Vector3.Dot(m_redCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_redCenter.transform.up, -transform.parent.right) >= 0.9f)
+            {
+                red = true;
+            }
+
+            if (Vector3.Dot(m_orangeCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_orangeCenter.transform.up, -transform.parent.right) >= 0.9f)
+            {
+                orange = true;
+            }
+
+            if (Vector3.Dot(m_greenCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_greenCenter.transform.up, -transform.parent.right) >= 0.9f)
+            {
+                green = true;
+            }
+
+            if (Vector3.Dot(m_yellowCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_yellowCenter.transform.up, -transform.parent.right) >= 0.9f)
+            {
+                yellow = true;
+            }
         }
-
-        if (Vector3.Dot(m_blueCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_blueCenter.transform.up, -transform.parent.right) >= 0.9f)
+        else
         {
-            blue = true;
-        }
+            if (Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_whiteCenter.transform.up, transform.parent.right) >= 0.9f)
+            {
+                white = true;
+            }
 
-        if (Vector3.Dot(m_redCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_redCenter.transform.up, -transform.parent.right) >= 0.9f)
-        {
-            red = true;
-        }
+            if (Vector3.Dot(m_blueCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_blueCenter.transform.up, transform.parent.right) >= 0.9f)
+            {
+                blue = true;
+            }
 
-        if (Vector3.Dot(m_orangeCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_orangeCenter.transform.up, -transform.parent.right) >= 0.9f)
-        {
-            orange = true;
-        }
+            if (Vector3.Dot(m_redCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_redCenter.transform.up, transform.parent.right) >= 0.9f)
+            {
+                red = true;
+            }
 
-        if (Vector3.Dot(m_greenCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_greenCenter.transform.up, -transform.parent.right) >= 0.9f)
-        {
-            green = true;
-        }
+            if (Vector3.Dot(m_orangeCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_orangeCenter.transform.up, transform.parent.right) >= 0.9f)
+            {
+                orange = true;
+            }
 
-        if (Vector3.Dot(m_yellowCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_yellowCenter.transform.up, -transform.parent.right) >= 0.9f)
-        {
-            yellow = true;
+            if (Vector3.Dot(m_greenCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_greenCenter.transform.up, transform.parent.right) >= 0.9f)
+            {
+                green = true;
+            }
+
+            if (Vector3.Dot(m_yellowCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_yellowCenter.transform.up, transform.parent.right) >= 0.9f)
+            {
+                yellow = true;
+            }            
         }
 
         string tarCubeName = "";
@@ -1573,7 +1607,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
         {
             if (cube.name == tarCubeName)
             {
-                //Debug.Log("tarEdgeCube found! name == " + cube.name);
+                Debug.Log("tarEdgeCube found! name == " + cube.name);
                 tarEdgeCube = cube;
             }
         }
@@ -1586,26 +1620,46 @@ public class VRubiksCubeMonitor : MonoBehaviour
             bool stateIndexFound = m_cubeMap.TryGetValue(mapInput, out stateIndex);
             if (stateIndexFound)
             {
-                //Debug.Log("stateIndex == " + stateIndex.ToString());
+                Debug.Log("stateIndex == " + stateIndex.ToString());
 
                 // DO A TURN/s BASED ON CURRENT STATE INDEX
                 switch (stateIndex)
                 {
                     case 13: // front top middle
 
-                        // Ui -> Li -> U -> L -> U -> F -> Ui -> Fi
-                        UserInput[] moves13 = new UserInput[8];
+                        if (!m_cubeStates[8])
+                        {
+                            // Ui -> Li -> U -> L -> U -> F -> Ui -> Fi
+                            UserInput[] moves13 = new UserInput[8];
 
-                        moves13[0] = new UserInput(13, -transform.parent.forward, new Vector2(300.0f, 0.0f));
-                        moves13[1] = new UserInput(8, transform.parent.up, new Vector2(0.0f, 300.0f));
-                        moves13[2] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
-                        moves13[3] = new UserInput(8, transform.parent.up, new Vector2(0.0f, -300.0f));
-                        moves13[2] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
-                        moves13[5] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
-                        moves13[6] = new UserInput(13, -transform.parent.forward, new Vector2(300.0f, 0.0f));
-                        moves13[7] = new UserInput(13, transform.parent.up, new Vector2(-300.0f, 0.0f));
+                            moves13[0] = new UserInput(13, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                            moves13[1] = new UserInput(15, transform.parent.up, new Vector2(0.0f, 300.0f));
+                            moves13[2] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                            moves13[3] = new UserInput(15, transform.parent.up, new Vector2(0.0f, -300.0f));
+                            moves13[4] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                            moves13[5] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
+                            moves13[6] = new UserInput(13, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                            moves13[7] = new UserInput(13, transform.parent.up, new Vector2(-300.0f, 0.0f));
 
-                        StartCoroutine(ExecuteMoves(moves13));
+                            StartCoroutine(ExecuteMoves(moves13));
+                        }
+                        else
+                        {
+                            // U -> R -> Ui -> Ri -> Ui -> Fi -> U -> F
+                            UserInput[] moves13 = new UserInput[8];
+
+                            moves13[0] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                            moves13[1] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                            moves13[2] = new UserInput(13, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                            moves13[3] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
+                            moves13[4] = new UserInput(13, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                            moves13[5] = new UserInput(13, transform.parent.up, new Vector2(-300.0f, 0.0f));
+                            moves13[6] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                            moves13[7] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
+
+                            StartCoroutine(ExecuteMoves(moves13));
+                        }
+
                         break;
 
                     case 15: // left top middle
@@ -1639,22 +1693,72 @@ public class VRubiksCubeMonitor : MonoBehaviour
                         StartCoroutine(ExecuteMoves(moves18));
                         break;
 
+                    case 8: // front left middle
+
+                        // Ui -> Li -> U -> L -> U -> F -> Ui -> Fi
+                        UserInput[] moves8 = new UserInput[8];
+
+                        moves8[0] = new UserInput(13, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                        moves8[1] = new UserInput(15, transform.parent.up, new Vector2(0.0f, 300.0f));
+                        moves8[2] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                        moves8[3] = new UserInput(15, transform.parent.up, new Vector2(0.0f, -300.0f));
+                        moves8[4] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                        moves8[5] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
+                        moves8[6] = new UserInput(13, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                        moves8[7] = new UserInput(13, transform.parent.up, new Vector2(-300.0f, 0.0f));
+
+                        StartCoroutine(ExecuteMoves(moves8));
+                        break;
+
                     case 9: // front right middle
 
                         // U -> R -> Ui -> Ri -> Ui -> Fi -> U -> F
+                        UserInput[] moves9 = new UserInput[8];
 
+                        moves9[0] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                        moves9[1] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                        moves9[2] = new UserInput(13, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                        moves9[3] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
+                        moves9[4] = new UserInput(13, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                        moves9[5] = new UserInput(13, transform.parent.up, new Vector2(-300.0f, 0.0f));
+                        moves9[6] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                        moves9[7] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
+
+                        StartCoroutine(ExecuteMoves(moves9));
                         break;
 
                     case 10: // left back middle
 
                         // Ui -> Bi -> U -> B -> U -> L -> Ui -> Li
+                        UserInput[] moves10 = new UserInput[8];
 
+                        moves10[0] = new UserInput(13, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                        moves10[1] = new UserInput(18, transform.parent.up, new Vector2(300.0f, 0.0f));
+                        moves10[2] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                        moves10[3] = new UserInput(18, transform.parent.up, new Vector2(-300.0f, 0.0f));
+                        moves10[4] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                        moves10[5] = new UserInput(15, transform.parent.up, new Vector2(0.0f, -300.0f));
+                        moves10[6] = new UserInput(13, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                        moves10[7] = new UserInput(15, transform.parent.up, new Vector2(0.0f, 300.0f));
+
+                        StartCoroutine(ExecuteMoves(moves10));
                         break;
 
                     case 11: // right back middle
 
                         // U -> B -> Ui -> Bi -> Ui -> Ri -> U -> R
+                        UserInput[] moves11 = new UserInput[8];
 
+                        moves11[0] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                        moves11[1] = new UserInput(18, transform.parent.up, new Vector2(-300.0f, 0.0f));
+                        moves11[2] = new UserInput(13, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                        moves11[3] = new UserInput(18, transform.parent.up, new Vector2(300.0f, 0.0f));
+                        moves11[4] = new UserInput(13, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                        moves11[5] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
+                        moves11[6] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                        moves11[7] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+
+                        StartCoroutine(ExecuteMoves(moves11));
                         break;
 
                     default:
@@ -1669,6 +1773,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
         return false;
     }
 
+    /*
     private bool SolveCubeStage3Pos9()
     {
         // Determine Target panels colors
@@ -1847,6 +1952,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
 
         return false;
     }
+    */
 }
 
     
