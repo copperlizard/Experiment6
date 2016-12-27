@@ -251,7 +251,9 @@ public class VRubiksCubeController : MonoBehaviour
     IEnumerator RotateCubeFace (GameObject touched, bool front, bool top, bool bottom, bool left, bool right, bool movedLeft, bool movedRight, bool movedUp, bool movedDown)
     {
         m_rotatingCube = true;
-        
+
+        //Handheld.Vibrate();  // it would be nice to have some subtle haptic feedback...
+
         SelectCubeFace(touched, front, top, bottom, left, right, movedLeft, movedRight, movedUp, movedDown);
         
         if (movedLeft)

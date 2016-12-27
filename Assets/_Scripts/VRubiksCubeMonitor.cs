@@ -661,7 +661,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
         }
         else
         {
-            Debug.Log("could not find top center panel to re-orient cube!");
+            Debug.Log("could not find panel to re-orient cube!");
         }
     }
 
@@ -675,6 +675,8 @@ public class VRubiksCubeMonitor : MonoBehaviour
     IEnumerator SolveCubeCoRoutine()
     {
         CheckSolved();
+
+        Screen.sleepTimeout = SleepTimeout.NeverSleep;
 
         Debug.Log("solving stage1!");
         while (!SolveCubeStage1())
@@ -708,6 +710,8 @@ public class VRubiksCubeMonitor : MonoBehaviour
             yield return null;
         }
         Debug.Log("done solving stage3!");
+
+        Screen.sleepTimeout = SleepTimeout.SystemSetting;
 
         Debug.Log("done solving cube!");
         yield return null;
@@ -892,6 +896,215 @@ public class VRubiksCubeMonitor : MonoBehaviour
         // Complete cross 
         return SolveStage1Cross();
     }
+
+    private GameObject FindEdgeCube (Vector3 dir1, Vector3 dir2)
+    {
+        // Determine Target panels colors
+        bool white = false, blue = false, red = false, orange = false, green = false, yellow = false;
+
+        Quaternion unRot = Quaternion.Inverse(transform.parent.rotation);
+        //dir1 = unRot * dir1; // maybe quit using world space dirs and just use vector.up/right/forward
+        //dir2 = unRot * dir2;
+
+        Vector3 whiteUp = unRot * m_whiteCenter.transform.up;
+        if (Vector3.Dot(whiteUp, dir1) >= 0.9f || Vector3.Dot(whiteUp, dir2) >= 0.9f)
+        {
+            white = true;
+        }
+
+        Vector3 blueUp = unRot * m_blueCenter.transform.up;
+        if (Vector3.Dot(blueUp, dir1) >= 0.9f || Vector3.Dot(blueUp, dir2) >= 0.9f)
+        {
+            blue = true;
+        }
+
+        Vector3 redUp = unRot * m_redCenter.transform.up;
+        if (Vector3.Dot(redUp, dir1) >= 0.9f || Vector3.Dot(redUp, dir2) >= 0.9f)
+        {
+            red = true;
+        }
+
+        Vector3 orangeUp = unRot * m_orangeCenter.transform.up;
+        if (Vector3.Dot(orangeUp, dir1) >= 0.9f || Vector3.Dot(orangeUp, dir2) >= 0.9f)
+        {
+            orange = true;
+        }
+
+        Vector3 greenUp = unRot * m_greenCenter.transform.up;
+        if (Vector3.Dot(greenUp, dir1) >= 0.9f || Vector3.Dot(greenUp, dir2) >= 0.9f)
+        {
+            green = true;
+        }
+
+        Vector3 yellowUp = unRot * m_yellowCenter.transform.up;
+        if (Vector3.Dot(yellowUp, dir1) >= 0.9f || Vector3.Dot(yellowUp, dir2) >= 0.9f)
+        {
+            yellow = true;
+        }
+
+        string tarCubeName = "";
+        if (white && blue)
+        {
+            tarCubeName = "WB-Edge_Cube";
+        }
+        else if (white && red)
+        {
+            tarCubeName = "WR-Edge_Cube";
+        }
+        else if (white && orange)
+        {
+            tarCubeName = "WO-Edge_Cube";
+        }
+        else if (white && green)
+        {
+            tarCubeName = "WG-Edge_Cube";
+        }
+        else if (yellow && blue)
+        {
+            tarCubeName = "YB-Edge_Cube";
+        }
+        else if (yellow && red)
+        {
+            tarCubeName = "YR-Edge_Cube";
+        }
+        else if (yellow && orange)
+        {
+            tarCubeName = "YO-Edge_Cube";
+        }
+        else if (yellow && green)
+        {
+            tarCubeName = "YG-Edge_Cube";
+        }
+        else if (orange && blue)
+        {
+            tarCubeName = "BO-Edge_Cube";
+        }
+        else if (blue && red)
+        {
+            tarCubeName = "RB-Edge_Cube";
+        }
+        else if (red && green)
+        {
+            tarCubeName = "GR-Edge_Cube";
+        }
+        else if (green && orange)
+        {
+            tarCubeName = "OG-Edge_Cube";
+        }
+        else
+        {
+            Debug.Log("Error Identifying target edge cube for solving stage1 cross!");
+        }
+
+        GameObject tarEdgeCube = null;
+        foreach (GameObject cube in m_cubes)
+        {
+            if (cube.name == tarCubeName)
+            {
+                //Debug.Log("tarEdgeCube found! name == " + cube.name);
+                tarEdgeCube = cube;
+            }
+        }
+
+        return tarEdgeCube;
+    }
+
+    private GameObject FindCornerCube(Vector3 dir1, Vector3 dir2, Vector3 dir3)
+    {
+        // Determine Target panels colors
+        bool white = false, blue = false, red = false, orange = false, green = false, yellow = false;
+
+        Quaternion unRot = Quaternion.Inverse(transform.parent.rotation);
+        //dir1 = unRot * dir1; // maybe quit using world space dirs and just use vector.up/right/forward
+        //dir2 = unRot * dir2;
+        //dir3 = unRot * dir3;
+
+        Vector3 whiteUp = unRot * m_whiteCenter.transform.up;
+        if (Vector3.Dot(whiteUp, dir1) >= 0.9f || Vector3.Dot(whiteUp, dir2) >= 0.9f || Vector3.Dot(whiteUp, dir3) >= 0.9f)
+        {
+            white = true;
+        }
+
+        Vector3 blueUp = unRot * m_blueCenter.transform.up;
+        if (Vector3.Dot(blueUp, dir1) >= 0.9f || Vector3.Dot(blueUp, dir2) >= 0.9f || Vector3.Dot(blueUp, dir3) >= 0.9f)
+        {
+            blue = true;
+        }
+
+        Vector3 redUp = unRot * m_redCenter.transform.up;
+        if (Vector3.Dot(redUp, dir1) >= 0.9f || Vector3.Dot(redUp, dir2) >= 0.9f || Vector3.Dot(redUp, dir3) >= 0.9f)
+        {
+            red = true;
+        }
+
+        Vector3 orangeUp = unRot * m_orangeCenter.transform.up;
+        if (Vector3.Dot(orangeUp, dir1) >= 0.9f || Vector3.Dot(orangeUp, dir2) >= 0.9f || Vector3.Dot(orangeUp, dir3) >= 0.9f)
+        {
+            orange = true;
+        }
+
+        Vector3 greenUp = unRot * m_greenCenter.transform.up;
+        if (Vector3.Dot(greenUp, dir1) >= 0.9f || Vector3.Dot(greenUp, dir2) >= 0.9f || Vector3.Dot(greenUp, dir3) >= 0.9f)
+        {
+            green = true;
+        }
+
+        Vector3 yellowUp = unRot * m_yellowCenter.transform.up;
+        if (Vector3.Dot(yellowUp, dir1) >= 0.9f || Vector3.Dot(yellowUp, dir2) >= 0.9f || Vector3.Dot(yellowUp, dir3) >= 0.9f)
+        {
+            yellow = true;
+        }
+
+        string tarCubeName = "";
+        if (white && blue && orange)
+        {
+            tarCubeName = "WBO-Corner_Cube";
+        }
+        else if (white && orange && green)
+        {
+            tarCubeName = "WOG-Corner_Cube";
+        }
+        else if (white && green && red)
+        {
+            tarCubeName = "WGR-Corner_Cube";
+        }
+        else if (white && red && blue)
+        {
+            tarCubeName = "WBR-Corner_Cube";
+        }
+        else if (yellow && blue && orange)
+        {
+            tarCubeName = "YBO-Corner_Cube";
+        }
+        else if (yellow && orange && green)
+        {
+            tarCubeName = "YGO-Corner_Cube";
+        }
+        else if (yellow && green && red)
+        {
+            tarCubeName = "YRG-Corner_Cube";
+        }
+        else if (yellow && red && blue)
+        {
+            tarCubeName = "YBR-Corner_Cube";
+        }
+        else
+        {
+            Debug.Log("Error Identifying target edge cube for solving stage2!");
+        }
+
+        GameObject tarCornerCube = null;
+        foreach (GameObject cube in m_cubes)
+        {
+            if (cube.name == tarCubeName)
+            {
+                //Debug.Log("tarEdgeCube found! name == " + cube.name);
+                tarCornerCube = cube;
+            }
+        }
+
+        return tarCornerCube;
+    }
     
     private bool SolveStage1Cross ()
     {
@@ -905,102 +1118,8 @@ public class VRubiksCubeMonitor : MonoBehaviour
         {
             if (!m_cubeStates[16]) // Solve top right edge
             {
-                // Determine Target panels colors
-                bool white = false, blue = false, red = false, orange = false, green = false, yellow = false;
-                
-                if (Vector3.Dot(m_whiteCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_whiteCenter.transform.up, transform.parent.right) >= 0.9f)
-                {
-                    white = true;
-                }
-
-                if (Vector3.Dot(m_blueCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_blueCenter.transform.up, transform.parent.right) >= 0.9f)
-                {
-                    blue = true;
-                }
-
-                if (Vector3.Dot(m_redCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_redCenter.transform.up, transform.parent.right) >= 0.9f)
-                {
-                    red = true;
-                }
-
-                if (Vector3.Dot(m_orangeCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_orangeCenter.transform.up, transform.parent.right) >= 0.9f)
-                {
-                    orange = true;
-                }
-
-                if (Vector3.Dot(m_greenCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_greenCenter.transform.up, transform.parent.right) >= 0.9f)
-                {
-                    green = true;
-                }
-
-                if (Vector3.Dot(m_yellowCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_yellowCenter.transform.up, transform.parent.right) >= 0.9f)
-                {
-                    yellow = true;
-                }
-
-                string tarCubeName = "";
-                if (white && blue)
-                {
-                    tarCubeName = "WB-Edge_Cube";
-                }
-                else if (white && red)
-                {
-                    tarCubeName = "WR-Edge_Cube";
-                }
-                else if (white && orange)
-                {
-                    tarCubeName = "WO-Edge_Cube";
-                }
-                else if (white && green)
-                {
-                    tarCubeName = "WG-Edge_Cube";
-                }
-                else if (yellow && blue)
-                {
-                    tarCubeName = "YB-Edge_Cube";
-                }
-                else if (yellow && red)
-                {
-                    tarCubeName = "YR-Edge_Cube";
-                }
-                else if (yellow && orange)
-                {
-                    tarCubeName = "YO-Edge_Cube";
-                }
-                else if (yellow && green)
-                {
-                    tarCubeName = "YG-Edge_Cube";
-                }
-                else if (orange && blue)
-                {
-                    tarCubeName = "BO-Edge_Cube";
-                }
-                else if (blue && red)
-                {
-                    tarCubeName = "RB-Edge_Cube";
-                }
-                else if (red && green)
-                {
-                    tarCubeName = "GR-Edge_Cube";
-                }
-                else if (green && orange)
-                {
-                    tarCubeName = "OG-Edge_Cube";
-                }
-                else
-                {
-                    Debug.Log("Error Identifying target edge cube for solving stage1 cross!");
-                }
-
-                GameObject tarEdgeCube = null;
-                foreach(GameObject cube in m_cubes)
-                {
-                    if (cube.name == tarCubeName)
-                    {
-                        //Debug.Log("tarEdgeCube found! name == " + cube.name);
-                        tarEdgeCube = cube;
-                    }
-                }
+                //GameObject tarEdgeCube = FindEdgeCube(transform.parent.up, transform.parent.right);
+                GameObject tarEdgeCube = FindEdgeCube(Vector3.up, Vector3.right);
 
                 if (tarEdgeCube != null)
                 {
@@ -1241,89 +1360,12 @@ public class VRubiksCubeMonitor : MonoBehaviour
 
     private bool SolveCubeStage2Moves ()
     {
-        // Determine Target panels colors
-        bool white = false, blue = false, red = false, orange = false, green = false, yellow = false;
-        if (Vector3.Dot(m_whiteCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_whiteCenter.transform.up, transform.parent.right) >= 0.9f || Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.forward) >= 0.9f)
-        {
-            white = true;
-        }
+        //GameObject tarCornerCube = FindCornerCube(transform.parent.up, transform.parent.right, -transform.parent.forward);
+        GameObject tarCornerCube = FindCornerCube(Vector3.up, Vector3.right, -Vector3.forward);
 
-        if (Vector3.Dot(m_blueCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_blueCenter.transform.up, transform.parent.right) >= 0.9f || Vector3.Dot(m_blueCenter.transform.up, -transform.parent.forward) >= 0.9f)
+        if (tarCornerCube != null)
         {
-            blue = true;
-        }
-
-        if (Vector3.Dot(m_redCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_redCenter.transform.up, transform.parent.right) >= 0.9f || Vector3.Dot(m_redCenter.transform.up, -transform.parent.forward) >= 0.9f)
-        {
-            red = true;
-        }
-
-        if (Vector3.Dot(m_orangeCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_orangeCenter.transform.up, transform.parent.right) >= 0.9f || Vector3.Dot(m_orangeCenter.transform.up, -transform.parent.forward) >= 0.9f)
-        {
-            orange = true;
-        }
-
-        if (Vector3.Dot(m_greenCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_greenCenter.transform.up, transform.parent.right) >= 0.9f || Vector3.Dot(m_greenCenter.transform.up, -transform.parent.forward) >= 0.9f)
-        {
-            green = true;
-        }
-
-        if (Vector3.Dot(m_yellowCenter.transform.up, transform.parent.up) >= 0.9f || Vector3.Dot(m_yellowCenter.transform.up, transform.parent.right) >= 0.9f || Vector3.Dot(m_yellowCenter.transform.up, -transform.parent.forward) >= 0.9f)
-        {
-            yellow = true;
-        }
-
-        string tarCubeName = "";
-        if (white && blue && orange)
-        {
-            tarCubeName = "WBO-Corner_Cube";
-        }
-        else if (white && orange && green)
-        {
-            tarCubeName = "WOG-Corner_Cube";
-        }
-        else if (white && green && red)
-        {
-            tarCubeName = "WGR-Corner_Cube";
-        }
-        else if (white && red && blue)
-        {
-            tarCubeName = "WBR-Corner_Cube";
-        }
-        else if (yellow && blue && orange)
-        {
-            tarCubeName = "YBO-Corner_Cube";
-        }
-        else if (yellow && orange && green)
-        {
-            tarCubeName = "YGO-Corner_Cube";
-        }
-        else if (yellow && green && red)
-        {
-            tarCubeName = "YRG-Corner_Cube";
-        }
-        else if (yellow && red && blue)
-        {
-            tarCubeName = "YBR-Corner_Cube";
-        }
-        else
-        {
-            Debug.Log("Error Identifying target edge cube for solving stage2!");
-        }
-
-        GameObject tarEdgeCube = null;
-        foreach (GameObject cube in m_cubes)
-        {
-            if (cube.name == tarCubeName)
-            {
-                //Debug.Log("tarEdgeCube found! name == " + cube.name);
-                tarEdgeCube = cube;
-            }
-        }
-
-        if (tarEdgeCube != null)
-        {
-            Vector3 mapInput = PrepareMapInput(tarEdgeCube);
+            Vector3 mapInput = PrepareMapInput(tarCornerCube);
 
             int stateIndex = -1;
             bool stateIndexFound = m_cubeMap.TryGetValue(mapInput, out stateIndex);
@@ -1480,136 +1522,17 @@ public class VRubiksCubeMonitor : MonoBehaviour
     }
 
     private bool SolveCubeStage3Moves ()
-    {
-        // Determine Target panels colors
-        bool white = false, blue = false, red = false, orange = false, green = false, yellow = false;
+    {        
+        GameObject tarEdgeCube = null;
         if (!m_cubeStates[8])
         {
-            if (Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.right) >= 0.9f)
-            {
-                white = true;
-            }
-
-            if (Vector3.Dot(m_blueCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_blueCenter.transform.up, -transform.parent.right) >= 0.9f)
-            {
-                blue = true;
-            }
-
-            if (Vector3.Dot(m_redCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_redCenter.transform.up, -transform.parent.right) >= 0.9f)
-            {
-                red = true;
-            }
-
-            if (Vector3.Dot(m_orangeCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_orangeCenter.transform.up, -transform.parent.right) >= 0.9f)
-            {
-                orange = true;
-            }
-
-            if (Vector3.Dot(m_greenCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_greenCenter.transform.up, -transform.parent.right) >= 0.9f)
-            {
-                green = true;
-            }
-
-            if (Vector3.Dot(m_yellowCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_yellowCenter.transform.up, -transform.parent.right) >= 0.9f)
-            {
-                yellow = true;
-            }
+            //tarEdgeCube = FindEdgeCube(-transform.parent.forward, -transform.parent.right);
+            tarEdgeCube = FindEdgeCube(-Vector3.forward, -Vector3.right);
         }
         else
         {
-            if (Vector3.Dot(m_whiteCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_whiteCenter.transform.up, transform.parent.right) >= 0.9f)
-            {
-                white = true;
-            }
-
-            if (Vector3.Dot(m_blueCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_blueCenter.transform.up, transform.parent.right) >= 0.9f)
-            {
-                blue = true;
-            }
-
-            if (Vector3.Dot(m_redCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_redCenter.transform.up, transform.parent.right) >= 0.9f)
-            {
-                red = true;
-            }
-
-            if (Vector3.Dot(m_orangeCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_orangeCenter.transform.up, transform.parent.right) >= 0.9f)
-            {
-                orange = true;
-            }
-
-            if (Vector3.Dot(m_greenCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_greenCenter.transform.up, transform.parent.right) >= 0.9f)
-            {
-                green = true;
-            }
-
-            if (Vector3.Dot(m_yellowCenter.transform.up, -transform.parent.forward) >= 0.9f || Vector3.Dot(m_yellowCenter.transform.up, transform.parent.right) >= 0.9f)
-            {
-                yellow = true;
-            }            
-        }
-
-        string tarCubeName = "";
-        if (white && blue)
-        {
-            tarCubeName = "WB-Edge_Cube";
-        }
-        else if (white && red)
-        {
-            tarCubeName = "WR-Edge_Cube";
-        }
-        else if (white && orange)
-        {
-            tarCubeName = "WO-Edge_Cube";
-        }
-        else if (white && green)
-        {
-            tarCubeName = "WG-Edge_Cube";
-        }
-        else if (yellow && blue)
-        {
-            tarCubeName = "YB-Edge_Cube";
-        }
-        else if (yellow && red)
-        {
-            tarCubeName = "YR-Edge_Cube";
-        }
-        else if (yellow && orange)
-        {
-            tarCubeName = "YO-Edge_Cube";
-        }
-        else if (yellow && green)
-        {
-            tarCubeName = "YG-Edge_Cube";
-        }
-        else if (orange && blue)
-        {
-            tarCubeName = "BO-Edge_Cube";
-        }
-        else if (blue && red)
-        {
-            tarCubeName = "RB-Edge_Cube";
-        }
-        else if (red && green)
-        {
-            tarCubeName = "GR-Edge_Cube";
-        }
-        else if (green && orange)
-        {
-            tarCubeName = "OG-Edge_Cube";
-        }
-        else
-        {
-            Debug.Log("Error Identifying target edge cube for solving stage1 cross!");
-        }
-
-        GameObject tarEdgeCube = null;
-        foreach (GameObject cube in m_cubes)
-        {
-            if (cube.name == tarCubeName)
-            {
-                Debug.Log("tarEdgeCube found! name == " + cube.name);
-                tarEdgeCube = cube;
-            }
+            //tarEdgeCube = FindEdgeCube(-transform.parent.forward, transform.parent.right);
+            tarEdgeCube = FindEdgeCube(-Vector3.forward, Vector3.right);
         }
 
         if (tarEdgeCube != null)
@@ -1620,7 +1543,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
             bool stateIndexFound = m_cubeMap.TryGetValue(mapInput, out stateIndex);
             if (stateIndexFound)
             {
-                Debug.Log("stateIndex == " + stateIndex.ToString());
+                //Debug.Log("stateIndex == " + stateIndex.ToString());
 
                 // DO A TURN/s BASED ON CURRENT STATE INDEX
                 switch (stateIndex)
