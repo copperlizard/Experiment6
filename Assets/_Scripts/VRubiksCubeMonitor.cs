@@ -762,11 +762,13 @@ public class VRubiksCubeMonitor : MonoBehaviour
         Debug.Log("done solving cube!");
         yield return null;
     }
-
+        
     IEnumerator ExecuteMoves (UserInput[] moves) 
     {        
         m_executingMoves = true;
-        
+
+        //int debug = 1;
+
         foreach (UserInput move in moves)
         {
             while (m_cubeController.m_rotatingFace || m_cubeController.m_rotatingCube) //wait for last move to finish
@@ -774,6 +776,8 @@ public class VRubiksCubeMonitor : MonoBehaviour
                 yield return null;
             }
 
+            //Debug.Log("move# == " + debug.ToString());
+            //debug++;
             //Debug.Log("executing move -> loc == " + move.m_touchedParentLocation.ToString() + " ; up == " + move.m_touchedUp.ToString() + " ; dir == " + move.m_move);
 
             foreach (GameObject cube in m_cubes)
@@ -1743,6 +1747,12 @@ public class VRubiksCubeMonitor : MonoBehaviour
     
     private bool SolveCubeStage4 ()
     {
+        // Wait for last controller input to be processed
+        if (m_cubeController.m_rotatingFace || m_cubeController.m_rotatingCube || m_executingMoves)
+        {
+            return false;
+        }
+
         //Find top panel color
         bool white = false, blue = false, red = false, orange = false, green = false, yellow = false;
 
@@ -1784,6 +1794,8 @@ public class VRubiksCubeMonitor : MonoBehaviour
         {
             yellow = true;
         }
+
+        //Debug.Log("white == " + white.ToString() + "; blue == " + blue.ToString() + "; red == " + red.ToString() + "; orange == " + orange.ToString() + "; green == " + green.ToString() + "; yellow == " + yellow.ToString());
 
         ReadTopLayerPanelStates(white, blue, red, orange, green, yellow);
                         
@@ -1851,7 +1863,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
                         break;
 
                     default:
-                        Debug.Log("Cube found in unaccounted position (ReadTopLayerPanelStates)!!!");                        
+                        //Debug.Log("Cube not in top layer!!! " + stateIndex.ToString());                        
                         break;
                 }                
             }
@@ -1865,62 +1877,66 @@ public class VRubiksCubeMonitor : MonoBehaviour
         for (int i = 0; i < cube.transform.childCount; i++)
         {
             Transform panel = cube.transform.GetChild(i);
-                        
+            
             Vector3 panelUpV = unRot * panel.transform.up;
             if (Vector3.Dot(panelUpV, Vector3.up) < dotThresh)
             {
                 // Panel not facing up
-                break;
+                //Debug.Log(System.Environment.NewLine + "panel.gameObject.tag == " + panel.gameObject.tag + System.Environment.NewLine + "panel not facing up!");                
             }
-
-            // Check panel color match
-            switch (panel.gameObject.tag)
+            else
             {
-                case "white":
-                    if (white)
-                    {
-                        return true;
-                    }
-                    break;
+                //Debug.Log(System.Environment.NewLine + "panel.gameObject.tag == " + panel.gameObject.tag + System.Environment.NewLine + "panel facing up!");
 
-                case "blue":
-                    if (blue)
-                    {
-                        return true;
-                    }
-                    break;
+                // Check panel color match
+                switch (panel.gameObject.tag)
+                {
+                    case "white":
+                        if (white)
+                        {                            
+                            return true;
+                        }
+                        break;
 
-                case "red":
-                    if (red)
-                    {
-                        return true;
-                    }
-                    break;
+                    case "blue":
+                        if (blue)
+                        {
+                            return true;
+                        }
+                        break;
 
-                case "orange":
-                    if (orange)
-                    {
-                        return true;
-                    }
-                    break;
+                    case "red":
+                        if (red)
+                        {
+                            return true;
+                        }
+                        break;
 
-                case "green":
-                    if (green)
-                    {
-                        return true;
-                    }
-                    break;
+                    case "orange":
+                        if (orange)
+                        {
+                            return true;
+                        }
+                        break;
 
-                case "yellow":
-                    if (yellow)
-                    {
-                        return true;
-                    }
-                    break;
+                    case "green":
+                        if (green)
+                        {
+                            return true;
+                        }
+                        break;
 
-                default:
-                    Debug.Log("error identifying panel in CheckTopPanels()!!!");
-                    break;
+                    case "yellow":
+                        if (yellow)
+                        {
+                            return true;
+                        }
+                        break;
+
+                    default:
+                        Debug.Log("error identifying panel color in CheckTopPanels()!!!");
+                        break;
+                }
             }
         }
 
@@ -1933,8 +1949,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
         float dotThresh = 0.95f;
         for (int i = 0; i < cube.transform.childCount; i++)
         {
-            Transform panel = cube.transform.GetChild(i);
-            Vector3 panelUp = unRot * panel.transform.up;
+            Transform panel = cube.transform.GetChild(i);            
 
             bool colorMatch = false;
 
@@ -1990,99 +2005,134 @@ public class VRubiksCubeMonitor : MonoBehaviour
             {
                 Vector3 panelUpV = unRot * panel.transform.up;
 
-                switch (mapLoc)
+                if (Vector3.Dot(panelUpV, Vector3.up) < dotThresh)
                 {
-                    case 12: // top front left
+                    switch (mapLoc)
+                    {
+                        case 12: // top front left
 
-                        if (Vector3.Dot(panelUpV, -Vector3.forward) >= dotThresh)
-                        {
-                            m_sidePanelStates[0] = true;
-                        }
-                        else if (Vector3.Dot(panelUpV, -Vector3.right) >= dotThresh)
-                        {
-                            m_sidePanelStates[11] = true;
-                        }
-                        
-                        break;
+                            if (Vector3.Dot(panelUpV, -Vector3.forward) >= dotThresh)
+                            {
+                                m_sidePanelStates[0] = true;
+                            }
+                            else if (Vector3.Dot(panelUpV, -Vector3.right) >= dotThresh)
+                            {
+                                m_sidePanelStates[11] = true;
+                            }
+                            else
+                            {
+                                Debug.Log("error identifying panel direction!!! 12");
+                            }
 
-                    case 13: // top front middle
+                            break;
 
-                        if (Vector3.Dot(panelUpV, -Vector3.forward) >= dotThresh)
-                        {
-                            m_sidePanelStates[1] = true;
-                        }
+                        case 13: // top front middle
 
-                        break;
+                            if (Vector3.Dot(panelUpV, -Vector3.forward) >= dotThresh)
+                            {
+                                m_sidePanelStates[1] = true;
+                            }
+                            else
+                            {
+                                Debug.Log("error identifying panel direction!!! 13");
+                            }
 
-                    case 14: // top front right
+                            break;
 
-                        if (Vector3.Dot(panelUpV, -Vector3.forward) >= dotThresh)
-                        {
-                            m_sidePanelStates[2] = true;
-                        }
-                        else if (Vector3.Dot(panelUpV, Vector3.right) >= dotThresh)
-                        {
-                            m_sidePanelStates[3] = true;
-                        }
+                        case 14: // top front right
 
-                        break;
+                            if (Vector3.Dot(panelUpV, -Vector3.forward) >= dotThresh)
+                            {
+                                m_sidePanelStates[2] = true;
+                            }
+                            else if (Vector3.Dot(panelUpV, Vector3.right) >= dotThresh)
+                            {
+                                m_sidePanelStates[3] = true;
+                            }
+                            else
+                            {
+                                Debug.Log("error identifying panel direction!!! 14");
+                            }
 
-                    case 15: // top middle left
+                            break;
 
-                        if (Vector3.Dot(panelUpV, -Vector3.right) >= dotThresh)
-                        {
-                            m_sidePanelStates[10] = true;
-                        }
+                        case 15: // top middle left
 
-                        break;
+                            if (Vector3.Dot(panelUpV, -Vector3.right) >= dotThresh)
+                            {
+                                m_sidePanelStates[10] = true;
+                            }
+                            else
+                            {
+                                Debug.Log("error identifying panel direction!!! 15");
+                            }
 
-                    case 16: // top middle right
+                            break;
 
-                        if (Vector3.Dot(panelUpV, Vector3.right) >= dotThresh)
-                        {
-                            m_sidePanelStates[4] = true;
-                        }
-                                                
-                        break;
+                        case 16: // top middle right
 
-                    case 17: // top back left
+                            if (Vector3.Dot(panelUpV, Vector3.right) >= dotThresh)
+                            {
+                                m_sidePanelStates[4] = true;
+                            }
+                            else
+                            {
+                                Debug.Log("error identifying panel direction!!! 16");
+                            }
 
-                        if (Vector3.Dot(panelUpV, -Vector3.right) >= dotThresh)
-                        {
-                            m_sidePanelStates[9] = true;
-                        }
-                        else if (Vector3.Dot(panelUpV, Vector3.forward) >= dotThresh)
-                        {
-                            m_sidePanelStates[8] = true;
-                        }
+                            break;
 
-                        break;
+                        case 17: // top back left
 
-                    case 18: // top back middle
+                            if (Vector3.Dot(panelUpV, -Vector3.right) >= dotThresh)
+                            {
+                                m_sidePanelStates[9] = true;
+                            }
+                            else if (Vector3.Dot(panelUpV, Vector3.forward) >= dotThresh)
+                            {
+                                m_sidePanelStates[8] = true;
+                            }
+                            else
+                            {
+                                Debug.Log("error identifying panel direction!!! 17");
+                            }
 
-                        if (Vector3.Dot(panelUpV, Vector3.forward) >= dotThresh)
-                        {
-                            m_sidePanelStates[7] = true;
-                        }
+                            break;
 
-                        break;
+                        case 18: // top back middle
 
-                    case 19: // top back right
+                            if (Vector3.Dot(panelUpV, Vector3.forward) >= dotThresh)
+                            {
+                                m_sidePanelStates[7] = true;
+                            }
+                            else
+                            {
+                                Debug.Log("error identifying panel direction!!! 18");
+                            }
 
-                        if (Vector3.Dot(panelUpV, Vector3.forward) >= dotThresh)
-                        {
-                            m_sidePanelStates[6] = true;
-                        }
-                        else if (Vector3.Dot(panelUpV, Vector3.right) >= dotThresh)
-                        {
-                            m_sidePanelStates[5] = true;
-                        }
+                            break;
 
-                        break;
+                        case 19: // top back right
 
-                    default:
-                        Debug.Log("panel found in unaccounted position (CheckSidePanels)!!!");
-                        break;
+                            if (Vector3.Dot(panelUpV, Vector3.forward) >= dotThresh)
+                            {
+                                m_sidePanelStates[6] = true;
+                            }
+                            else if (Vector3.Dot(panelUpV, Vector3.right) >= dotThresh)
+                            {
+                                m_sidePanelStates[5] = true;
+                            }
+                            else
+                            {
+                                Debug.Log("error identifying panel direction!!! 19");
+                            }
+
+                            break;
+
+                        default:
+                            Debug.Log("cube/panel found in unaccounted position (CheckSidePanels)!!!");
+                            break;
+                    }
                 }
             }
         }
@@ -2090,34 +2140,200 @@ public class VRubiksCubeMonitor : MonoBehaviour
 
     private bool SolveCubeStage4Moves ()
     {
-        //If no top panels
-
-        //If backwards L
-
-        //If three in arow
-
-        //If cross only (ensure correct orientation)
-
-        //If cross plus two (ensure correct orientation)
-
+        /*
         Debug.Log("TOP PANEL STATES!!!");
         int i = 0;
         foreach(bool state in m_topPanelStates)
         {
-            Debug.Log("m_topPanelState[" + i.ToString() + "] == " + state.ToString());
+            Debug.Log("m_topPanelStates[" + i.ToString() + "] == " + state.ToString());
             i++;
         }
 
         Debug.Log(System.Environment.NewLine + "Side PANEL STATES!!!");
         i = 0;
-        foreach (bool state in m_topPanelStates)
+        foreach (bool state in m_sidePanelStates)
         {
-            Debug.Log("m_topPanelState[" + i.ToString() + "] == " + state.ToString());
+            Debug.Log("m_sidePanelStates[" + i.ToString() + "] == " + state.ToString());
             i++;
         }
+        */
 
-        return true;
+        bool topFaceComplete = true;
+        foreach (bool state in m_topPanelStates)
+        {
+            if (!state)
+            {
+                topFaceComplete = false;
+            }
+        }
+
+        if (topFaceComplete)
+        {
+            return true;
+        }
+
+        if (!m_topPanelStates[1] || !m_topPanelStates[3] || !m_topPanelStates[4] || !m_topPanelStates[6]) // Need to complete cross
+        {
+            if (m_topPanelStates[3] && m_topPanelStates[6]) // Backwards L shape
+            {
+                // F -> U -> R -> Ui -> Ri -> Fi                                
+                UserInput[] movesA = new UserInput[6];
+                movesA[0] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
+                movesA[1] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                movesA[2] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                movesA[3] = new UserInput(13, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                movesA[4] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
+                movesA[5] = new UserInput(13, transform.parent.up, new Vector2(-300.0f, 0.0f));
+                
+                StartCoroutine(ExecuteMoves(movesA));
+            }
+            else if (m_topPanelStates[3] && m_topPanelStates[4]) // 3 in a row
+            {
+                // F -> R -> U -> Ri -> Ui -> Fi
+                UserInput[] movesB = new UserInput[6];
+                movesB[0] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
+                movesB[1] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f)); 
+                movesB[2] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                movesB[3] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
+                movesB[4] = new UserInput(13, -transform.parent.forward, new Vector2(300.0f, 0.0f)); 
+                movesB[5] = new UserInput(13, transform.parent.up, new Vector2(-300.0f, 0.0f));
+
+                StartCoroutine(ExecuteMoves(movesB));
+            }
+            else if (!m_topPanelStates[1] && !m_topPanelStates[3] && !m_topPanelStates[4] && !m_topPanelStates[6]) // Center only
+            {
+                // F -> U -> R -> Ui -> Ri -> Fi                                                
+                UserInput[] movesA = new UserInput[6];
+                movesA[0] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
+                movesA[1] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                movesA[2] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                movesA[3] = new UserInput(13, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                movesA[4] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
+                movesA[5] = new UserInput(13, transform.parent.up, new Vector2(-300.0f, 0.0f));
+
+                StartCoroutine(ExecuteMoves(movesA));
+            }
+            else if (m_topPanelStates[1] && (m_topPanelStates[3] || m_topPanelStates[4] || m_topPanelStates[6])) // Reorient cube CW around Y 
+            {
+                ReOrientCube(-transform.parent.forward, new Vector2(-300.0f, 0.0f));
+            }
+            else if (m_topPanelStates[6] && (m_topPanelStates[3] || m_topPanelStates[4] || m_topPanelStates[1])) // Reorient cube CCW around Y
+            {
+                ReOrientCube(-transform.parent.forward, new Vector2(300.0f, 0.0f));
+            }
+            else if (m_topPanelStates[1] || m_topPanelStates[3] || m_topPanelStates[4] || m_topPanelStates[6]) // Only 2 panels up (counting center)
+            {
+                // F -> U -> R -> Ui -> Ri -> Fi                                
+                UserInput[] movesA = new UserInput[6];
+                movesA[0] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
+                movesA[1] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                movesA[2] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                movesA[3] = new UserInput(13, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+                movesA[4] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
+                movesA[5] = new UserInput(13, transform.parent.up, new Vector2(-300.0f, 0.0f));
+
+                StartCoroutine(ExecuteMoves(movesA));
+            }
+            else
+            {
+                Debug.Log("error completing cross!");
+                return true;
+            }
+
+            return false;
+        }
+        else
+        {
+            bool prefAlg = false;
+
+            // Need to complete top face
+            if (!m_topPanelStates[0] && !m_topPanelStates[2] && !m_topPanelStates[5] && !m_topPanelStates[7]) // No corners
+            {
+                if (m_sidePanelStates[11])
+                {
+                    prefAlg = true;
+                }
+                else if (m_sidePanelStates[2])
+                {
+                    // Reorient cube CW around Y
+                    ReOrientCube(-transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                }
+                else if (m_sidePanelStates[8])
+                {
+                    // Reorient cube CCW around Y
+                    ReOrientCube(-transform.parent.forward, new Vector2(300.0f, 0.0f));
+                }
+                else
+                {
+                    // Reorient cube CCW around Y
+                    ReOrientCube(-transform.parent.forward, new Vector2(300.0f, 0.0f));
+                }
+            }
+            else if (m_topPanelStates[0] && !m_topPanelStates[2] && !m_topPanelStates[5] && !m_topPanelStates[7]) // Good Fish
+            {
+                Debug.Log("goodFish!!!");
+
+                prefAlg = true;
+            }
+            else if (!m_topPanelStates[0] && m_topPanelStates[2] && !m_topPanelStates[5] && !m_topPanelStates[7]) // Bad Fish
+            {
+                // Reorient cube CW around Y
+                ReOrientCube(-transform.parent.forward, new Vector2(-300.0f, 0.0f));
+            }
+            else if (!m_topPanelStates[0] && !m_topPanelStates[2] && m_topPanelStates[5] && !m_topPanelStates[7]) // Bad Fish
+            {
+                // Reorient cube CCW around Y
+                ReOrientCube(-transform.parent.forward, new Vector2(300.0f, 0.0f));
+            }
+            else if (!m_topPanelStates[0] && !m_topPanelStates[2] && !m_topPanelStates[5] && m_topPanelStates[7]) // Bad Fish
+            {
+                // Reorient cube CCW around Y
+                ReOrientCube(-transform.parent.forward, new Vector2(300.0f, 0.0f));
+            }
+            else // Two corners
+            {
+                if (m_sidePanelStates[0])
+                {
+                    prefAlg = true;
+                }
+                else if (m_sidePanelStates[3]) 
+                {
+                    // Reorient cube CW around Y
+                    ReOrientCube(-transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                }
+                else if (m_sidePanelStates[9])
+                {
+                    // Reorient cube CCW around Y
+                    ReOrientCube(-transform.parent.forward, new Vector2(300.0f, 0.0f));
+                }
+                else
+                {
+                    // Reorient cube CCW around Y
+                    ReOrientCube(-transform.parent.forward, new Vector2(300.0f, 0.0f));
+                }
+            }
+
+            if (prefAlg)
+            {
+                Debug.Log("PREFALG!!!");
+
+                // R -> U -> Ri -> U -> R -> U -> U -> Ri
+                UserInput[] movesC = new UserInput[8];
+                movesC[0] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                movesC[1] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                movesC[2] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
+                movesC[3] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                movesC[4] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+                movesC[5] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                movesC[6] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                movesC[7] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
+
+                StartCoroutine(ExecuteMoves(movesC));
+
+                //return true;
+            }
+
+            return false;
+        }
     }
 }
-
-    
