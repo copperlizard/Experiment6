@@ -684,13 +684,6 @@ public class VRubiksCubeMonitor : MonoBehaviour
         }
     }
 
-    public void SolveCube ()
-    {
-        Debug.Log("Solving Cube!");
-
-        StartCoroutine(SolveCubeCoRoutine());        
-    }
-
     Quaternion m_isoRot = Quaternion.Euler(-45.0f, 45.0f, 0.0f);
     private bool ToIso ()
     {        
@@ -703,7 +696,560 @@ public class VRubiksCubeMonitor : MonoBehaviour
 
         return false;
     }
-    
+
+    private GameObject FindEdgeCube(Vector3 dir1, Vector3 dir2)
+    {
+        // Determine Target panels colors
+        bool white = false, blue = false, red = false, orange = false, green = false, yellow = false;
+
+        Quaternion unRot = Quaternion.Inverse(transform.parent.rotation);
+
+        float dotThresh = 0.95f;
+
+        Vector3 whiteUp = unRot * m_whiteCenter.transform.up;
+        if (Vector3.Dot(whiteUp, dir1) >= dotThresh || Vector3.Dot(whiteUp, dir2) >= dotThresh)
+        {
+            white = true;
+        }
+
+        Vector3 blueUp = unRot * m_blueCenter.transform.up;
+        if (Vector3.Dot(blueUp, dir1) >= dotThresh || Vector3.Dot(blueUp, dir2) >= dotThresh)
+        {
+            blue = true;
+        }
+
+        Vector3 redUp = unRot * m_redCenter.transform.up;
+        if (Vector3.Dot(redUp, dir1) >= dotThresh || Vector3.Dot(redUp, dir2) >= dotThresh)
+        {
+            red = true;
+        }
+
+        Vector3 orangeUp = unRot * m_orangeCenter.transform.up;
+        if (Vector3.Dot(orangeUp, dir1) >= dotThresh || Vector3.Dot(orangeUp, dir2) >= dotThresh)
+        {
+            orange = true;
+        }
+
+        Vector3 greenUp = unRot * m_greenCenter.transform.up;
+        if (Vector3.Dot(greenUp, dir1) >= dotThresh || Vector3.Dot(greenUp, dir2) >= dotThresh)
+        {
+            green = true;
+        }
+
+        Vector3 yellowUp = unRot * m_yellowCenter.transform.up;
+        if (Vector3.Dot(yellowUp, dir1) >= dotThresh || Vector3.Dot(yellowUp, dir2) >= dotThresh)
+        {
+            yellow = true;
+        }
+
+        Debug.Log("white == " + white.ToString() +  " ; blue == " + blue.ToString() + " ; red == " + red.ToString() + " ; orange == " + orange.ToString() + " ; green == " + green.ToString() + " ; yellow == " + yellow.ToString());
+
+        string tarCubeName = "";
+        if (white && blue)
+        {
+            tarCubeName = "WB-Edge_Cube";
+        }
+        else if (white && red)
+        {
+            tarCubeName = "WR-Edge_Cube";
+        }
+        else if (white && orange)
+        {
+            tarCubeName = "WO-Edge_Cube";
+        }
+        else if (white && green)
+        {
+            tarCubeName = "WG-Edge_Cube";
+        }
+        else if (yellow && blue)
+        {
+            tarCubeName = "YB-Edge_Cube";
+        }
+        else if (yellow && red)
+        {
+            tarCubeName = "YR-Edge_Cube";
+        }
+        else if (yellow && orange)
+        {
+            tarCubeName = "YO-Edge_Cube";
+        }
+        else if (yellow && green)
+        {
+            tarCubeName = "YG-Edge_Cube";
+        }
+        else if (orange && blue)
+        {
+            tarCubeName = "BO-Edge_Cube";
+        }
+        else if (blue && red)
+        {
+            tarCubeName = "RB-Edge_Cube";
+        }
+        else if (red && green)
+        {
+            tarCubeName = "GR-Edge_Cube";
+        }
+        else if (green && orange)
+        {
+            tarCubeName = "OG-Edge_Cube";
+        }
+        else
+        {
+            Debug.Log("Error Identifying target edge cube!!!");
+        }
+
+        GameObject tarEdgeCube = null;
+        foreach (GameObject cube in m_cubes)
+        {
+            if (cube.name == tarCubeName)
+            {
+                //Debug.Log("tarEdgeCube found! name == " + cube.name);
+                tarEdgeCube = cube;
+            }
+        }
+
+        return tarEdgeCube;
+    }
+
+    private GameObject FindCornerCube(Vector3 dir1, Vector3 dir2, Vector3 dir3)
+    {
+        // Determine Target panels colors
+        bool white = false, blue = false, red = false, orange = false, green = false, yellow = false;
+
+        Quaternion unRot = Quaternion.Inverse(transform.parent.rotation);
+
+        float dotThresh = 0.95f;
+
+        Vector3 whiteUp = unRot * m_whiteCenter.transform.up;
+        if (Vector3.Dot(whiteUp, dir1) >= dotThresh || Vector3.Dot(whiteUp, dir2) >= dotThresh || Vector3.Dot(whiteUp, dir3) >= dotThresh)
+        {
+            white = true;
+        }
+
+        Vector3 blueUp = unRot * m_blueCenter.transform.up;
+        if (Vector3.Dot(blueUp, dir1) >= dotThresh || Vector3.Dot(blueUp, dir2) >= dotThresh || Vector3.Dot(blueUp, dir3) >= dotThresh)
+        {
+            blue = true;
+        }
+
+        Vector3 redUp = unRot * m_redCenter.transform.up;
+        if (Vector3.Dot(redUp, dir1) >= dotThresh || Vector3.Dot(redUp, dir2) >= dotThresh || Vector3.Dot(redUp, dir3) >= dotThresh)
+        {
+            red = true;
+        }
+
+        Vector3 orangeUp = unRot * m_orangeCenter.transform.up;
+        if (Vector3.Dot(orangeUp, dir1) >= dotThresh || Vector3.Dot(orangeUp, dir2) >= dotThresh || Vector3.Dot(orangeUp, dir3) >= dotThresh)
+        {
+            orange = true;
+        }
+
+        Vector3 greenUp = unRot * m_greenCenter.transform.up;
+        if (Vector3.Dot(greenUp, dir1) >= dotThresh || Vector3.Dot(greenUp, dir2) >= dotThresh || Vector3.Dot(greenUp, dir3) >= dotThresh)
+        {
+            green = true;
+        }
+
+        Vector3 yellowUp = unRot * m_yellowCenter.transform.up;
+        if (Vector3.Dot(yellowUp, dir1) >= dotThresh || Vector3.Dot(yellowUp, dir2) >= dotThresh || Vector3.Dot(yellowUp, dir3) >= dotThresh)
+        {
+            yellow = true;
+        }
+
+        string tarCubeName = "";
+        if (white && blue && orange)
+        {
+            tarCubeName = "WBO-Corner_Cube";
+        }
+        else if (white && orange && green)
+        {
+            tarCubeName = "WOG-Corner_Cube";
+        }
+        else if (white && green && red)
+        {
+            tarCubeName = "WGR-Corner_Cube";
+        }
+        else if (white && red && blue)
+        {
+            tarCubeName = "WBR-Corner_Cube";
+        }
+        else if (yellow && blue && orange)
+        {
+            tarCubeName = "YBO-Corner_Cube";
+        }
+        else if (yellow && orange && green)
+        {
+            tarCubeName = "YGO-Corner_Cube";
+        }
+        else if (yellow && green && red)
+        {
+            tarCubeName = "YRG-Corner_Cube";
+        }
+        else if (yellow && red && blue)
+        {
+            tarCubeName = "YBR-Corner_Cube";
+        }
+        else
+        {
+            Debug.Log("Error Identifying target edge cube for solving stage2!");
+        }
+
+        GameObject tarCornerCube = null;
+        foreach (GameObject cube in m_cubes)
+        {
+            if (cube.name == tarCubeName)
+            {
+                //Debug.Log("tarEdgeCube found! name == " + cube.name);
+                tarCornerCube = cube;
+            }
+        }
+
+        return tarCornerCube;
+    }
+
+    private void ReadTopLayerPanelStates(bool white, bool blue, bool red, bool orange, bool green, bool yellow)
+    {
+        foreach (GameObject cube in m_cubes)
+        {
+            Vector3 mapInput = PrepareMapInput(cube);
+
+            int stateIndex = -1;
+            bool stateIndexFound = m_cubeMap.TryGetValue(mapInput, out stateIndex);
+            if (stateIndexFound)
+            {
+                switch (stateIndex)
+                {
+                    case 12: // top front left
+                        m_topPanelStates[0] = CheckTopPanel(cube, white, blue, red, orange, green, yellow);
+
+                        CheckSidePanels(cube, 12, white, blue, red, orange, green, yellow);
+                        break;
+
+                    case 13: // top front middle
+                        m_topPanelStates[1] = CheckTopPanel(cube, white, blue, red, orange, green, yellow);
+
+                        CheckSidePanels(cube, 13, white, blue, red, orange, green, yellow);
+                        break;
+
+                    case 14: // top front right
+                        m_topPanelStates[2] = CheckTopPanel(cube, white, blue, red, orange, green, yellow);
+
+                        CheckSidePanels(cube, 14, white, blue, red, orange, green, yellow);
+                        break;
+
+                    case 15: // top middle left
+                        m_topPanelStates[3] = CheckTopPanel(cube, white, blue, red, orange, green, yellow);
+
+                        CheckSidePanels(cube, 15, white, blue, red, orange, green, yellow);
+                        break;
+
+                    case 16: // top middle right
+                        m_topPanelStates[4] = CheckTopPanel(cube, white, blue, red, orange, green, yellow);
+
+                        CheckSidePanels(cube, 16, white, blue, red, orange, green, yellow);
+                        break;
+
+                    case 17: // top back left
+                        m_topPanelStates[5] = CheckTopPanel(cube, white, blue, red, orange, green, yellow);
+
+                        CheckSidePanels(cube, 17, white, blue, red, orange, green, yellow);
+                        break;
+
+                    case 18: // top back middle
+                        m_topPanelStates[6] = CheckTopPanel(cube, white, blue, red, orange, green, yellow);
+
+                        CheckSidePanels(cube, 18, white, blue, red, orange, green, yellow);
+                        break;
+
+                    case 19: // top back right
+                        m_topPanelStates[7] = CheckTopPanel(cube, white, blue, red, orange, green, yellow);
+
+                        CheckSidePanels(cube, 19, white, blue, red, orange, green, yellow);
+                        break;
+
+                    default:
+                        //Debug.Log("Cube not in top layer!!! " + stateIndex.ToString());                        
+                        break;
+                }
+            }
+        }
+    }
+
+    private bool CheckTopPanel(GameObject cube, bool white, bool blue, bool red, bool orange, bool green, bool yellow)
+    {
+        Quaternion unRot = Quaternion.Inverse(transform.parent.rotation);
+        float dotThresh = 0.95f;
+        for (int i = 0; i < cube.transform.childCount; i++)
+        {
+            Transform panel = cube.transform.GetChild(i);
+
+            Vector3 panelUpV = unRot * panel.transform.up;
+            if (Vector3.Dot(panelUpV, Vector3.up) < dotThresh)
+            {
+                // Panel not facing up
+                //Debug.Log(System.Environment.NewLine + "panel.gameObject.tag == " + panel.gameObject.tag + System.Environment.NewLine + "panel not facing up!");                
+            }
+            else
+            {
+                //Debug.Log(System.Environment.NewLine + "panel.gameObject.tag == " + panel.gameObject.tag + System.Environment.NewLine + "panel facing up!");
+
+                // Check panel color match
+                switch (panel.gameObject.tag)
+                {
+                    case "white":
+                        if (white)
+                        {
+                            return true;
+                        }
+                        break;
+
+                    case "blue":
+                        if (blue)
+                        {
+                            return true;
+                        }
+                        break;
+
+                    case "red":
+                        if (red)
+                        {
+                            return true;
+                        }
+                        break;
+
+                    case "orange":
+                        if (orange)
+                        {
+                            return true;
+                        }
+                        break;
+
+                    case "green":
+                        if (green)
+                        {
+                            return true;
+                        }
+                        break;
+
+                    case "yellow":
+                        if (yellow)
+                        {
+                            return true;
+                        }
+                        break;
+
+                    default:
+                        Debug.Log("error identifying panel color in CheckTopPanels()!!!");
+                        break;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private void CheckSidePanels(GameObject cube, int mapLoc, bool white, bool blue, bool red, bool orange, bool green, bool yellow)
+    {
+        Quaternion unRot = Quaternion.Inverse(transform.parent.rotation);
+        float dotThresh = 0.95f;
+        for (int i = 0; i < cube.transform.childCount; i++)
+        {
+            Transform panel = cube.transform.GetChild(i);
+
+            bool colorMatch = false;
+
+            switch (panel.gameObject.tag)
+            {
+                case "white":
+                    if (white)
+                    {
+                        colorMatch = true;
+                    }
+                    break;
+
+                case "blue":
+                    if (blue)
+                    {
+                        colorMatch = true;
+                    }
+                    break;
+
+                case "red":
+                    if (red)
+                    {
+                        colorMatch = true;
+                    }
+                    break;
+
+                case "orange":
+                    if (orange)
+                    {
+                        colorMatch = true;
+                    }
+                    break;
+
+                case "green":
+                    if (green)
+                    {
+                        colorMatch = true;
+                    }
+                    break;
+
+                case "yellow":
+                    if (yellow)
+                    {
+                        colorMatch = true;
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+
+            if (colorMatch)
+            {
+                Vector3 panelUpV = unRot * panel.transform.up;
+
+                if (Vector3.Dot(panelUpV, Vector3.up) < dotThresh)
+                {
+                    switch (mapLoc)
+                    {
+                        case 12: // top front left
+
+                            if (Vector3.Dot(panelUpV, -Vector3.forward) >= dotThresh)
+                            {
+                                m_sidePanelStates[0] = true;
+                            }
+                            else if (Vector3.Dot(panelUpV, -Vector3.right) >= dotThresh)
+                            {
+                                m_sidePanelStates[11] = true;
+                            }
+                            else
+                            {
+                                Debug.Log("error identifying panel direction!!! 12");
+                            }
+
+                            break;
+
+                        case 13: // top front middle
+
+                            if (Vector3.Dot(panelUpV, -Vector3.forward) >= dotThresh)
+                            {
+                                m_sidePanelStates[1] = true;
+                            }
+                            else
+                            {
+                                Debug.Log("error identifying panel direction!!! 13");
+                            }
+
+                            break;
+
+                        case 14: // top front right
+
+                            if (Vector3.Dot(panelUpV, -Vector3.forward) >= dotThresh)
+                            {
+                                m_sidePanelStates[2] = true;
+                            }
+                            else if (Vector3.Dot(panelUpV, Vector3.right) >= dotThresh)
+                            {
+                                m_sidePanelStates[3] = true;
+                            }
+                            else
+                            {
+                                Debug.Log("error identifying panel direction!!! 14");
+                            }
+
+                            break;
+
+                        case 15: // top middle left
+
+                            if (Vector3.Dot(panelUpV, -Vector3.right) >= dotThresh)
+                            {
+                                m_sidePanelStates[10] = true;
+                            }
+                            else
+                            {
+                                Debug.Log("error identifying panel direction!!! 15");
+                            }
+
+                            break;
+
+                        case 16: // top middle right
+
+                            if (Vector3.Dot(panelUpV, Vector3.right) >= dotThresh)
+                            {
+                                m_sidePanelStates[4] = true;
+                            }
+                            else
+                            {
+                                Debug.Log("error identifying panel direction!!! 16");
+                            }
+
+                            break;
+
+                        case 17: // top back left
+
+                            if (Vector3.Dot(panelUpV, -Vector3.right) >= dotThresh)
+                            {
+                                m_sidePanelStates[9] = true;
+                            }
+                            else if (Vector3.Dot(panelUpV, Vector3.forward) >= dotThresh)
+                            {
+                                m_sidePanelStates[8] = true;
+                            }
+                            else
+                            {
+                                Debug.Log("error identifying panel direction!!! 17");
+                            }
+
+                            break;
+
+                        case 18: // top back middle
+
+                            if (Vector3.Dot(panelUpV, Vector3.forward) >= dotThresh)
+                            {
+                                m_sidePanelStates[7] = true;
+                            }
+                            else
+                            {
+                                Debug.Log("error identifying panel direction!!! 18");
+                            }
+
+                            break;
+
+                        case 19: // top back right
+
+                            if (Vector3.Dot(panelUpV, Vector3.forward) >= dotThresh)
+                            {
+                                m_sidePanelStates[6] = true;
+                            }
+                            else if (Vector3.Dot(panelUpV, Vector3.right) >= dotThresh)
+                            {
+                                m_sidePanelStates[5] = true;
+                            }
+                            else
+                            {
+                                Debug.Log("error identifying panel direction!!! 19");
+                            }
+
+                            break;
+
+                        default:
+                            Debug.Log("cube/panel found in unaccounted position (CheckSidePanels)!!!");
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
+    public void SolveCube()
+    {
+        Debug.Log("Solving Cube!");
+
+        StartCoroutine(SolveCubeCoRoutine());
+    }
+
     IEnumerator SolveCubeCoRoutine()
     {
         CheckSolved();
@@ -755,7 +1301,21 @@ public class VRubiksCubeMonitor : MonoBehaviour
         {
             yield return null;
         }
+        Debug.Log("done solving stage4!");
 
+        Debug.Log("solving stage5!");
+        while (!SolveCubeStage5())
+        {
+            yield return null;
+        }
+        Debug.Log("done solving stage5!");
+
+        Debug.Log("solving stage6!");
+        while (!SolveCubeStage6())
+        {
+            yield return null;
+        }
+        Debug.Log("done solving stage6!");
 
         Screen.sleepTimeout = SleepTimeout.SystemSetting;
 
@@ -944,218 +1504,10 @@ public class VRubiksCubeMonitor : MonoBehaviour
         }        
 
         // Complete cross 
-        return SolveStage1Cross();
-    }
-
-    private GameObject FindEdgeCube (Vector3 dir1, Vector3 dir2)
-    {
-        // Determine Target panels colors
-        bool white = false, blue = false, red = false, orange = false, green = false, yellow = false;
-
-        Quaternion unRot = Quaternion.Inverse(transform.parent.rotation);
-
-        float dotThresh = 0.95f;
-
-        Vector3 whiteUp = unRot * m_whiteCenter.transform.up;
-        if (Vector3.Dot(whiteUp, dir1) >= dotThresh || Vector3.Dot(whiteUp, dir2) >= dotThresh)
-        {
-            white = true;
-        }
-
-        Vector3 blueUp = unRot * m_blueCenter.transform.up;
-        if (Vector3.Dot(blueUp, dir1) >= dotThresh || Vector3.Dot(blueUp, dir2) >= dotThresh)
-        {
-            blue = true;
-        }
-
-        Vector3 redUp = unRot * m_redCenter.transform.up;
-        if (Vector3.Dot(redUp, dir1) >= dotThresh || Vector3.Dot(redUp, dir2) >= dotThresh)
-        {
-            red = true;
-        }
-
-        Vector3 orangeUp = unRot * m_orangeCenter.transform.up;
-        if (Vector3.Dot(orangeUp, dir1) >= dotThresh || Vector3.Dot(orangeUp, dir2) >= dotThresh)
-        {
-            orange = true;
-        }
-
-        Vector3 greenUp = unRot * m_greenCenter.transform.up;
-        if (Vector3.Dot(greenUp, dir1) >= dotThresh || Vector3.Dot(greenUp, dir2) >= dotThresh)
-        {
-            green = true;
-        }
-
-        Vector3 yellowUp = unRot * m_yellowCenter.transform.up;
-        if (Vector3.Dot(yellowUp, dir1) >= dotThresh || Vector3.Dot(yellowUp, dir2) >= dotThresh)
-        {
-            yellow = true;
-        }
-
-        string tarCubeName = "";
-        if (white && blue)
-        {
-            tarCubeName = "WB-Edge_Cube";
-        }
-        else if (white && red)
-        {
-            tarCubeName = "WR-Edge_Cube";
-        }
-        else if (white && orange)
-        {
-            tarCubeName = "WO-Edge_Cube";
-        }
-        else if (white && green)
-        {
-            tarCubeName = "WG-Edge_Cube";
-        }
-        else if (yellow && blue)
-        {
-            tarCubeName = "YB-Edge_Cube";
-        }
-        else if (yellow && red)
-        {
-            tarCubeName = "YR-Edge_Cube";
-        }
-        else if (yellow && orange)
-        {
-            tarCubeName = "YO-Edge_Cube";
-        }
-        else if (yellow && green)
-        {
-            tarCubeName = "YG-Edge_Cube";
-        }
-        else if (orange && blue)
-        {
-            tarCubeName = "BO-Edge_Cube";
-        }
-        else if (blue && red)
-        {
-            tarCubeName = "RB-Edge_Cube";
-        }
-        else if (red && green)
-        {
-            tarCubeName = "GR-Edge_Cube";
-        }
-        else if (green && orange)
-        {
-            tarCubeName = "OG-Edge_Cube";
-        }
-        else
-        {
-            Debug.Log("Error Identifying target edge cube for solving stage1 cross!");
-        }
-
-        GameObject tarEdgeCube = null;
-        foreach (GameObject cube in m_cubes)
-        {
-            if (cube.name == tarCubeName)
-            {
-                //Debug.Log("tarEdgeCube found! name == " + cube.name);
-                tarEdgeCube = cube;
-            }
-        }
-
-        return tarEdgeCube;
-    }
-        
-    private GameObject FindCornerCube(Vector3 dir1, Vector3 dir2, Vector3 dir3)
-    {
-        // Determine Target panels colors
-        bool white = false, blue = false, red = false, orange = false, green = false, yellow = false;
-
-        Quaternion unRot = Quaternion.Inverse(transform.parent.rotation);
-
-        float dotThresh = 0.95f;
-
-        Vector3 whiteUp = unRot * m_whiteCenter.transform.up;
-        if (Vector3.Dot(whiteUp, dir1) >= dotThresh || Vector3.Dot(whiteUp, dir2) >= dotThresh || Vector3.Dot(whiteUp, dir3) >= dotThresh)
-        {
-            white = true;
-        }
-
-        Vector3 blueUp = unRot * m_blueCenter.transform.up;
-        if (Vector3.Dot(blueUp, dir1) >= dotThresh || Vector3.Dot(blueUp, dir2) >= dotThresh || Vector3.Dot(blueUp, dir3) >= dotThresh)
-        {
-            blue = true;
-        }
-
-        Vector3 redUp = unRot * m_redCenter.transform.up;
-        if (Vector3.Dot(redUp, dir1) >= dotThresh || Vector3.Dot(redUp, dir2) >= dotThresh || Vector3.Dot(redUp, dir3) >= dotThresh)
-        {
-            red = true;
-        }
-
-        Vector3 orangeUp = unRot * m_orangeCenter.transform.up;
-        if (Vector3.Dot(orangeUp, dir1) >= dotThresh || Vector3.Dot(orangeUp, dir2) >= dotThresh || Vector3.Dot(orangeUp, dir3) >= dotThresh)
-        {
-            orange = true;
-        }
-
-        Vector3 greenUp = unRot * m_greenCenter.transform.up;
-        if (Vector3.Dot(greenUp, dir1) >= dotThresh || Vector3.Dot(greenUp, dir2) >= dotThresh || Vector3.Dot(greenUp, dir3) >= dotThresh)
-        {
-            green = true;
-        }
-
-        Vector3 yellowUp = unRot * m_yellowCenter.transform.up;
-        if (Vector3.Dot(yellowUp, dir1) >= dotThresh || Vector3.Dot(yellowUp, dir2) >= dotThresh || Vector3.Dot(yellowUp, dir3) >= dotThresh)
-        {
-            yellow = true;
-        }
-
-        string tarCubeName = "";
-        if (white && blue && orange)
-        {
-            tarCubeName = "WBO-Corner_Cube";
-        }
-        else if (white && orange && green)
-        {
-            tarCubeName = "WOG-Corner_Cube";
-        }
-        else if (white && green && red)
-        {
-            tarCubeName = "WGR-Corner_Cube";
-        }
-        else if (white && red && blue)
-        {
-            tarCubeName = "WBR-Corner_Cube";
-        }
-        else if (yellow && blue && orange)
-        {
-            tarCubeName = "YBO-Corner_Cube";
-        }
-        else if (yellow && orange && green)
-        {
-            tarCubeName = "YGO-Corner_Cube";
-        }
-        else if (yellow && green && red)
-        {
-            tarCubeName = "YRG-Corner_Cube";
-        }
-        else if (yellow && red && blue)
-        {
-            tarCubeName = "YBR-Corner_Cube";
-        }
-        else
-        {
-            Debug.Log("Error Identifying target edge cube for solving stage2!");
-        }
-
-        GameObject tarCornerCube = null;
-        foreach (GameObject cube in m_cubes)
-        {
-            if (cube.name == tarCubeName)
-            {
-                //Debug.Log("tarEdgeCube found! name == " + cube.name);
-                tarCornerCube = cube;
-            }
-        }
-
-        return tarCornerCube;
+        return SolveStage1Moves();
     }
     
-    private bool SolveStage1Cross ()
+    private bool SolveStage1Moves ()
     {
         Debug.Log("SolvingStage1Cross()");
 
@@ -1801,363 +2153,9 @@ public class VRubiksCubeMonitor : MonoBehaviour
                         
         return SolveCubeStage4Moves();
     }    
-
-    private void ReadTopLayerPanelStates (bool white, bool blue, bool red, bool orange, bool green, bool yellow)
-    {
-        foreach (GameObject cube in m_cubes)
-        {
-            Vector3 mapInput = PrepareMapInput(cube);
-
-            int stateIndex = -1;
-            bool stateIndexFound = m_cubeMap.TryGetValue(mapInput, out stateIndex);
-            if (stateIndexFound)
-            {               
-                switch (stateIndex)
-                {
-                    case 12: // top front left
-                        m_topPanelStates[0] = CheckTopPanel(cube, white, blue, red, orange, green, yellow);
-
-                        CheckSidePanels(cube, 12, white, blue, red, orange, green, yellow);
-                        break;
-
-                    case 13: // top front middle
-                        m_topPanelStates[1] = CheckTopPanel(cube, white, blue, red, orange, green, yellow);
-
-                        CheckSidePanels(cube, 13, white, blue, red, orange, green, yellow);
-                        break;
-
-                    case 14: // top front right
-                        m_topPanelStates[2] = CheckTopPanel(cube, white, blue, red, orange, green, yellow);
-
-                        CheckSidePanels(cube, 14, white, blue, red, orange, green, yellow);
-                        break;
-
-                    case 15: // top middle left
-                        m_topPanelStates[3] = CheckTopPanel(cube, white, blue, red, orange, green, yellow);
-
-                        CheckSidePanels(cube, 15, white, blue, red, orange, green, yellow);
-                        break;
-
-                    case 16: // top middle right
-                        m_topPanelStates[4] = CheckTopPanel(cube, white, blue, red, orange, green, yellow);
-
-                        CheckSidePanels(cube, 16, white, blue, red, orange, green, yellow);
-                        break;
-
-                    case 17: // top back left
-                        m_topPanelStates[5] = CheckTopPanel(cube, white, blue, red, orange, green, yellow);
-
-                        CheckSidePanels(cube, 17, white, blue, red, orange, green, yellow);
-                        break;
-
-                    case 18: // top back middle
-                        m_topPanelStates[6] = CheckTopPanel(cube, white, blue, red, orange, green, yellow);
-
-                        CheckSidePanels(cube, 18, white, blue, red, orange, green, yellow);
-                        break;
-
-                    case 19: // top back right
-                        m_topPanelStates[7] = CheckTopPanel(cube, white, blue, red, orange, green, yellow);
-
-                        CheckSidePanels(cube, 19, white, blue, red, orange, green, yellow);
-                        break;
-
-                    default:
-                        //Debug.Log("Cube not in top layer!!! " + stateIndex.ToString());                        
-                        break;
-                }                
-            }
-        }
-    }
-
-    private bool CheckTopPanel (GameObject cube, bool white, bool blue, bool red, bool orange, bool green, bool yellow)
-    {
-        Quaternion unRot = Quaternion.Inverse(transform.parent.rotation);
-        float dotThresh = 0.95f;
-        for (int i = 0; i < cube.transform.childCount; i++)
-        {
-            Transform panel = cube.transform.GetChild(i);
-            
-            Vector3 panelUpV = unRot * panel.transform.up;
-            if (Vector3.Dot(panelUpV, Vector3.up) < dotThresh)
-            {
-                // Panel not facing up
-                //Debug.Log(System.Environment.NewLine + "panel.gameObject.tag == " + panel.gameObject.tag + System.Environment.NewLine + "panel not facing up!");                
-            }
-            else
-            {
-                //Debug.Log(System.Environment.NewLine + "panel.gameObject.tag == " + panel.gameObject.tag + System.Environment.NewLine + "panel facing up!");
-
-                // Check panel color match
-                switch (panel.gameObject.tag)
-                {
-                    case "white":
-                        if (white)
-                        {                            
-                            return true;
-                        }
-                        break;
-
-                    case "blue":
-                        if (blue)
-                        {
-                            return true;
-                        }
-                        break;
-
-                    case "red":
-                        if (red)
-                        {
-                            return true;
-                        }
-                        break;
-
-                    case "orange":
-                        if (orange)
-                        {
-                            return true;
-                        }
-                        break;
-
-                    case "green":
-                        if (green)
-                        {
-                            return true;
-                        }
-                        break;
-
-                    case "yellow":
-                        if (yellow)
-                        {
-                            return true;
-                        }
-                        break;
-
-                    default:
-                        Debug.Log("error identifying panel color in CheckTopPanels()!!!");
-                        break;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    private void CheckSidePanels (GameObject cube, int mapLoc , bool white, bool blue, bool red, bool orange, bool green, bool yellow)
-    {
-        Quaternion unRot = Quaternion.Inverse(transform.parent.rotation);
-        float dotThresh = 0.95f;
-        for (int i = 0; i < cube.transform.childCount; i++)
-        {
-            Transform panel = cube.transform.GetChild(i);            
-
-            bool colorMatch = false;
-
-            switch (panel.gameObject.tag)
-            {
-                case "white":
-                    if (white)
-                    {
-                        colorMatch = true;
-                    }
-                    break;
-
-                case "blue":
-                    if (blue)
-                    {
-                        colorMatch = true;
-                    }
-                    break;
-
-                case "red":
-                    if (red)
-                    {
-                        colorMatch = true;
-                    }
-                    break;
-
-                case "orange":
-                    if (orange)
-                    {
-                        colorMatch = true;
-                    }
-                    break;
-
-                case "green":
-                    if (green)
-                    {
-                        colorMatch = true;
-                    }
-                    break;
-
-                case "yellow":
-                    if (yellow)
-                    {
-                        colorMatch = true;
-                    }
-                    break;
-
-                default:
-                    break;
-            }
-
-            if (colorMatch)
-            {
-                Vector3 panelUpV = unRot * panel.transform.up;
-
-                if (Vector3.Dot(panelUpV, Vector3.up) < dotThresh)
-                {
-                    switch (mapLoc)
-                    {
-                        case 12: // top front left
-
-                            if (Vector3.Dot(panelUpV, -Vector3.forward) >= dotThresh)
-                            {
-                                m_sidePanelStates[0] = true;
-                            }
-                            else if (Vector3.Dot(panelUpV, -Vector3.right) >= dotThresh)
-                            {
-                                m_sidePanelStates[11] = true;
-                            }
-                            else
-                            {
-                                Debug.Log("error identifying panel direction!!! 12");
-                            }
-
-                            break;
-
-                        case 13: // top front middle
-
-                            if (Vector3.Dot(panelUpV, -Vector3.forward) >= dotThresh)
-                            {
-                                m_sidePanelStates[1] = true;
-                            }
-                            else
-                            {
-                                Debug.Log("error identifying panel direction!!! 13");
-                            }
-
-                            break;
-
-                        case 14: // top front right
-
-                            if (Vector3.Dot(panelUpV, -Vector3.forward) >= dotThresh)
-                            {
-                                m_sidePanelStates[2] = true;
-                            }
-                            else if (Vector3.Dot(panelUpV, Vector3.right) >= dotThresh)
-                            {
-                                m_sidePanelStates[3] = true;
-                            }
-                            else
-                            {
-                                Debug.Log("error identifying panel direction!!! 14");
-                            }
-
-                            break;
-
-                        case 15: // top middle left
-
-                            if (Vector3.Dot(panelUpV, -Vector3.right) >= dotThresh)
-                            {
-                                m_sidePanelStates[10] = true;
-                            }
-                            else
-                            {
-                                Debug.Log("error identifying panel direction!!! 15");
-                            }
-
-                            break;
-
-                        case 16: // top middle right
-
-                            if (Vector3.Dot(panelUpV, Vector3.right) >= dotThresh)
-                            {
-                                m_sidePanelStates[4] = true;
-                            }
-                            else
-                            {
-                                Debug.Log("error identifying panel direction!!! 16");
-                            }
-
-                            break;
-
-                        case 17: // top back left
-
-                            if (Vector3.Dot(panelUpV, -Vector3.right) >= dotThresh)
-                            {
-                                m_sidePanelStates[9] = true;
-                            }
-                            else if (Vector3.Dot(panelUpV, Vector3.forward) >= dotThresh)
-                            {
-                                m_sidePanelStates[8] = true;
-                            }
-                            else
-                            {
-                                Debug.Log("error identifying panel direction!!! 17");
-                            }
-
-                            break;
-
-                        case 18: // top back middle
-
-                            if (Vector3.Dot(panelUpV, Vector3.forward) >= dotThresh)
-                            {
-                                m_sidePanelStates[7] = true;
-                            }
-                            else
-                            {
-                                Debug.Log("error identifying panel direction!!! 18");
-                            }
-
-                            break;
-
-                        case 19: // top back right
-
-                            if (Vector3.Dot(panelUpV, Vector3.forward) >= dotThresh)
-                            {
-                                m_sidePanelStates[6] = true;
-                            }
-                            else if (Vector3.Dot(panelUpV, Vector3.right) >= dotThresh)
-                            {
-                                m_sidePanelStates[5] = true;
-                            }
-                            else
-                            {
-                                Debug.Log("error identifying panel direction!!! 19");
-                            }
-
-                            break;
-
-                        default:
-                            Debug.Log("cube/panel found in unaccounted position (CheckSidePanels)!!!");
-                            break;
-                    }
-                }
-            }
-        }
-    }
-
+    
     private bool SolveCubeStage4Moves ()
     {
-        /*
-        Debug.Log("TOP PANEL STATES!!!");
-        int i = 0;
-        foreach(bool state in m_topPanelStates)
-        {
-            Debug.Log("m_topPanelStates[" + i.ToString() + "] == " + state.ToString());
-            i++;
-        }
-
-        Debug.Log(System.Environment.NewLine + "Side PANEL STATES!!!");
-        i = 0;
-        foreach (bool state in m_sidePanelStates)
-        {
-            Debug.Log("m_sidePanelStates[" + i.ToString() + "] == " + state.ToString());
-            i++;
-        }
-        */
-
         bool topFaceComplete = true;
         foreach (bool state in m_topPanelStates)
         {
@@ -2253,7 +2251,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
                 {
                     prefAlg = true;
                 }
-                else if (m_sidePanelStates[2])
+                else if (m_sidePanelStates[2] || m_sidePanelStates[5])
                 {
                     // Reorient cube CW around Y
                     ReOrientCube(-transform.parent.forward, new Vector2(-300.0f, 0.0f));
@@ -2265,14 +2263,11 @@ public class VRubiksCubeMonitor : MonoBehaviour
                 }
                 else
                 {
-                    // Reorient cube CCW around Y
-                    ReOrientCube(-transform.parent.forward, new Vector2(300.0f, 0.0f));
+                    Debug.Log("error orienting cube for final step of stage 4!!!");
                 }
             }
             else if (m_topPanelStates[0] && !m_topPanelStates[2] && !m_topPanelStates[5] && !m_topPanelStates[7]) // Good Fish
             {
-                Debug.Log("goodFish!!!");
-
                 prefAlg = true;
             }
             else if (!m_topPanelStates[0] && m_topPanelStates[2] && !m_topPanelStates[5] && !m_topPanelStates[7]) // Bad Fish
@@ -2301,21 +2296,21 @@ public class VRubiksCubeMonitor : MonoBehaviour
                     // Reorient cube CW around Y
                     ReOrientCube(-transform.parent.forward, new Vector2(-300.0f, 0.0f));
                 }
-                else if (m_sidePanelStates[9])
+                else if (m_sidePanelStates[6] || m_sidePanelStates[9])
                 {
                     // Reorient cube CCW around Y
                     ReOrientCube(-transform.parent.forward, new Vector2(300.0f, 0.0f));
                 }
                 else
                 {
-                    // Reorient cube CCW around Y
-                    ReOrientCube(-transform.parent.forward, new Vector2(300.0f, 0.0f));
+                    Debug.Log("error orienting cube for final step of stage 4!!!");
+                    return true;
                 }
             }
 
             if (prefAlg)
             {
-                Debug.Log("PREFALG!!!");
+                //Debug.Log("PREFALG!!!");
 
                 // R -> U -> Ri -> U -> R -> U -> U -> Ri
                 UserInput[] movesC = new UserInput[8];
@@ -2335,5 +2330,307 @@ public class VRubiksCubeMonitor : MonoBehaviour
 
             return false;
         }
+    }
+
+    private bool SolveCubeStage5 ()
+    {
+        // Wait for last controller input to be processed
+        if (m_cubeController.m_rotatingFace || m_cubeController.m_rotatingCube || m_executingMoves)
+        {
+            return false;
+        }
+
+        /*
+        //Find top panel color
+        bool white = false, blue = false, red = false, orange = false, green = false, yellow = false;
+
+        Quaternion unRot = Quaternion.Inverse(transform.parent.rotation);
+        float dotThresh = 0.95f;
+
+        Vector3 whiteUp = unRot * m_whiteCenter.transform.up;
+        if (Vector3.Dot(whiteUp, Vector3.up) >= dotThresh)
+        {
+            white = true;
+        }
+
+        Vector3 blueUp = unRot * m_blueCenter.transform.up;
+        if (Vector3.Dot(blueUp, Vector3.up) >= dotThresh)
+        {
+            blue = true;
+        }
+
+        Vector3 redUp = unRot * m_redCenter.transform.up;
+        if (Vector3.Dot(redUp, Vector3.up) >= dotThresh)
+        {
+            red = true;
+        }
+
+        Vector3 orangeUp = unRot * m_orangeCenter.transform.up;
+        if (Vector3.Dot(orangeUp, Vector3.up) >= dotThresh)
+        {
+            orange = true;
+        }
+
+        Vector3 greenUp = unRot * m_greenCenter.transform.up;
+        if (Vector3.Dot(greenUp, Vector3.up) >= dotThresh)
+        {
+            green = true;
+        }
+
+        Vector3 yellowUp = unRot * m_yellowCenter.transform.up;
+        if (Vector3.Dot(yellowUp, Vector3.up) >= dotThresh)
+        {
+            yellow = true;
+        }
+        */
+
+        //Debug.Log("white == " + white.ToString() + "; blue == " + blue.ToString() + "; red == " + red.ToString() + "; orange == " + orange.ToString() + "; green == " + green.ToString() + "; yellow == " + yellow.ToString());
+
+        //ReadTopLayerPanelStates(white, blue, red, orange, green, yellow);
+
+        return SolveCubeStage5Moves();
+    }
+
+    private bool SolveCubeStage5Moves ()
+    {
+        CheckSolved(); // Maybe redundant here...
+
+        if (m_cubeStates[12] && m_cubeStates[14] && m_cubeStates[17] && m_cubeStates[19])
+        {   
+            return true;
+        }
+        else if ((m_cubeStates[12] && m_cubeStates[14]) || (m_cubeStates[12] && m_cubeStates[17]) || (m_cubeStates[12] && m_cubeStates[19]))
+        {
+            // Reorient cube CW around Y
+            ReOrientCube(-transform.parent.forward, new Vector2(-300.0f, 0.0f));
+        }
+        else if (m_cubeStates[14] && m_cubeStates[19])
+        {
+            // Reorient cube CCW around Y
+            ReOrientCube(-transform.parent.forward, new Vector2(300.0f, 0.0f));
+        }
+        else if ((m_cubeStates[17] && m_cubeStates[19]) || (m_cubeStates[17] && m_cubeStates[14]))
+        {
+            // Ri -> F -> Ri -> B -> B -> R -> Fi -> Ri -> B -> B -> R -> R -> Ui
+            UserInput[] movesA = new UserInput[13];
+
+            movesA[0] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
+            movesA[1] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
+            movesA[2] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f)); 
+            movesA[3] = new UserInput(18, transform.parent.up, new Vector2(-300.0f, 0.0f));
+            movesA[4] = new UserInput(18, transform.parent.up, new Vector2(-300.0f, 0.0f));
+            movesA[5] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+            movesA[6] = new UserInput(13, transform.parent.up, new Vector2(-300.0f, 0.0f));
+            movesA[7] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f)); 
+            movesA[8] = new UserInput(18, transform.parent.up, new Vector2(-300.0f, 0.0f));
+            movesA[9] = new UserInput(18, transform.parent.up, new Vector2(-300.0f, 0.0f));
+            movesA[10] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+            movesA[11] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+            movesA[12] = new UserInput(13, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+
+            StartCoroutine(ExecuteMoves(movesA));
+        }
+        else
+        {
+            UserInput[] movesB = new UserInput[1];
+
+            movesB[0] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+
+            StartCoroutine(ExecuteMoves(movesB));            
+        }
+
+        return false;
+    }
+
+    private bool SolveCubeStage6 ()
+    {
+        // Wait for last controller input to be processed
+        if (m_cubeController.m_rotatingFace || m_cubeController.m_rotatingCube || m_executingMoves)
+        {
+            return false;
+        }
+
+        return SolveCubeStage6Moves();
+    }
+
+    private bool SolveCubeStage6Moves ()
+    {
+        CheckSolved(); // Maybe redundant here...
+
+        bool prefAlgA = false, prefAlgB = false;
+        if (m_cubeStates[13] && m_cubeStates[15] && m_cubeStates[16] && m_cubeStates[18])
+        {
+            return true;
+        }
+        else if (!m_cubeStates[13] && !m_cubeStates[15] && !m_cubeStates[16] && !m_cubeStates[18])
+        {
+            prefAlgA = true;
+        }
+        else if (!m_cubeStates[18] && m_cubeStates[15]) // Reorient cube CW around Y axis
+        {
+            ReOrientCube(-transform.parent.forward, new Vector2(-300.0f, 0.0f));
+        }
+        else if (!m_cubeStates[18] && (m_cubeStates[15] || m_cubeStates[13])) // Reorient cube CCW around Y axis
+        {
+            ReOrientCube(-transform.parent.forward, new Vector2(300.0f, 0.0f));
+        }
+        else  // A or B
+        {
+            GameObject leftFaceCenter = null, rightFaceCenter = null;
+
+            Quaternion unRot = Quaternion.Inverse(transform.parent.rotation);
+            float dotThresh = 0.95f;
+
+            Vector3 whiteUp = unRot * m_whiteCenter.transform.up;
+            if (Vector3.Dot(whiteUp, Vector3.right) >= dotThresh)
+            {
+                rightFaceCenter = m_whiteCenter;
+            }
+            else if (Vector3.Dot(whiteUp, -Vector3.right) >= dotThresh)
+            {
+                leftFaceCenter = m_whiteCenter;
+            }
+
+            Vector3 blueUp = unRot * m_blueCenter.transform.up;
+            if (Vector3.Dot(blueUp, Vector3.right) >= dotThresh)
+            {
+                rightFaceCenter = m_blueCenter;
+            }
+            else if (Vector3.Dot(blueUp, -Vector3.right) >= dotThresh)
+            {
+                leftFaceCenter = m_blueCenter;
+            }
+
+            Vector3 redUp = unRot * m_redCenter.transform.up;
+            if (Vector3.Dot(redUp, Vector3.right) >= dotThresh)
+            {
+                rightFaceCenter = m_redCenter;
+            }
+            else if (Vector3.Dot(redUp, -Vector3.right) >= dotThresh)
+            {
+                leftFaceCenter = m_redCenter;
+            }
+
+            Vector3 orangeUp = unRot * m_orangeCenter.transform.up;
+            if (Vector3.Dot(orangeUp, Vector3.right) >= dotThresh)
+            {
+                rightFaceCenter = m_orangeCenter;
+            }
+            else if (Vector3.Dot(orangeUp, -Vector3.right) >= dotThresh)
+            {
+                leftFaceCenter = m_orangeCenter;
+            }
+
+            Vector3 greenUp = unRot * m_greenCenter.transform.up;
+            if (Vector3.Dot(greenUp, Vector3.right) >= dotThresh)
+            {
+                rightFaceCenter = m_greenCenter;
+            }
+            else if (Vector3.Dot(greenUp, -Vector3.right) >= dotThresh)
+            {
+                leftFaceCenter = m_greenCenter;
+            }
+
+            Vector3 yellowUp = unRot * m_yellowCenter.transform.up;
+            if (Vector3.Dot(yellowUp, Vector3.right) >= dotThresh)
+            {
+                rightFaceCenter = m_yellowCenter;
+            }
+            else if (Vector3.Dot(yellowUp, -Vector3.right) >= dotThresh)
+            {
+                leftFaceCenter = m_yellowCenter;
+            }
+
+            if (leftFaceCenter == null || rightFaceCenter == null)
+            {
+                Debug.Log("could not find left or right center panel!!!");
+            }
+
+            GameObject frontEdgePiece = FindEdgeCube(Vector3.up, -Vector3.forward);  // FINDS PIECE THAT BELONGS TOP MIDDLE FRONT (SHOULD NOT BE THERE!!!)
+                                                                                     // USE FOUND PIECE LOC TO DETERMINE A OR B
+            if (frontEdgePiece == null)
+            {
+                Debug.Log("cound not find front edge piece!!!");
+            }
+
+            ///////
+            Debug.Log("edge piece == " + frontEdgePiece.name);
+
+            GameObject frontPanel = null;
+
+            for (int i = 0; i < frontEdgePiece.transform.childCount; i++)
+            {
+                GameObject panel = frontEdgePiece.transform.GetChild(i).gameObject;
+
+                Vector3 panelUp = unRot * panel.transform.up;
+
+                if (Vector3.Dot(panelUp, -Vector3.forward) >= dotThresh)
+                {
+                    frontPanel = panel;
+                }
+            }
+
+            if (frontPanel == null)
+            {
+                Debug.Log("could not find front panel!!!");
+                return true;
+            }
+
+            if (frontPanel.tag == leftFaceCenter.tag)
+            {
+                prefAlgA = true;
+            }
+            else if (frontPanel.tag == rightFaceCenter.tag)
+            {
+                prefAlgB = true;
+            }
+        }
+
+        if (prefAlgA) //CW
+        {
+            Debug.Log("prefAlgA!!!");
+
+            // F -> F -> U -> L -> Ri -> F -> F -> Li -> R -> U -> F -> F
+            UserInput[] movesA = new UserInput[12];
+
+            movesA[0] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
+            movesA[1] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
+            movesA[2] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+            movesA[3] = new UserInput(15, transform.parent.up, new Vector2(0.0f, -300.0f));
+            movesA[4] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
+            movesA[5] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
+            movesA[6] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));        
+            movesA[7] = new UserInput(15, transform.parent.up, new Vector2(0.0f, 300.0f));
+            movesA[8] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+            movesA[9] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
+            movesA[10] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
+            movesA[11] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));            
+
+            StartCoroutine(ExecuteMoves(movesA));
+        }
+        else if (prefAlgB) //CCW
+        {
+            Debug.Log("prefAlgA!!!");
+
+            // F -> F -> Ui -> L -> Ri -> F -> F -> Li -> R -> Ui -> F -> F
+            UserInput[] movesB = new UserInput[13];
+
+            movesB[0] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
+            movesB[1] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
+            movesB[2] = new UserInput(13, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+            movesB[3] = new UserInput(15, transform.parent.up, new Vector2(0.0f, -300.0f));
+            movesB[4] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
+            movesB[5] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
+            movesB[6] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
+            movesB[7] = new UserInput(15, transform.parent.up, new Vector2(0.0f, 300.0f));
+            movesB[8] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
+            movesB[9] = new UserInput(13, -transform.parent.forward, new Vector2(300.0f, 0.0f));
+            movesB[10] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
+            movesB[11] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
+
+            StartCoroutine(ExecuteMoves(movesB));
+        }
+
+        return false;
     }
 }
