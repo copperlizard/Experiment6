@@ -742,7 +742,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
             yellow = true;
         }
 
-        Debug.Log("white == " + white.ToString() +  " ; blue == " + blue.ToString() + " ; red == " + red.ToString() + " ; orange == " + orange.ToString() + " ; green == " + green.ToString() + " ; yellow == " + yellow.ToString());
+        //Debug.Log("white == " + white.ToString() +  " ; blue == " + blue.ToString() + " ; red == " + red.ToString() + " ; orange == " + orange.ToString() + " ; green == " + green.ToString() + " ; yellow == " + yellow.ToString());
 
         string tarCubeName = "";
         if (white && blue)
@@ -1509,7 +1509,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
     
     private bool SolveStage1Moves ()
     {
-        Debug.Log("SolvingStage1Cross()");
+        //Debug.Log("SolvingStage1Cross()");
 
         if (m_cubeStates[13] && m_cubeStates[15] && m_cubeStates[16] && m_cubeStates[18]) // Top Cross complete
         {
@@ -2466,129 +2466,52 @@ public class VRubiksCubeMonitor : MonoBehaviour
         {
             prefAlgA = true;
         }
-        else if (!m_cubeStates[18] && m_cubeStates[15]) // Reorient cube CW around Y axis
+        else if (m_cubeStates[15] || m_cubeStates[13]) // Reorient cube CW around Y axis
         {
             ReOrientCube(-transform.parent.forward, new Vector2(-300.0f, 0.0f));
         }
-        else if (!m_cubeStates[18] && (m_cubeStates[15] || m_cubeStates[13])) // Reorient cube CCW around Y axis
+        else if (m_cubeStates[16]) // Reorient cube CCW around Y axis
         {
             ReOrientCube(-transform.parent.forward, new Vector2(300.0f, 0.0f));
         }
-        else  // A or B
+        else if (!m_cubeStates[13] && !m_cubeStates[15] && !m_cubeStates[16] && m_cubeStates[18])  // A or B
         {
-            GameObject leftFaceCenter = null, rightFaceCenter = null;
-
-            Quaternion unRot = Quaternion.Inverse(transform.parent.rotation);
-            float dotThresh = 0.95f;
-
-            Vector3 whiteUp = unRot * m_whiteCenter.transform.up;
-            if (Vector3.Dot(whiteUp, Vector3.right) >= dotThresh)
-            {
-                rightFaceCenter = m_whiteCenter;
-            }
-            else if (Vector3.Dot(whiteUp, -Vector3.right) >= dotThresh)
-            {
-                leftFaceCenter = m_whiteCenter;
-            }
-
-            Vector3 blueUp = unRot * m_blueCenter.transform.up;
-            if (Vector3.Dot(blueUp, Vector3.right) >= dotThresh)
-            {
-                rightFaceCenter = m_blueCenter;
-            }
-            else if (Vector3.Dot(blueUp, -Vector3.right) >= dotThresh)
-            {
-                leftFaceCenter = m_blueCenter;
-            }
-
-            Vector3 redUp = unRot * m_redCenter.transform.up;
-            if (Vector3.Dot(redUp, Vector3.right) >= dotThresh)
-            {
-                rightFaceCenter = m_redCenter;
-            }
-            else if (Vector3.Dot(redUp, -Vector3.right) >= dotThresh)
-            {
-                leftFaceCenter = m_redCenter;
-            }
-
-            Vector3 orangeUp = unRot * m_orangeCenter.transform.up;
-            if (Vector3.Dot(orangeUp, Vector3.right) >= dotThresh)
-            {
-                rightFaceCenter = m_orangeCenter;
-            }
-            else if (Vector3.Dot(orangeUp, -Vector3.right) >= dotThresh)
-            {
-                leftFaceCenter = m_orangeCenter;
-            }
-
-            Vector3 greenUp = unRot * m_greenCenter.transform.up;
-            if (Vector3.Dot(greenUp, Vector3.right) >= dotThresh)
-            {
-                rightFaceCenter = m_greenCenter;
-            }
-            else if (Vector3.Dot(greenUp, -Vector3.right) >= dotThresh)
-            {
-                leftFaceCenter = m_greenCenter;
-            }
-
-            Vector3 yellowUp = unRot * m_yellowCenter.transform.up;
-            if (Vector3.Dot(yellowUp, Vector3.right) >= dotThresh)
-            {
-                rightFaceCenter = m_yellowCenter;
-            }
-            else if (Vector3.Dot(yellowUp, -Vector3.right) >= dotThresh)
-            {
-                leftFaceCenter = m_yellowCenter;
-            }
-
-            if (leftFaceCenter == null || rightFaceCenter == null)
-            {
-                Debug.Log("could not find left or right center panel!!!");
-            }
-
-            GameObject frontEdgePiece = FindEdgeCube(Vector3.up, -Vector3.forward);  // FINDS PIECE THAT BELONGS TOP MIDDLE FRONT (SHOULD NOT BE THERE!!!)
-                                                                                     // USE FOUND PIECE LOC TO DETERMINE A OR B
+            GameObject frontEdgePiece = FindEdgeCube(Vector3.up, -Vector3.forward);  
+                                                                                     
             if (frontEdgePiece == null)
             {
                 Debug.Log("cound not find front edge piece!!!");
             }
 
-            ///////
-            Debug.Log("edge piece == " + frontEdgePiece.name);
+            Vector3 mapInput = PrepareMapInput(frontEdgePiece);
 
-            GameObject frontPanel = null;
-
-            for (int i = 0; i < frontEdgePiece.transform.childCount; i++)
+            int stateIndex = -1;
+            bool stateIndexFound = m_cubeMap.TryGetValue(mapInput, out stateIndex);
+            if (stateIndexFound)
             {
-                GameObject panel = frontEdgePiece.transform.GetChild(i).gameObject;
-
-                Vector3 panelUp = unRot * panel.transform.up;
-
-                if (Vector3.Dot(panelUp, -Vector3.forward) >= dotThresh)
+                if (stateIndex == 15)
                 {
-                    frontPanel = panel;
+                    prefAlgB = true;
+                }
+                else if (stateIndex == 16)
+                {
+                    prefAlgA = true;
+                }
+                else
+                {
+                    Debug.Log("error identifying correct alg solving stage 6!!! " + stateIndex.ToString());
+                    return true;
                 }
             }
-
-            if (frontPanel == null)
-            {
-                Debug.Log("could not find front panel!!!");
-                return true;
-            }
-
-            if (frontPanel.tag == leftFaceCenter.tag)
-            {
-                prefAlgA = true;
-            }
-            else if (frontPanel.tag == rightFaceCenter.tag)
-            {
-                prefAlgB = true;
-            }
+        }
+        else
+        {
+            Debug.Log("cube in unknown state solving stage6!!!");
         }
 
         if (prefAlgA) //CW
         {
-            Debug.Log("prefAlgA!!!");
+            //Debug.Log("prefAlgA!!!");
 
             // F -> F -> U -> L -> Ri -> F -> F -> Li -> R -> U -> F -> F
             UserInput[] movesA = new UserInput[12];
@@ -2610,10 +2533,10 @@ public class VRubiksCubeMonitor : MonoBehaviour
         }
         else if (prefAlgB) //CCW
         {
-            Debug.Log("prefAlgA!!!");
+            //Debug.Log("prefAlgA!!!");
 
             // F -> F -> Ui -> L -> Ri -> F -> F -> Li -> R -> Ui -> F -> F
-            UserInput[] movesB = new UserInput[13];
+            UserInput[] movesB = new UserInput[12];
 
             movesB[0] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
             movesB[1] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
