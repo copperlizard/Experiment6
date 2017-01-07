@@ -18,7 +18,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
     public bool m_randomizeOnStart = false;
 
     [HideInInspector]
-    public bool m_randomizing = false;
+    public bool m_randomizing = false, m_autosolve = false;
 
     private VRubiksCubeController m_cubeController;
     private GimbalController m_gimbalController;
@@ -687,7 +687,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
     Quaternion m_isoRot = Quaternion.Euler(-45.0f, 45.0f, 0.0f);
     private bool ToIso ()
     {        
-        transform.parent.rotation = Quaternion.RotateTowards(transform.parent.rotation, m_isoRot, 5.0f);
+        transform.parent.rotation = Quaternion.RotateTowards(transform.parent.rotation, m_isoRot, 2.5f);
 
         if (Quaternion.Angle(transform.parent.rotation, m_isoRot) <= 0.5f)
         {
@@ -907,8 +907,50 @@ public class VRubiksCubeMonitor : MonoBehaviour
         return tarCornerCube;
     }
 
-    private void ReadTopLayerPanelStates(bool white, bool blue, bool red, bool orange, bool green, bool yellow)
+    private void ReadTopLayerPanelStates()
     {
+        //Find top panel color
+        bool white = false, blue = false, red = false, orange = false, green = false, yellow = false;
+
+        Quaternion unRot = Quaternion.Inverse(transform.parent.rotation);
+        float dotThresh = 0.95f;
+
+        Vector3 whiteUp = unRot * m_whiteCenter.transform.up;
+        if (Vector3.Dot(whiteUp, Vector3.up) >= dotThresh)
+        {
+            white = true;
+        }
+
+        Vector3 blueUp = unRot * m_blueCenter.transform.up;
+        if (Vector3.Dot(blueUp, Vector3.up) >= dotThresh)
+        {
+            blue = true;
+        }
+
+        Vector3 redUp = unRot * m_redCenter.transform.up;
+        if (Vector3.Dot(redUp, Vector3.up) >= dotThresh)
+        {
+            red = true;
+        }
+
+        Vector3 orangeUp = unRot * m_orangeCenter.transform.up;
+        if (Vector3.Dot(orangeUp, Vector3.up) >= dotThresh)
+        {
+            orange = true;
+        }
+
+        Vector3 greenUp = unRot * m_greenCenter.transform.up;
+        if (Vector3.Dot(greenUp, Vector3.up) >= dotThresh)
+        {
+            green = true;
+        }
+
+        Vector3 yellowUp = unRot * m_yellowCenter.transform.up;
+        if (Vector3.Dot(yellowUp, Vector3.up) >= dotThresh)
+        {
+            yellow = true;
+        }
+
         foreach (GameObject cube in m_cubes)
         {
             Vector3 mapInput = PrepareMapInput(cube);
@@ -1245,8 +1287,8 @@ public class VRubiksCubeMonitor : MonoBehaviour
 
     public void SolveCube()
     {
-        Debug.Log("Solving Cube!");
-
+        Debug.Log(System.Environment.NewLine + "Solving Cube!");
+        m_autosolve = true;
         StartCoroutine(SolveCubeCoRoutine());
     }
 
@@ -1320,6 +1362,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
         Screen.sleepTimeout = SleepTimeout.SystemSetting;
 
         Debug.Log("done solving cube!");
+        
         yield return null;
     }
         
@@ -1500,7 +1543,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
         }
         else
         {
-            Debug.Log("Failed to find most complete cross!");                  
+            //Debug.Log("Failed to find most complete cross!");                  
         }        
 
         // Complete cross 
@@ -2104,58 +2147,21 @@ public class VRubiksCubeMonitor : MonoBehaviour
         {
             return false;
         }
-
-        //Find top panel color
-        bool white = false, blue = false, red = false, orange = false, green = false, yellow = false;
-
-        Quaternion unRot = Quaternion.Inverse(transform.parent.rotation);
-        float dotThresh = 0.95f;
-
-        Vector3 whiteUp = unRot * m_whiteCenter.transform.up;
-        if (Vector3.Dot(whiteUp, Vector3.up) >= dotThresh)
-        {
-            white = true;
-        }
-
-        Vector3 blueUp = unRot * m_blueCenter.transform.up;
-        if (Vector3.Dot(blueUp, Vector3.up) >= dotThresh)
-        {
-            blue = true;
-        }
-
-        Vector3 redUp = unRot * m_redCenter.transform.up;
-        if (Vector3.Dot(redUp, Vector3.up) >= dotThresh)
-        {
-            red = true;
-        }
-
-        Vector3 orangeUp = unRot * m_orangeCenter.transform.up;
-        if (Vector3.Dot(orangeUp, Vector3.up) >= dotThresh)
-        {
-            orange = true;
-        }
-
-        Vector3 greenUp = unRot * m_greenCenter.transform.up;
-        if (Vector3.Dot(greenUp, Vector3.up) >= dotThresh)
-        {
-            green = true;
-        }
-
-        Vector3 yellowUp = unRot * m_yellowCenter.transform.up;
-        if (Vector3.Dot(yellowUp, Vector3.up) >= dotThresh)
-        {
-            yellow = true;
-        }
-
-        //Debug.Log("white == " + white.ToString() + "; blue == " + blue.ToString() + "; red == " + red.ToString() + "; orange == " + orange.ToString() + "; green == " + green.ToString() + "; yellow == " + yellow.ToString());
-
-        ReadTopLayerPanelStates(white, blue, red, orange, green, yellow);
                         
         return SolveCubeStage4Moves();
     }    
     
     private bool SolveCubeStage4Moves ()
     {
+        ReadTopLayerPanelStates();
+
+        /*
+        Debug.Log("m_sidePanelsStates[0] == " + m_sidePanelStates[0].ToString() + "; m_sidePanelsStates[1] == " + m_sidePanelStates[1].ToString() + "; m_sidePanelsStates[2] == " + m_sidePanelStates[2].ToString() + System.Environment.NewLine +
+                        "m_sidePanelsStates[3] == " + m_sidePanelStates[3].ToString() + "; m_sidePanelsStates[4] == " + m_sidePanelStates[4].ToString() + "; m_sidePanelsStates[5] == " + m_sidePanelStates[5].ToString());
+        Debug.Log("m_sidePanelsStates[6] == " + m_sidePanelStates[6].ToString() + "; m_sidePanelsStates[7] == " + m_sidePanelStates[7].ToString() + "; m_sidePanelsStates[8] == " + m_sidePanelStates[8].ToString() + System.Environment.NewLine +
+            "m_sidePanelsStates[9] == " + m_sidePanelStates[9].ToString() + "; m_sidePanelsStates[10] == " + m_sidePanelStates[10].ToString() + "; m_sidePanelsStates[11] == " + m_sidePanelStates[11].ToString());
+            */
+
         bool topFaceComplete = true;
         foreach (bool state in m_topPanelStates)
         {
@@ -2172,7 +2178,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
 
         if (!m_topPanelStates[1] || !m_topPanelStates[3] || !m_topPanelStates[4] || !m_topPanelStates[6]) // Need to complete cross
         {
-            if (m_topPanelStates[3] && m_topPanelStates[6]) // Backwards L shape
+            if ((m_topPanelStates[3] && m_topPanelStates[6]) || (!m_topPanelStates[1] && !m_topPanelStates[3] && !m_topPanelStates[4] && !m_topPanelStates[6])) // Backwards L shape or center only
             {
                 // F -> U -> R -> Ui -> Ri -> Fi                                
                 UserInput[] movesA = new UserInput[6];
@@ -2184,8 +2190,9 @@ public class VRubiksCubeMonitor : MonoBehaviour
                 movesA[5] = new UserInput(13, transform.parent.up, new Vector2(-300.0f, 0.0f));
                 
                 StartCoroutine(ExecuteMoves(movesA));
+                return false;
             }
-            else if (m_topPanelStates[3] && m_topPanelStates[4]) // 3 in a row
+            else if (m_topPanelStates[3] && m_topPanelStates[4] && !m_topPanelStates[1] && !m_topPanelStates[6]) // 3 in a row
             {
                 // F -> R -> U -> Ri -> Ui -> Fi
                 UserInput[] movesB = new UserInput[6];
@@ -2197,50 +2204,28 @@ public class VRubiksCubeMonitor : MonoBehaviour
                 movesB[5] = new UserInput(13, transform.parent.up, new Vector2(-300.0f, 0.0f));
 
                 StartCoroutine(ExecuteMoves(movesB));
-            }
-            else if (!m_topPanelStates[1] && !m_topPanelStates[3] && !m_topPanelStates[4] && !m_topPanelStates[6]) // Center only
-            {
-                // F -> U -> R -> Ui -> Ri -> Fi                                                
-                UserInput[] movesA = new UserInput[6];
-                movesA[0] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
-                movesA[1] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
-                movesA[2] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
-                movesA[3] = new UserInput(13, -transform.parent.forward, new Vector2(300.0f, 0.0f));
-                movesA[4] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
-                movesA[5] = new UserInput(13, transform.parent.up, new Vector2(-300.0f, 0.0f));
-
-                StartCoroutine(ExecuteMoves(movesA));
-            }
-            else if (m_topPanelStates[1] && (m_topPanelStates[3] || m_topPanelStates[4] || m_topPanelStates[6])) // Reorient cube CW around Y 
+                return false;
+            }            
+            else if (m_topPanelStates[1] && (m_topPanelStates[3] || m_topPanelStates[6] || m_topPanelStates[4])) // Reorient cube CW around Y 
             {
                 ReOrientCube(-transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                return false;
             }
-            else if (m_topPanelStates[6] && (m_topPanelStates[3] || m_topPanelStates[4] || m_topPanelStates[1])) // Reorient cube CCW around Y
+            else if (m_topPanelStates[6] && (m_topPanelStates[4] || m_topPanelStates[1])) // Reorient cube CCW around Y
             {
                 ReOrientCube(-transform.parent.forward, new Vector2(300.0f, 0.0f));
-            }
-            else if (m_topPanelStates[1] || m_topPanelStates[3] || m_topPanelStates[4] || m_topPanelStates[6]) // Only 2 panels up (counting center)
-            {
-                // F -> U -> R -> Ui -> Ri -> Fi                                
-                UserInput[] movesA = new UserInput[6];
-                movesA[0] = new UserInput(13, transform.parent.up, new Vector2(300.0f, 0.0f));
-                movesA[1] = new UserInput(13, -transform.parent.forward, new Vector2(-300.0f, 0.0f));
-                movesA[2] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
-                movesA[3] = new UserInput(13, -transform.parent.forward, new Vector2(300.0f, 0.0f));
-                movesA[4] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
-                movesA[5] = new UserInput(13, transform.parent.up, new Vector2(-300.0f, 0.0f));
-
-                StartCoroutine(ExecuteMoves(movesA));
+                return false;
             }
             else
             {
                 Debug.Log("error completing cross!");
-                return true;
-            }
 
-            return false;
+                //Debug.Log("m_topPanelsStates[1] == " + m_topPanelStates[1].ToString() + "; m_topPanelsStates[3] == " + m_topPanelStates[3].ToString() + "; m_topPanelsStates[4] == " + m_topPanelStates[4].ToString() + "; m_topPanelsStates[6] == " + m_topPanelStates[6].ToString());
+                
+                return true; 
+            }
         }
-        else
+        else // Top cross complete
         {
             bool prefAlg = false;
 
@@ -2255,15 +2240,18 @@ public class VRubiksCubeMonitor : MonoBehaviour
                 {
                     // Reorient cube CW around Y
                     ReOrientCube(-transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                    return false;
                 }
                 else if (m_sidePanelStates[8])
                 {
                     // Reorient cube CCW around Y
                     ReOrientCube(-transform.parent.forward, new Vector2(300.0f, 0.0f));
+                    return false;
                 }
                 else
                 {
-                    Debug.Log("error orienting cube for final step of stage 4!!!");
+                    Debug.Log("error orienting cube!!! stage4 no corners");
+                    return false;
                 }
             }
             else if (m_topPanelStates[0] && !m_topPanelStates[2] && !m_topPanelStates[5] && !m_topPanelStates[7]) // Good Fish
@@ -2274,44 +2262,55 @@ public class VRubiksCubeMonitor : MonoBehaviour
             {
                 // Reorient cube CW around Y
                 ReOrientCube(-transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                return false;
             }
             else if (!m_topPanelStates[0] && !m_topPanelStates[2] && m_topPanelStates[5] && !m_topPanelStates[7]) // Bad Fish
             {
                 // Reorient cube CCW around Y
                 ReOrientCube(-transform.parent.forward, new Vector2(300.0f, 0.0f));
+                return false;
             }
             else if (!m_topPanelStates[0] && !m_topPanelStates[2] && !m_topPanelStates[5] && m_topPanelStates[7]) // Bad Fish
             {
                 // Reorient cube CCW around Y
                 ReOrientCube(-transform.parent.forward, new Vector2(300.0f, 0.0f));
+                return false;
             }
             else // Two corners
             {
-                if (m_sidePanelStates[0])
+                if (m_sidePanelStates[0] && !m_sidePanelStates[11])
                 {
                     prefAlg = true;
                 }
-                else if (m_sidePanelStates[3]) 
+                else if (m_sidePanelStates[3] && !m_sidePanelStates[0]) 
                 {
                     // Reorient cube CW around Y
                     ReOrientCube(-transform.parent.forward, new Vector2(-300.0f, 0.0f));
+                    return false;
                 }
-                else if (m_sidePanelStates[6] || m_sidePanelStates[9])
+                else if ((m_sidePanelStates[6] || m_sidePanelStates[9]) && !m_sidePanelStates[0])
                 {
                     // Reorient cube CCW around Y
                     ReOrientCube(-transform.parent.forward, new Vector2(300.0f, 0.0f));
+                    return false;
                 }
                 else
                 {
-                    Debug.Log("error orienting cube for final step of stage 4!!!");
-                    return true;
+                    Debug.Log("error orienting cube stage4 2 corners!!!"); //
+
+                    Debug.Log("m_sidePanelsStates[0] == " + m_sidePanelStates[0].ToString() + "; m_sidePanelsStates[1] == " + m_sidePanelStates[1].ToString() + "; m_sidePanelsStates[2] == " + m_sidePanelStates[2].ToString() + System.Environment.NewLine +
+                        "m_sidePanelsStates[3] == " + m_sidePanelStates[3].ToString() + "; m_sidePanelsStates[4] == " + m_sidePanelStates[4].ToString() + "; m_sidePanelsStates[5] == " + m_sidePanelStates[5].ToString());
+                    Debug.Log("m_sidePanelsStates[6] == " + m_sidePanelStates[6].ToString() + "; m_sidePanelsStates[7] == " + m_sidePanelStates[7].ToString() + "; m_sidePanelsStates[8] == " + m_sidePanelStates[8].ToString() + System.Environment.NewLine +
+                        "m_sidePanelsStates[9] == " + m_sidePanelStates[9].ToString() + "; m_sidePanelsStates[10] == " + m_sidePanelStates[10].ToString() + "; m_sidePanelsStates[11] == " + m_sidePanelStates[11].ToString());
+
+                    Time.timeScale = 0.0f;
+
+                    return false; //change back to true...
                 }
             }
 
             if (prefAlg)
             {
-                //Debug.Log("PREFALG!!!");
-
                 // R -> U -> Ri -> U -> R -> U -> U -> Ri
                 UserInput[] movesC = new UserInput[8];
                 movesC[0] = new UserInput(16, transform.parent.up, new Vector2(0.0f, 300.0f));
@@ -2324,8 +2323,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
                 movesC[7] = new UserInput(16, transform.parent.up, new Vector2(0.0f, -300.0f));
 
                 StartCoroutine(ExecuteMoves(movesC));
-
-                //return true;
+                return false;
             }
 
             return false;
@@ -2339,54 +2337,6 @@ public class VRubiksCubeMonitor : MonoBehaviour
         {
             return false;
         }
-
-        /*
-        //Find top panel color
-        bool white = false, blue = false, red = false, orange = false, green = false, yellow = false;
-
-        Quaternion unRot = Quaternion.Inverse(transform.parent.rotation);
-        float dotThresh = 0.95f;
-
-        Vector3 whiteUp = unRot * m_whiteCenter.transform.up;
-        if (Vector3.Dot(whiteUp, Vector3.up) >= dotThresh)
-        {
-            white = true;
-        }
-
-        Vector3 blueUp = unRot * m_blueCenter.transform.up;
-        if (Vector3.Dot(blueUp, Vector3.up) >= dotThresh)
-        {
-            blue = true;
-        }
-
-        Vector3 redUp = unRot * m_redCenter.transform.up;
-        if (Vector3.Dot(redUp, Vector3.up) >= dotThresh)
-        {
-            red = true;
-        }
-
-        Vector3 orangeUp = unRot * m_orangeCenter.transform.up;
-        if (Vector3.Dot(orangeUp, Vector3.up) >= dotThresh)
-        {
-            orange = true;
-        }
-
-        Vector3 greenUp = unRot * m_greenCenter.transform.up;
-        if (Vector3.Dot(greenUp, Vector3.up) >= dotThresh)
-        {
-            green = true;
-        }
-
-        Vector3 yellowUp = unRot * m_yellowCenter.transform.up;
-        if (Vector3.Dot(yellowUp, Vector3.up) >= dotThresh)
-        {
-            yellow = true;
-        }
-        */
-
-        //Debug.Log("white == " + white.ToString() + "; blue == " + blue.ToString() + "; red == " + red.ToString() + "; orange == " + orange.ToString() + "; green == " + green.ToString() + "; yellow == " + yellow.ToString());
-
-        //ReadTopLayerPanelStates(white, blue, red, orange, green, yellow);
 
         return SolveCubeStage5Moves();
     }

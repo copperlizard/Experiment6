@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using System;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
@@ -255,16 +256,28 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private static int debug = 0;
     private void LearnUpdate ()
     {
-        if (m_cubeMonitor.m_percentComplete <= 1.0f)
+        if (m_cubeMonitor.m_percentComplete < 1.0f)
         {
             // Update helpers...  CURRENTLY NOT NECESSARY! MAYBE REDUCE TO ONE UPDATE METHOD FOR ALL GAMEMODES!
-            
+
+
+            if (!m_cubeMonitor.m_autosolve)
+            {
+                //m_cubeMonitor.SolveCube();
+            }
         }
         else
         {
-            StartCoroutine(TimedComplete());
+            debug++;
+            Debug.Log("completed Learning cube# " + debug.ToString());
+
+            SceneManager.LoadScene(1);
+            
+
+            //StartCoroutine(TimedComplete());
         }
     }
 
