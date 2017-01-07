@@ -192,6 +192,11 @@ public class VRubiksCubeMonitor : MonoBehaviour
         }        
     }
 
+    void Update ()
+    {
+        ReadTopLayerPanelStates();
+    }
+
     public void RandomizeCube()
     {
         //m_cubeSolved = false; 
@@ -1015,10 +1020,29 @@ public class VRubiksCubeMonitor : MonoBehaviour
                 }
             }
         }
+
+        
+        Debug.Log("");
+        Debug.Log("m_sidePanelsStates[0] == " + m_sidePanelStates[0].ToString() + "; m_sidePanelsStates[1] == " + m_sidePanelStates[1].ToString() + "; m_sidePanelsStates[2] == " + m_sidePanelStates[2].ToString() + System.Environment.NewLine +
+                        "m_sidePanelsStates[3] == " + m_sidePanelStates[3].ToString() + "; m_sidePanelsStates[4] == " + m_sidePanelStates[4].ToString() + "; m_sidePanelsStates[5] == " + m_sidePanelStates[5].ToString());
+        Debug.Log("m_sidePanelsStates[6] == " + m_sidePanelStates[6].ToString() + "; m_sidePanelsStates[7] == " + m_sidePanelStates[7].ToString() + "; m_sidePanelsStates[8] == " + m_sidePanelStates[8].ToString() + System.Environment.NewLine +
+            "m_sidePanelsStates[9] == " + m_sidePanelStates[9].ToString() + "; m_sidePanelsStates[10] == " + m_sidePanelStates[10].ToString() + "; m_sidePanelsStates[11] == " + m_sidePanelStates[11].ToString());
+            
+        /*
+        Debug.Log("");
+        Debug.Log("m_topPanelStates[0] == " + m_topPanelStates[0].ToString() + "; m_topPanelStates[1] == " + m_topPanelStates[1].ToString() + "; m_topPanelStates[2] == " + m_topPanelStates[2].ToString() + System.Environment.NewLine +
+            "m_topPanelStates[3] == " + m_topPanelStates[3].ToString() + "; m_topPanelStates[4] == " + m_topPanelStates[4].ToString() + "; m_topPanelStates[5] == " + m_topPanelStates[5].ToString());
+        Debug.Log("m_topPanelStates[6] == " + m_topPanelStates[6].ToString() + "; m_topPanelStates[7] == " + m_topPanelStates[7].ToString());
+        */
     }
 
     private bool CheckTopPanel(GameObject cube, bool white, bool blue, bool red, bool orange, bool green, bool yellow)
     {
+        for (int i = 0; i < m_topPanelStates.Length; i++) // Assume false (maybe unecessary)
+        {
+            m_topPanelStates[i] = false;
+        }
+
         Quaternion unRot = Quaternion.Inverse(transform.parent.rotation);
         float dotThresh = 0.95f;
         for (int i = 0; i < cube.transform.childCount; i++)
@@ -1092,6 +1116,11 @@ public class VRubiksCubeMonitor : MonoBehaviour
 
     private void CheckSidePanels(GameObject cube, int mapLoc, bool white, bool blue, bool red, bool orange, bool green, bool yellow)
     {
+        for (int i = 0; i < m_sidePanelStates.Length; i++) // Assume false (maybe unecessary)
+        {
+            m_sidePanelStates[i] = false;
+        }
+
         Quaternion unRot = Quaternion.Inverse(transform.parent.rotation);
         float dotThresh = 0.95f;
         for (int i = 0; i < cube.transform.childCount; i++)
@@ -1145,6 +1174,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
                     break;
 
                 default:
+                    Debug.Log("error identifying panel color!");
                     break;
             }
 
@@ -2154,14 +2184,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
     private bool SolveCubeStage4Moves ()
     {
         ReadTopLayerPanelStates();
-
-        /*
-        Debug.Log("m_sidePanelsStates[0] == " + m_sidePanelStates[0].ToString() + "; m_sidePanelsStates[1] == " + m_sidePanelStates[1].ToString() + "; m_sidePanelsStates[2] == " + m_sidePanelStates[2].ToString() + System.Environment.NewLine +
-                        "m_sidePanelsStates[3] == " + m_sidePanelStates[3].ToString() + "; m_sidePanelsStates[4] == " + m_sidePanelStates[4].ToString() + "; m_sidePanelsStates[5] == " + m_sidePanelStates[5].ToString());
-        Debug.Log("m_sidePanelsStates[6] == " + m_sidePanelStates[6].ToString() + "; m_sidePanelsStates[7] == " + m_sidePanelStates[7].ToString() + "; m_sidePanelsStates[8] == " + m_sidePanelStates[8].ToString() + System.Environment.NewLine +
-            "m_sidePanelsStates[9] == " + m_sidePanelStates[9].ToString() + "; m_sidePanelsStates[10] == " + m_sidePanelStates[10].ToString() + "; m_sidePanelsStates[11] == " + m_sidePanelStates[11].ToString());
-            */
-
+        
         bool topFaceComplete = true;
         foreach (bool state in m_topPanelStates)
         {
@@ -2305,7 +2328,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
 
                     Time.timeScale = 0.0f;
 
-                    return false; //change back to true...
+                    return true; //change back to true...
                 }
             }
 

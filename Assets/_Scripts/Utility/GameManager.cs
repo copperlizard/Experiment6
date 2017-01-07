@@ -266,7 +266,7 @@ public class GameManager : MonoBehaviour
 
             if (!m_cubeMonitor.m_autosolve)
             {
-                //m_cubeMonitor.SolveCube();
+                m_cubeMonitor.SolveCube();
             }
         }
         else
