@@ -192,10 +192,11 @@ public class VRubiksCubeMonitor : MonoBehaviour
         }        
     }
 
+    /*
     void Update ()
     {
         ReadTopLayerPanelStates();
-    }
+    }*/
 
     public void RandomizeCube()
     {
@@ -956,6 +957,11 @@ public class VRubiksCubeMonitor : MonoBehaviour
             yellow = true;
         }
 
+        for (int i = 0; i < m_sidePanelStates.Length; i++) // Assume/preset false (maybe unecessary)
+        {
+            m_sidePanelStates[i] = false;
+        }
+
         foreach (GameObject cube in m_cubes)
         {
             Vector3 mapInput = PrepareMapInput(cube);
@@ -1020,15 +1026,14 @@ public class VRubiksCubeMonitor : MonoBehaviour
                 }
             }
         }
-
         
+        /*
         Debug.Log("");
         Debug.Log("m_sidePanelsStates[0] == " + m_sidePanelStates[0].ToString() + "; m_sidePanelsStates[1] == " + m_sidePanelStates[1].ToString() + "; m_sidePanelsStates[2] == " + m_sidePanelStates[2].ToString() + System.Environment.NewLine +
                         "m_sidePanelsStates[3] == " + m_sidePanelStates[3].ToString() + "; m_sidePanelsStates[4] == " + m_sidePanelStates[4].ToString() + "; m_sidePanelsStates[5] == " + m_sidePanelStates[5].ToString());
         Debug.Log("m_sidePanelsStates[6] == " + m_sidePanelStates[6].ToString() + "; m_sidePanelsStates[7] == " + m_sidePanelStates[7].ToString() + "; m_sidePanelsStates[8] == " + m_sidePanelStates[8].ToString() + System.Environment.NewLine +
             "m_sidePanelsStates[9] == " + m_sidePanelStates[9].ToString() + "; m_sidePanelsStates[10] == " + m_sidePanelStates[10].ToString() + "; m_sidePanelsStates[11] == " + m_sidePanelStates[11].ToString());
-            
-        /*
+        
         Debug.Log("");
         Debug.Log("m_topPanelStates[0] == " + m_topPanelStates[0].ToString() + "; m_topPanelStates[1] == " + m_topPanelStates[1].ToString() + "; m_topPanelStates[2] == " + m_topPanelStates[2].ToString() + System.Environment.NewLine +
             "m_topPanelStates[3] == " + m_topPanelStates[3].ToString() + "; m_topPanelStates[4] == " + m_topPanelStates[4].ToString() + "; m_topPanelStates[5] == " + m_topPanelStates[5].ToString());
@@ -1038,11 +1043,6 @@ public class VRubiksCubeMonitor : MonoBehaviour
 
     private bool CheckTopPanel(GameObject cube, bool white, bool blue, bool red, bool orange, bool green, bool yellow)
     {
-        for (int i = 0; i < m_topPanelStates.Length; i++) // Assume false (maybe unecessary)
-        {
-            m_topPanelStates[i] = false;
-        }
-
         Quaternion unRot = Quaternion.Inverse(transform.parent.rotation);
         float dotThresh = 0.95f;
         for (int i = 0; i < cube.transform.childCount; i++)
@@ -1116,11 +1116,6 @@ public class VRubiksCubeMonitor : MonoBehaviour
 
     private void CheckSidePanels(GameObject cube, int mapLoc, bool white, bool blue, bool red, bool orange, bool green, bool yellow)
     {
-        for (int i = 0; i < m_sidePanelStates.Length; i++) // Assume false (maybe unecessary)
-        {
-            m_sidePanelStates[i] = false;
-        }
-
         Quaternion unRot = Quaternion.Inverse(transform.parent.rotation);
         float dotThresh = 0.95f;
         for (int i = 0; i < cube.transform.childCount; i++)
@@ -1182,135 +1177,96 @@ public class VRubiksCubeMonitor : MonoBehaviour
             {
                 Vector3 panelUpV = unRot * panel.transform.up;
 
-                if (Vector3.Dot(panelUpV, Vector3.up) < dotThresh)
+                //Debug.Log("mapLoc == " + mapLoc.ToString() + "; panelUpV == " + panelUpV.ToString());
+                
+                if (Vector3.Dot(panelUpV, Vector3.up) < dotThresh) // Ignore panels facing up
                 {
+                    float left, right, forward, backward;
+                    left = Vector3.Dot(panelUpV, -Vector3.right);
+                    right = Vector3.Dot(panelUpV, Vector3.right);
+                    forward = Vector3.Dot(panelUpV, Vector3.forward);
+                    backward = Vector3.Dot(panelUpV, -Vector3.forward);
+
+                    //Debug.Log("left == " + left.ToString() + "; right == " + right.ToString() + "; forward == " + forward.ToString() + "; backward == " + backward.ToString());
+                    
                     switch (mapLoc)
                     {
                         case 12: // top front left
-
-                            if (Vector3.Dot(panelUpV, -Vector3.forward) >= dotThresh)
+                            if (backward >= dotThresh)
                             {
-                                m_sidePanelStates[0] = true;
+                                m_sidePanelStates[0] = true;                                
                             }
-                            else if (Vector3.Dot(panelUpV, -Vector3.right) >= dotThresh)
+                            else if (left >= dotThresh)
                             {
-                                m_sidePanelStates[11] = true;
-                            }
-                            else
-                            {
-                                Debug.Log("error identifying panel direction!!! 12");
-                            }
-
+                                m_sidePanelStates[11] = true;                                
+                            }                            
                             break;
 
                         case 13: // top front middle
-
-                            if (Vector3.Dot(panelUpV, -Vector3.forward) >= dotThresh)
+                            if (backward >= dotThresh)
                             {
                                 m_sidePanelStates[1] = true;
                             }
-                            else
-                            {
-                                Debug.Log("error identifying panel direction!!! 13");
-                            }
-
                             break;
 
                         case 14: // top front right
-
-                            if (Vector3.Dot(panelUpV, -Vector3.forward) >= dotThresh)
+                            if (backward >= dotThresh)
                             {
                                 m_sidePanelStates[2] = true;
                             }
-                            else if (Vector3.Dot(panelUpV, Vector3.right) >= dotThresh)
+                            else if (right >= dotThresh)
                             {
                                 m_sidePanelStates[3] = true;
                             }
-                            else
-                            {
-                                Debug.Log("error identifying panel direction!!! 14");
-                            }
-
                             break;
 
                         case 15: // top middle left
-
-                            if (Vector3.Dot(panelUpV, -Vector3.right) >= dotThresh)
+                            if (left >= dotThresh)
                             {
                                 m_sidePanelStates[10] = true;
                             }
-                            else
-                            {
-                                Debug.Log("error identifying panel direction!!! 15");
-                            }
-
                             break;
 
                         case 16: // top middle right
-
-                            if (Vector3.Dot(panelUpV, Vector3.right) >= dotThresh)
+                            if (right >= dotThresh)
                             {
                                 m_sidePanelStates[4] = true;
                             }
-                            else
-                            {
-                                Debug.Log("error identifying panel direction!!! 16");
-                            }
-
                             break;
 
                         case 17: // top back left
-
-                            if (Vector3.Dot(panelUpV, -Vector3.right) >= dotThresh)
-                            {
-                                m_sidePanelStates[9] = true;
-                            }
-                            else if (Vector3.Dot(panelUpV, Vector3.forward) >= dotThresh)
+                            if (forward >= dotThresh)
                             {
                                 m_sidePanelStates[8] = true;
                             }
-                            else
+                            else if (left >= dotThresh)
                             {
-                                Debug.Log("error identifying panel direction!!! 17");
+                                m_sidePanelStates[9] = true;
                             }
-
                             break;
-
                         case 18: // top back middle
-
-                            if (Vector3.Dot(panelUpV, Vector3.forward) >= dotThresh)
+                            if (forward >= dotThresh)
                             {
                                 m_sidePanelStates[7] = true;
                             }
-                            else
-                            {
-                                Debug.Log("error identifying panel direction!!! 18");
-                            }
-
                             break;
 
                         case 19: // top back right
-
-                            if (Vector3.Dot(panelUpV, Vector3.forward) >= dotThresh)
+                            if (forward >= dotThresh)
                             {
                                 m_sidePanelStates[6] = true;
                             }
-                            else if (Vector3.Dot(panelUpV, Vector3.right) >= dotThresh)
+                            else if (right >= dotThresh)
                             {
                                 m_sidePanelStates[5] = true;
                             }
-                            else
-                            {
-                                Debug.Log("error identifying panel direction!!! 19");
-                            }
-
                             break;
 
                         default:
-                            Debug.Log("cube/panel found in unaccounted position (CheckSidePanels)!!!");
+                            Debug.Log("cube in unaccounted position (CheckSidePanels)!!!");
                             break;
                     }
-                }
+                }                
             }
         }
     }
