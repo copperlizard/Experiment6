@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using System;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
@@ -255,29 +254,16 @@ public class GameManager : MonoBehaviour
             m_lastMoveText.color = new Color(m_lastMoveText.color.r, m_lastMoveText.color.g, m_lastMoveText.color.b, Mathf.Lerp(m_lastMoveText.color.a, 0.0f, 1.0f * Time.deltaTime));
         }
     }
-
-    private static int debug = 0;
+    
     private void LearnUpdate ()
     {
         if (m_cubeMonitor.m_percentComplete < 1.0f)
         {
             // Update helpers...  CURRENTLY NOT NECESSARY! MAYBE REDUCE TO ONE UPDATE METHOD FOR ALL GAMEMODES!
-
-
-            if (!m_cubeMonitor.m_autosolve)
-            {
-                m_cubeMonitor.SolveCube();
-            }
         }
-        else
+        else if (!m_modeComplete)
         {
-            debug++;
-            Debug.Log("completed Learning cube# " + debug.ToString());
-
-            SceneManager.LoadScene(1);
-            
-
-            //StartCoroutine(TimedComplete());
+            StartCoroutine(TimedComplete());
         }
     }
 
@@ -422,8 +408,8 @@ public class GameManager : MonoBehaviour
                 }
                 break;
             default:
-                file = File.Create(Application.persistentDataPath + "/LearnRecords.dat");
-                break;
+                Debug.Log("m_mode not set (LoadRecords)!!!");
+                return;
         }
 
         file.Close();
@@ -442,8 +428,9 @@ public class GameManager : MonoBehaviour
                     file = File.Open(Application.persistentDataPath + "/LearnRecords.dat", FileMode.Open);                    
                 }
                 else
-                {
-                    file = File.Create(Application.persistentDataPath + "/LearnRecords.dat");
+                {   
+                    Debug.Log("error loading records!!!");
+                    return;
                 }
                 break;
             case GameMode.TIMED:
@@ -453,7 +440,8 @@ public class GameManager : MonoBehaviour
                 }
                 else
                 {
-                    file = File.Create(Application.persistentDataPath + "/TimedRecords.dat");
+                    Debug.Log("error loading records!!!");
+                    return;
                 }
                 break;
             case GameMode.TURNS:
@@ -463,12 +451,19 @@ public class GameManager : MonoBehaviour
                 }
                 else
                 {
-                    file = File.Create(Application.persistentDataPath + "/TurnsRecords.dat");
+                    Debug.Log("error loading records!!!");
+                    return;
                 }
                 break;
             default:
-                file = File.Create(Application.persistentDataPath + "/LearnRecords.dat");
-                break;
+                Debug.Log("m_mode not set (SaveRecords)!!!");
+                return;
+        }
+
+        Debug.Log("saving records!!!");        
+        for (int i = 0; i < m_recs.m_record.Length; i++)
+        {
+            Debug.Log("recs.m_record[" + i.ToString() + "].time == " + m_recs.m_record[i].time.ToString());
         }
 
         bf.Serialize(file, m_recs);
@@ -483,12 +478,15 @@ public class GameManager : MonoBehaviour
                 for (int i = 0; i < m_recs.m_record.Length; i++)
                 {
                     //|| (m_solveTimeElapsed == m_recs.m_record[i].time && m_cubeMonitor.m_cubePar >= m_recs.m_record[i].par)
-                    if (m_solveTimeElapsed < m_recs.m_record[i].time)
+                    if (m_solveTimeElapsed < m_recs.m_record[i].time && !m_cubeMonitor.m_autosolve)
                     {
                         for (int j = 1; j <= m_recs.m_record.Length - (i + 1); j++)
                         {
-                            //Debug.Log("j == " + j.ToString());
-                            m_recs.m_record[m_recs.m_record.Length - j] = m_recs.m_record[(m_recs.m_record.Length - j) - 1];
+                            //Debug.Log("recs.m_record[" + (m_recs.m_record.Length - j).ToString() + "] = recs.m_record[" + ((m_recs.m_record.Length - j) - 1).ToString() + "]");
+
+                            m_recs.m_record[m_recs.m_record.Length - j].time = m_recs.m_record[(m_recs.m_record.Length - j) - 1].time;
+                            m_recs.m_record[m_recs.m_record.Length - j].par = m_recs.m_record[(m_recs.m_record.Length - j) - 1].par;
+                            m_recs.m_record[m_recs.m_record.Length - j].turns = m_recs.m_record[(m_recs.m_record.Length - j) - 1].turns;
                         }
 
                         m_recs.m_record[i].time = m_solveTimeElapsed;
@@ -556,13 +554,13 @@ public class GameManager : MonoBehaviour
     {
         LoadRecords();  // Load saved records
 
-        /*
+        
         Debug.Log(System.Environment.NewLine + "loaded records...");
         for (int i = 0; i < m_recs.m_record.Length; i++)
         {
             Debug.Log("recs.m_record[" + i.ToString() + "].time == " + m_recs.m_record[i].time.ToString());
         }
-        */
+        
 
         UpdateRecords();  // Check if new record set; saves records if changed      
 

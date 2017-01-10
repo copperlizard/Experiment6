@@ -31,7 +31,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
     private bool[] m_topPanelStates = new bool[8];
     private bool[] m_sidePanelStates = new bool[12]; 
 
-    private bool m_executingMoves = false; // Set when executing move set with coroutine
+    private bool m_executingMoves = false, m_autoSolveFail = false; // Set when executing move set with coroutine
 
     // Use this for initialization
     void Start ()
@@ -191,13 +191,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
             CheckSolved();
         }        
     }
-
-    /*
-    void Update ()
-    {
-        ReadTopLayerPanelStates();
-    }*/
-
+    
     public void RandomizeCube()
     {
         //m_cubeSolved = false; 
@@ -255,7 +249,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
 
         yield return null;
     }
-
+    
     private Vector3 PrepareMapInput(GameObject cube)
     {
         // Prep to record cube state (there is probably a nicer way to do this...)
@@ -693,7 +687,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
     Quaternion m_isoRot = Quaternion.Euler(-45.0f, 45.0f, 0.0f);
     private bool ToIso ()
     {        
-        transform.parent.rotation = Quaternion.RotateTowards(transform.parent.rotation, m_isoRot, 2.5f);
+        transform.parent.rotation = Quaternion.RotateTowards(transform.parent.rotation, m_isoRot, 1.5f);
 
         if (Quaternion.Angle(transform.parent.rotation, m_isoRot) <= 0.5f)
         {
@@ -1292,20 +1286,20 @@ public class VRubiksCubeMonitor : MonoBehaviour
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
 
         Debug.Log("solving stage1!");
-        while (!SolveCubeStage1())
+        while (!SolveCubeStage1() && !m_autoSolveFail)
         {
             yield return null;
         }
         Debug.Log("done solving stage1!");
 
         Debug.Log("solving stage2!");
-        while (!SolveCubeStage2())
+        while (!SolveCubeStage2() && !m_autoSolveFail)
         {
             yield return null;
         }
         Debug.Log("done solving stage2!");
 
-        Debug.Log("re-orienting!");
+        Debug.Log("re-orienting for next stage!");
         ReOrientCube(transform.parent.up, new Vector2(0.0f, 300.0f));
         while (m_cubeController.m_rotatingFace || m_cubeController.m_rotatingCube)
         {
@@ -1318,36 +1312,43 @@ public class VRubiksCubeMonitor : MonoBehaviour
         }
 
         Debug.Log("solving stage3!");
-        while (!SolveCubeStage3())
+        while (!SolveCubeStage3() && !m_autoSolveFail)
         {
             yield return null;
         }
         Debug.Log("done solving stage3!");
 
         Debug.Log("solving stage4!");
-        while (!SolveCubeStage4())
+        while (!SolveCubeStage4() && !m_autoSolveFail)
         {
             yield return null;
         }
         Debug.Log("done solving stage4!");
 
         Debug.Log("solving stage5!");
-        while (!SolveCubeStage5())
+        while (!SolveCubeStage5() && !m_autoSolveFail)
         {
             yield return null;
         }
         Debug.Log("done solving stage5!");
 
         Debug.Log("solving stage6!");
-        while (!SolveCubeStage6())
+        while (!SolveCubeStage6() && !m_autoSolveFail)
         {
             yield return null;
         }
         Debug.Log("done solving stage6!");
 
         Screen.sleepTimeout = SleepTimeout.SystemSetting;
-
-        Debug.Log("done solving cube!");
+        
+        if (m_autoSolveFail)
+        {
+            Debug.Log("autosolve failed!!!");
+        }
+        else
+        {
+            Debug.Log("done solving cube!");
+        }
         
         yield return null;
     }
@@ -1538,8 +1539,6 @@ public class VRubiksCubeMonitor : MonoBehaviour
     
     private bool SolveStage1Moves ()
     {
-        //Debug.Log("SolvingStage1Cross()");
-
         if (m_cubeStates[13] && m_cubeStates[15] && m_cubeStates[16] && m_cubeStates[18]) // Top Cross complete
         {
             return true;
@@ -1547,8 +1546,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
         else
         {
             if (!m_cubeStates[16]) // Solve top right edge
-            {
-                //GameObject tarEdgeCube = FindEdgeCube(transform.parent.up, transform.parent.right);
+            {                
                 GameObject tarEdgeCube = FindEdgeCube(Vector3.up, Vector3.right);
 
                 if (tarEdgeCube != null)
@@ -1720,6 +1718,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
 
                             default:
                                 Debug.Log("tarEdgeCube found in un-accounted position! ");
+                                m_autoSolveFail = true;
                                 return true; // END RECURSION!!!                                
                         }
 
@@ -1728,14 +1727,14 @@ public class VRubiksCubeMonitor : MonoBehaviour
                     else
                     {
                         Debug.Log("tarEdgeCube stateIndex not found!!!");
-
+                        m_autoSolveFail = true;
                         return true; // END RECURSION!!!
                     }
                 }
                 else
                 {
                     Debug.Log("Error finding target edge cube in m_cubes!");
-
+                    m_autoSolveFail = true;
                     return true; // END RECURSION!!!
                 }
             }
@@ -1912,6 +1911,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
 
                     default:
                         Debug.Log("tarEdgeCube found in un-accounted position! ");
+                        m_autoSolveFail = true;
                         return true; // END RECURSION!!!      
                 }
 
@@ -1955,13 +1955,11 @@ public class VRubiksCubeMonitor : MonoBehaviour
     {        
         GameObject tarEdgeCube = null;
         if (!m_cubeStates[8])
-        {
-            //tarEdgeCube = FindEdgeCube(-transform.parent.forward, -transform.parent.right);
+        {            
             tarEdgeCube = FindEdgeCube(-Vector3.forward, -Vector3.right);
         }
         else
-        {
-            //tarEdgeCube = FindEdgeCube(-transform.parent.forward, transform.parent.right);
+        {            
             tarEdgeCube = FindEdgeCube(-Vector3.forward, Vector3.right);
         }
 
@@ -2116,6 +2114,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
 
                     default:
                         Debug.Log("tarEdgeCube found in un-accounted position! ");
+                        m_autoSolveFail = true;
                         return true; // END RECURSION!!!      
                 }
 
@@ -2198,9 +2197,8 @@ public class VRubiksCubeMonitor : MonoBehaviour
             else
             {
                 Debug.Log("error completing cross!");
-
+                m_autoSolveFail = true;
                 //Debug.Log("m_topPanelsStates[1] == " + m_topPanelStates[1].ToString() + "; m_topPanelsStates[3] == " + m_topPanelStates[3].ToString() + "; m_topPanelsStates[4] == " + m_topPanelStates[4].ToString() + "; m_topPanelsStates[6] == " + m_topPanelStates[6].ToString());
-                
                 return true; 
             }
         }
@@ -2230,7 +2228,8 @@ public class VRubiksCubeMonitor : MonoBehaviour
                 else
                 {
                     Debug.Log("error orienting cube!!! stage4 no corners");
-                    return false;
+                    m_autoSolveFail = true;
+                    return true;
                 }
             }
             else if (m_topPanelStates[0] && !m_topPanelStates[2] && !m_topPanelStates[5] && !m_topPanelStates[7]) // Good Fish
@@ -2275,16 +2274,16 @@ public class VRubiksCubeMonitor : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log("error orienting cube stage4 2 corners!!!"); //
-
+                    Debug.Log("error orienting cube stage4 2 corners!!!");
+                    m_autoSolveFail = true;
+                    /*
                     Debug.Log("m_sidePanelsStates[0] == " + m_sidePanelStates[0].ToString() + "; m_sidePanelsStates[1] == " + m_sidePanelStates[1].ToString() + "; m_sidePanelsStates[2] == " + m_sidePanelStates[2].ToString() + System.Environment.NewLine +
                         "m_sidePanelsStates[3] == " + m_sidePanelStates[3].ToString() + "; m_sidePanelsStates[4] == " + m_sidePanelStates[4].ToString() + "; m_sidePanelsStates[5] == " + m_sidePanelStates[5].ToString());
                     Debug.Log("m_sidePanelsStates[6] == " + m_sidePanelStates[6].ToString() + "; m_sidePanelsStates[7] == " + m_sidePanelStates[7].ToString() + "; m_sidePanelsStates[8] == " + m_sidePanelStates[8].ToString() + System.Environment.NewLine +
                         "m_sidePanelsStates[9] == " + m_sidePanelStates[9].ToString() + "; m_sidePanelsStates[10] == " + m_sidePanelStates[10].ToString() + "; m_sidePanelsStates[11] == " + m_sidePanelStates[11].ToString());
+                        */
 
-                    Time.timeScale = 0.0f;
-
-                    return true; //change back to true...
+                    return true;
                 }
             }
 
@@ -2429,6 +2428,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
                 else
                 {
                     Debug.Log("error identifying correct alg solving stage 6!!! " + stateIndex.ToString());
+                    m_autoSolveFail = true;
                     return true;
                 }
             }
@@ -2436,6 +2436,8 @@ public class VRubiksCubeMonitor : MonoBehaviour
         else
         {
             Debug.Log("cube in unknown state solving stage6!!!");
+            m_autoSolveFail = true;
+            return true;
         }
 
         if (prefAlgA) //CW
