@@ -196,6 +196,7 @@ public class VRubiksCubeMonitor : MonoBehaviour
     {
         //m_cubeSolved = false; 
         m_randomizing = true;
+        m_cubeController.m_audioSource.volume = 0.0f;
         StartCoroutine(Randomizing());        
     }
 
@@ -246,6 +247,8 @@ public class VRubiksCubeMonitor : MonoBehaviour
             // Managed to randomly create a very simple cube...
             RandomizeCube();
         }
+
+        m_cubeController.m_audioSource.volume = 0.05f;
 
         yield return null;
     }
@@ -1267,9 +1270,13 @@ public class VRubiksCubeMonitor : MonoBehaviour
 
     public void SolveCube()
     {
-        Debug.Log(System.Environment.NewLine + "Solving Cube!");
-        m_autosolve = true;
-        StartCoroutine(SolveCubeCoRoutine());
+        if (!m_autosolve)
+        {
+            Debug.Log(System.Environment.NewLine + "Solving Cube!");
+            m_autosolve = true;
+            m_cubeController.m_audioSource.volume = 0.0f;
+            StartCoroutine(SolveCubeCoRoutine());
+        }
     }
 
     IEnumerator SolveCubeCoRoutine()
@@ -1349,7 +1356,9 @@ public class VRubiksCubeMonitor : MonoBehaviour
         {
             Debug.Log("done solving cube!");
         }
-        
+
+        m_cubeController.m_audioSource.volume = 0.05f;
+
         yield return null;
     }
         

@@ -9,6 +9,9 @@ public class VRubiksCubeController : MonoBehaviour
     public float m_cubeRotateSpeed, m_faceRotateSpeed;
 
     [HideInInspector]
+    public AudioSource m_audioSource;
+
+    [HideInInspector]
     public string m_lastMoveType;
 
     [HideInInspector]
@@ -25,6 +28,12 @@ public class VRubiksCubeController : MonoBehaviour
 	// Use this for initialization
 	void Awake ()
     {
+        m_audioSource = GetComponent<AudioSource>();
+        if (m_audioSource == null)
+        {
+            Debug.Log("could not find VRubiksCubeController audio source!!!");
+        }
+
         m_userInput = GetComponent<VRubiksCubeUserInput>();
 
         m_monitor = GetComponent<VRubiksCubeMonitor>();
@@ -268,6 +277,7 @@ public class VRubiksCubeController : MonoBehaviour
                     RotateCubeFaceRotate(tarRot);
                     yield return null;
                 } while (m_rotatingFace);
+                m_audioSource.Play();
             }
             else if (top)
             {
@@ -279,6 +289,7 @@ public class VRubiksCubeController : MonoBehaviour
                     RotateCubeFaceRotate(tarRot);
                     yield return null;
                 } while (m_rotatingFace);
+                m_audioSource.Play();
             }
             else if (bottom)
             {
@@ -290,6 +301,7 @@ public class VRubiksCubeController : MonoBehaviour
                     RotateCubeFaceRotate(tarRot);
                     yield return null;
                 } while (m_rotatingFace);
+                m_audioSource.Play();
             }                      
         }
         else if (movedRight)
@@ -304,6 +316,7 @@ public class VRubiksCubeController : MonoBehaviour
                     RotateCubeFaceRotate(tarRot);
                     yield return null;
                 } while (m_rotatingFace);
+                m_audioSource.Play();
             }
             else if (top)
             {
@@ -315,6 +328,7 @@ public class VRubiksCubeController : MonoBehaviour
                     RotateCubeFaceRotate(tarRot);
                     yield return null;
                 } while (m_rotatingFace);
+                m_audioSource.Play();
             }
             else if (bottom)
             {
@@ -326,6 +340,7 @@ public class VRubiksCubeController : MonoBehaviour
                     RotateCubeFaceRotate(tarRot);
                     yield return null;
                 } while (m_rotatingFace);
+                m_audioSource.Play();
             }            
         }
         else if (movedUp)
@@ -340,6 +355,7 @@ public class VRubiksCubeController : MonoBehaviour
                     RotateCubeFaceRotate(tarRot);
                     yield return null;
                 } while (m_rotatingFace);
+                m_audioSource.Play();
             }            
             else if (left)
             {
@@ -351,6 +367,7 @@ public class VRubiksCubeController : MonoBehaviour
                     RotateCubeFaceRotate(tarRot);
                     yield return null;
                 } while (m_rotatingFace);
+                m_audioSource.Play();
             }
             else if (right)
             {
@@ -362,6 +379,7 @@ public class VRubiksCubeController : MonoBehaviour
                     RotateCubeFaceRotate(tarRot);
                     yield return null;
                 } while (m_rotatingFace);
+                m_audioSource.Play();
             }
         }
         else if (movedDown)
@@ -376,6 +394,7 @@ public class VRubiksCubeController : MonoBehaviour
                     RotateCubeFaceRotate(tarRot);
                     yield return null;
                 } while (m_rotatingFace);
+                m_audioSource.Play();
             }            
             else if (left)
             {
@@ -387,6 +406,7 @@ public class VRubiksCubeController : MonoBehaviour
                     RotateCubeFaceRotate(tarRot);
                     yield return null;
                 } while (m_rotatingFace);
+                m_audioSource.Play();
             }
             else if (right)
             {
@@ -398,6 +418,7 @@ public class VRubiksCubeController : MonoBehaviour
                     RotateCubeFaceRotate(tarRot);
                     yield return null;
                 } while (m_rotatingFace);
+                m_audioSource.Play();
             }
         }
         

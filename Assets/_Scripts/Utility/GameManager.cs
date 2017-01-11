@@ -282,6 +282,7 @@ public class GameManager : MonoBehaviour
     IEnumerator TimedComplete ()
     {
         m_modeComplete = true;
+        ResumeGame();
 
         m_cubeInput.enabled = false;
         m_gimbalController.enabled = false;
@@ -322,7 +323,7 @@ public class GameManager : MonoBehaviour
     // Toggles game pause state
     public void PauseGame ()
     {
-        if (m_isPaused)
+        if (m_isPaused || m_modeComplete)
         {
             ResumeGame();
             return;
@@ -378,7 +379,7 @@ public class GameManager : MonoBehaviour
                 if (File.Exists(Application.persistentDataPath + "/LearnRecords.dat"))
                 {
                     file = File.Open(Application.persistentDataPath + "/LearnRecords.dat", FileMode.Open);
-                    m_recs = (Records)bf.Deserialize(file);
+                    m_recs = (Records)bf.Deserialize(file);                    
                 }
                 else
                 {
@@ -460,11 +461,13 @@ public class GameManager : MonoBehaviour
                 return;
         }
 
+        /*
         Debug.Log("saving records!!!");        
         for (int i = 0; i < m_recs.m_record.Length; i++)
         {
             Debug.Log("recs.m_record[" + i.ToString() + "].time == " + m_recs.m_record[i].time.ToString());
         }
+        */
 
         bf.Serialize(file, m_recs);
         file.Close();
@@ -491,10 +494,10 @@ public class GameManager : MonoBehaviour
 
                         m_recs.m_record[i].time = m_solveTimeElapsed;
                         m_recs.m_record[i].par = m_cubeMonitor.m_cubePar;
-                        m_recs.m_record[i].turns = m_cubeMonitor.m_turns;
-                        SaveRecords();
+                        m_recs.m_record[i].turns = m_cubeMonitor.m_turns;                        
                         break;
                     }
+                    SaveRecords();
                 }
                 break;
             case GameMode.TIMED:
@@ -519,10 +522,10 @@ public class GameManager : MonoBehaviour
 
                         m_recs.m_record[i].time = m_solveTimeElapsed;
                         m_recs.m_record[i].par = m_cubeMonitor.m_cubePar;
-                        m_recs.m_record[i].turns = m_cubeMonitor.m_turns;
-                        SaveRecords();
+                        m_recs.m_record[i].turns = m_cubeMonitor.m_turns;                        
                         break;
                     }
+                    SaveRecords();
                 }
                 break;
             case GameMode.TURNS:
@@ -539,13 +542,14 @@ public class GameManager : MonoBehaviour
 
                         m_recs.m_record[i].time = m_solveTimeElapsed;
                         m_recs.m_record[i].par = m_cubeMonitor.m_cubePar;
-                        m_recs.m_record[i].turns = m_cubeMonitor.m_turns;
-                        SaveRecords();
+                        m_recs.m_record[i].turns = m_cubeMonitor.m_turns;                        
                         break;
                     }
+                    SaveRecords();
                 }
                 break;
             default:
+                SaveRecords();
                 break;
         }
     }
@@ -554,13 +558,13 @@ public class GameManager : MonoBehaviour
     {
         LoadRecords();  // Load saved records
 
-        
+        /*
         Debug.Log(System.Environment.NewLine + "loaded records...");
         for (int i = 0; i < m_recs.m_record.Length; i++)
         {
             Debug.Log("recs.m_record[" + i.ToString() + "].time == " + m_recs.m_record[i].time.ToString());
         }
-        
+        */
 
         UpdateRecords();  // Check if new record set; saves records if changed      
 
