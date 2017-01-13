@@ -56,8 +56,22 @@ public class VRubiksCubeController : MonoBehaviour
         m_faceRotator = new GameObject();
         m_faceRotator.transform.position = transform.parent.position;
         m_faceRotator.transform.rotation = transform.parent.rotation;
-        m_faceRotator.transform.parent = transform.parent;                
-	}
+        m_faceRotator.transform.parent = transform.parent;
+
+        // Set desired cube rotate speed
+        float prefCubeRotateSpeed = PlayerPrefs.GetFloat("CubeRotationSpeed", -1.0f);
+        if (prefCubeRotateSpeed != -1.0f)
+        {
+            m_cubeRotateSpeed = prefCubeRotateSpeed * 15.0f;
+        }
+
+        // Set desired face rotate speed
+        float prefFaceRotateSpeed = PlayerPrefs.GetFloat("FaceRotationSpeed", -1.0f);
+        if (prefFaceRotateSpeed != -1.0f)
+        {
+            m_faceRotateSpeed = prefFaceRotateSpeed * 15.0f;
+        }
+    }
 	
 	// Update is called once per frame
 	void Update ()

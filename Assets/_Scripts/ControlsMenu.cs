@@ -6,11 +6,12 @@ public class ControlsMenu : MonoBehaviour
 {
     public Text m_homeTiltText, m_gyroSmoothingText, m_gyroPollRateText, m_accelerometerSmoothingText;
 
-    public Slider m_homeTiltSlider, m_tiltAmplificationSlider, m_gyroSmoothingSlider, m_gyroPollRateSlider, m_accelerometerSmoothingSlider;
+    public Slider m_homeTiltSlider, m_tiltAmplificationSlider, m_gyroSmoothingSlider, m_gyroPollRateSlider,
+        m_accelerometerSmoothingSlider, m_cubeRotateSpeedSlider, m_faceRotateSpeedSlider;
 
     public Toggle m_gyroToggle;
 
-    private bool m_gyroOn = true;
+    private bool m_gyroOn = false;
 
 	// Use this for initialization
 	void Awake ()
@@ -45,13 +46,26 @@ public class ControlsMenu : MonoBehaviour
             Debug.Log("m_accelerometerSmoothingSlider not assigned!");
         }
 
+        if (m_cubeRotateSpeedSlider == null)
+        {
+            Debug.Log("m_cubeRotateSpeedSlider not assigned!");
+        }
+
+        if (m_faceRotateSpeedSlider == null)
+        {
+            Debug.Log("m_faceRotateSpeedSlider not assigned!");
+        }
+
         if (m_gyroToggle == null)
         {
             Debug.Log("m_gyroToggle not assigned!");
         }
 
         LoadPlayerPrefs();
+    }
 
+    void Start ()
+    {
         ToggleGyro();
     }
 
@@ -94,14 +108,26 @@ public class ControlsMenu : MonoBehaviour
         {
             m_accelerometerSmoothingSlider.value = prefAccelerometerSmoothing;
         }
+
+        // Set desired cube rotate speed
+        float prefCubeRotateSpeed = PlayerPrefs.GetFloat("CubeRotationSpeed", -1.0f);        
+        if (prefCubeRotateSpeed != -1.0f)
+        {            
+            m_cubeRotateSpeedSlider.value = prefCubeRotateSpeed;            
+        }
+
+        // Set desired face rotate speed
+        float prefFaceRotateSpeed = PlayerPrefs.GetFloat("FaceRotationSpeed", -1.0f);
+        if (prefFaceRotateSpeed != -1.0f)
+        {
+            m_faceRotateSpeedSlider.value = prefFaceRotateSpeed;
+        }
     }
 		
 	public void ToggleGyro ()
     {
 	    if (m_gyroToggle.isOn)
         {
-            //Debug.Log("toggle is on!");
-
             if (m_gyroOn == false)
             {
                 //Debug.Log("Setting gyro on! changing text colors...");
@@ -129,34 +155,30 @@ public class ControlsMenu : MonoBehaviour
             }
         }
         else
-        {
-            //Debug.Log("toggle is off!");
+        {              
+            //Debug.Log("Setting gyro off! changing text colors...");
 
-            if (m_gyroOn == true)
+            m_gyroOn = false;
+            PlayerPrefs.SetInt("UseGyro", 0);
+
+            m_gyroSmoothingText.color = new Color(0.5f, 0.5f, 0.5f);
+            m_gyroPollRateText.color = new Color(0.5f, 0.5f, 0.5f);
+            m_gyroSmoothingSlider.interactable = false;
+            m_gyroPollRateSlider.interactable = false;
+
+            ColorBlock cblock = m_gyroSmoothingSlider.colors;
+            cblock.colorMultiplier = 0.5f;
+            m_gyroSmoothingSlider.colors = cblock;
+
+            if (!m_accelerometerSmoothingSlider.interactable)
             {
-                //Debug.Log("Setting gyro off! changing text colors...");
-
-                m_gyroOn = false;
-                PlayerPrefs.SetInt("UseGyro", 0);
-
-                m_gyroSmoothingText.color = new Color(0.5f, 0.5f, 0.5f);
-                m_gyroPollRateText.color = new Color(0.5f, 0.5f, 0.5f);
-                m_gyroSmoothingSlider.interactable = false;
-                m_gyroPollRateSlider.interactable = false;
-
-                ColorBlock cblock = m_gyroSmoothingSlider.colors;
-                cblock.colorMultiplier = 0.5f;
-                m_gyroSmoothingSlider.colors = cblock;
-
-                if (!m_accelerometerSmoothingSlider.interactable)
-                {
-                    m_accelerometerSmoothingText.color = new Color(1.0f, 1.0f, 1.0f);
-                    m_accelerometerSmoothingSlider.interactable = true;
-                    cblock = m_accelerometerSmoothingSlider.colors;
-                    cblock.colorMultiplier = 1.0f;
-                    m_accelerometerSmoothingSlider.colors = cblock;
-                }
+                m_accelerometerSmoothingText.color = new Color(1.0f, 1.0f, 1.0f);
+                m_accelerometerSmoothingSlider.interactable = true;
+                cblock = m_accelerometerSmoothingSlider.colors;
+                cblock.colorMultiplier = 1.0f;
+                m_accelerometerSmoothingSlider.colors = cblock;
             }
+            
         }
 	}
 
@@ -167,7 +189,9 @@ public class ControlsMenu : MonoBehaviour
         m_gyroToggle.isOn = true;
         m_gyroSmoothingSlider.value = 0.0f;
         m_gyroPollRateSlider.value = 1.0f;
-        m_accelerometerSmoothingSlider.value = 0.3f;
+        m_accelerometerSmoothingSlider.value = 0.3333f;
+        m_cubeRotateSpeedSlider.value = 0.3333f;
+        m_faceRotateSpeedSlider.value = 0.3333f;
         ToggleGyro();
 
         /*
@@ -201,8 +225,18 @@ public class ControlsMenu : MonoBehaviour
         PlayerPrefs.SetFloat("GyroSmoothing", m_gyroSmoothingSlider.value);
     }
 
-    public void SetAccelerometerSmoothing()
+    public void SetAccelerometerSmoothing ()
     {
         PlayerPrefs.SetFloat("AccelerometerSmoothing", m_accelerometerSmoothingSlider.value);
+    }
+
+    public void SetCubeRotateSpeed ()
+    {        
+        PlayerPrefs.SetFloat("CubeRotationSpeed", m_cubeRotateSpeedSlider.value);
+    }
+
+    public void SetFaceRotateSpeed()
+    {
+        PlayerPrefs.SetFloat("FaceRotationSpeed", m_faceRotateSpeedSlider.value);
     }
 }

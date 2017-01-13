@@ -133,7 +133,7 @@ public class GimbalController : MonoBehaviour
         m_lastPhoneUp = m_phoneUp;
         m_phoneUp = -Input.gyro.gravity;
 
-        if (m_gyroSmoothing < 1.0f)
+        if (m_gyroSmoothing > 0.0f)
         {
             m_phoneUp = Vector3.Lerp(m_lastPhoneUp, m_phoneUp, m_gyroSmoothing);
         }        

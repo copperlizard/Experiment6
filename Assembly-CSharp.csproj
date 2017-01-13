@@ -46,9 +46,12 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\RotationTest.cs" />
+     <Compile Include="Assets\_Scripts\AudioMenu.cs" />
      <Compile Include="Assets\_Scripts\ControlsMenu.cs" />
      <Compile Include="Assets\_Scripts\GimbalController.cs" />
+     <Compile Include="Assets\_Scripts\RecordsMenu.cs" />
      <Compile Include="Assets\_Scripts\Utility\BackgroundManager.cs" />
+     <Compile Include="Assets\_Scripts\Utility\CustomScrollbar.cs" />
      <Compile Include="Assets\_Scripts\Utility\DisableScreenRotation.cs" />
      <Compile Include="Assets\_Scripts\Utility\FPSDisplay.cs" />
      <Compile Include="Assets\_Scripts\Utility\GameManager.cs" />

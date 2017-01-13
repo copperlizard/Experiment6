@@ -1273,6 +1273,9 @@ public class VRubiksCubeMonitor : MonoBehaviour
         if (!m_autosolve)
         {
             Debug.Log(System.Environment.NewLine + "Solving Cube!");
+            m_cubeController.m_cubeRotateSpeed = 5.0f;
+            m_cubeController.m_faceRotateSpeed = 5.0f;
+
             m_autosolve = true;
             m_cubeController.m_audioSource.volume = 0.0f;
             StartCoroutine(SolveCubeCoRoutine());
