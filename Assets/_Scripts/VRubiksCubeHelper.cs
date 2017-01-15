@@ -93,11 +93,11 @@ public class VRubiksCubeHelper : MonoBehaviour
             if (!m_gameIsPaused)
             {
                 Camera.main.ResetReplacementShader();
+                m_undoRedoPanel.SetActive(true);
             }
             
             m_isHelping = false;
             m_cubeInput.enabled = true;
-            m_undoRedoPanel.SetActive(true);
             m_helperPanel.SetActive(false);
         }
     }

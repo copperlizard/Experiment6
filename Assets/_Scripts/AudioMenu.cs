@@ -12,8 +12,6 @@ public class AudioMenu : MonoBehaviour
 	// Use this for initialization
 	void Start ()
     {
-        Debug.Log("hello?");
-
         if (m_masterVolumeSlider == null)
         {
             Debug.Log("m_masterVolumeSlider not assigned!!!");
