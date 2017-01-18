@@ -51,6 +51,7 @@
      <Compile Include="Assets\_Scripts\GimbalController.cs" />
      <Compile Include="Assets\_Scripts\RecordsMenu.cs" />
      <Compile Include="Assets\_Scripts\Utility\BackgroundManager.cs" />
+     <Compile Include="Assets\_Scripts\Utility\BackroundFXToggle.cs" />
      <Compile Include="Assets\_Scripts\Utility\CustomScrollbar.cs" />
      <Compile Include="Assets\_Scripts\Utility\DisableScreenRotation.cs" />
      <Compile Include="Assets\_Scripts\Utility\FPSDisplay.cs" />

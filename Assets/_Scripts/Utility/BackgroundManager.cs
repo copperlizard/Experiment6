@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class BackgroundManager : MonoBehaviour
 {
     private static BackgroundManager self;
-
+        
     void Awake()
     {
         if (self == null)
@@ -21,12 +22,12 @@ public class BackgroundManager : MonoBehaviour
     // Use this for initialization
     void Start ()
     {
-	
-	}
+        
+    }
 	
 	// Update is called once per frame
 	void Update ()
     {
 	
-	}
+	}  
 }

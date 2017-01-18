@@ -75,7 +75,7 @@ Shader "Custom/PauseEffectShader"
 			ENDCG
 		}
 	}		
-	SubShader
+	/*SubShader
 	{
 		Tags { "Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent" "PreviewType" = "Plane" }
 		Blend SrcAlpha OneMinusSrcAlpha
@@ -90,8 +90,6 @@ Shader "Custom/PauseEffectShader"
 			#pragma target 2.0
 			#pragma multi_compile_particles
 			#pragma multi_compile_fog
-
-			#include "UnityCG.cginc"
 
 			#include "UnityCG.cginc"
 
@@ -151,5 +149,23 @@ Shader "Custom/PauseEffectShader"
 			ENDCG
 		}
 
+	}*/
+	SubShader
+	{
+		Tags{ "Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent" "PreviewType" = "Plane" }
+		Blend SrcAlpha OneMinusSrcAlpha
+		Cull Off Lighting Off ZWrite Off Fog{ Color(0,0,0,0) }
+
+		BindChannels
+		{
+			Bind "Color", color
+			Bind "Vertex", vertex
+			Bind "TexCoord", texcoord
+		}
+
+		Pass 
+		{
+			SetTexture [_MainTex] {	combine texture * primary }
+		}		
 	}
 }
