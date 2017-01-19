@@ -3,6 +3,8 @@ using System.Collections;
 
 public class VRubiksCubeHelper : MonoBehaviour
 {
+    public GameManager m_gameManager;
+
     public GameObject m_cube, m_helperPanel, m_undoRedoPanel;
 
     public Shader m_helpReplacementShader;
@@ -20,6 +22,11 @@ public class VRubiksCubeHelper : MonoBehaviour
 	// Use this for initialization
 	void Start ()
     {
+        if (m_gameManager == null)
+        {
+            Debug.Log("m_gameManager not assigned!");
+        }
+
 	    if (m_cube == null)
         {
             Debug.Log("m_cube not assigned!");
@@ -65,6 +72,11 @@ public class VRubiksCubeHelper : MonoBehaviour
         else
         {
             //Debug.Log("Helping!");
+
+            if (m_gameManager.m_modeComplete)
+            {
+                return;
+            }
 
             m_isHelping = true;
             m_cubeInput.enabled = false;

@@ -15,7 +15,10 @@ public class BackgroundManager : MonoBehaviour
         }
         else
         {
-            DestroyImmediate(gameObject);
+            if (gameObject != null)
+            {
+                DestroyImmediate(gameObject);
+            }            
         }
     }
 

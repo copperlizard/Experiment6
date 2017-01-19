@@ -40,9 +40,12 @@ public class GameManager : MonoBehaviour
 
     public Shader m_pauseReplacementShader;
 
+    public VRubiksCubeHelper m_helper;
+
     public bool m_isPaused = false;
 
-    public VRubiksCubeHelper m_helper;
+    [HideInInspector]
+    public bool m_modeComplete = false;
     
     private VRubiksCubeMonitor m_cubeMonitor;
     private VRubiksCubeController m_cubeController;
@@ -54,8 +57,6 @@ public class GameManager : MonoBehaviour
     private string m_diplayedMove;
 
     private float m_solveTimeElapsed = 0.0f, m_pauseTimeElapsed = 0.0f;
-
-    private bool m_modeComplete = false;
 
     // Use this for initialization
     void Start ()
@@ -263,6 +264,7 @@ public class GameManager : MonoBehaviour
         }
         else if (!m_modeComplete)
         {
+            m_helper.StopHelping();
             StartCoroutine(TimedComplete());
         }
     }
@@ -467,7 +469,7 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log("recs.m_record[" + i.ToString() + "].time == " + m_recs.m_record[i].time.ToString());
         }
-        */
+        */        
 
         bf.Serialize(file, m_recs);
         file.Close();
@@ -496,8 +498,7 @@ public class GameManager : MonoBehaviour
                         m_recs.m_record[i].par = m_cubeMonitor.m_cubePar;
                         m_recs.m_record[i].turns = m_cubeMonitor.m_turns;                        
                         break;
-                    }
-                    SaveRecords();
+                    }                    
                 }
                 break;
             case GameMode.TIMED:
@@ -524,8 +525,7 @@ public class GameManager : MonoBehaviour
                         m_recs.m_record[i].par = m_cubeMonitor.m_cubePar;
                         m_recs.m_record[i].turns = m_cubeMonitor.m_turns;                        
                         break;
-                    }
-                    SaveRecords();
+                    }                    
                 }
                 break;
             case GameMode.TURNS:
@@ -544,14 +544,13 @@ public class GameManager : MonoBehaviour
                         m_recs.m_record[i].par = m_cubeMonitor.m_cubePar;
                         m_recs.m_record[i].turns = m_cubeMonitor.m_turns;                        
                         break;
-                    }
-                    SaveRecords();
+                    }                    
                 }
                 break;
-            default:
-                SaveRecords();
+            default:                
                 break;
         }
+        SaveRecords();
     }
 
     private string BuildRecordsString ()

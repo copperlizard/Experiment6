@@ -4,18 +4,20 @@ using System.Collections;
 
 public class BackroundFXToggle : MonoBehaviour
 {
-    public GameObject m_particleManager;
-
     public Toggle m_bgFXToggle;
+
+    private GameObject m_backgroundParticles;
 
     private GameObject[] m_bgParticles;
 
     // Use this for initialization
-    void Start ()
+    void Awake ()
     {
-        if (m_particleManager == null)
+        m_backgroundParticles = GameObject.FindGameObjectWithTag("BackgroundParticles");
+
+        if (m_backgroundParticles == null)
         {
-            Debug.Log("m_particleManager not assigned!!!");
+            Debug.Log("m_backgroundParticles not found!!!");
         }
 
         if (m_bgFXToggle == null)
@@ -23,14 +25,12 @@ public class BackroundFXToggle : MonoBehaviour
             Debug.Log("m_bgFXToggle not assigned!!!");
         }
 
-        Transform[] ts = new Transform[m_particleManager.transform.childCount];
-        m_bgParticles = new GameObject[m_particleManager.transform.childCount];
-        for (int i = 0; i < m_particleManager.transform.childCount; i++)
+        Transform[] ts = new Transform[m_backgroundParticles.transform.childCount];
+        m_bgParticles = new GameObject[m_backgroundParticles.transform.childCount];
+        for (int i = 0; i < m_backgroundParticles.transform.childCount; i++)
         {
-            ts[i] = m_particleManager.transform.GetChild(i);
+            ts[i] = m_backgroundParticles.transform.GetChild(i);
             m_bgParticles[i] = ts[i].gameObject;
-
-            Debug.Log("found particles " + ts[i].gameObject.name);
         }
 
         int coolBG = PlayerPrefs.GetInt("BackroundFX", 1);

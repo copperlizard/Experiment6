@@ -77,7 +77,8 @@ public class RecordsMenu : MonoBehaviour
         file.Close();
     }
 
-    private void SaveRecords()
+    
+    private void SaveRecords() // IF FILE IS NOT SAVED AFTER LOADING IT ENDS UP BLANK(0kb)?!?!?
     {
         FileStream file;
         BinaryFormatter bf = new BinaryFormatter();
@@ -133,6 +134,7 @@ public class RecordsMenu : MonoBehaviour
         bf.Serialize(file, m_recs);
         file.Close();
     }
+
 
     void UpdateRecordsText ()
     {
