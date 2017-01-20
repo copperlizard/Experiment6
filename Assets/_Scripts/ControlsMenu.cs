@@ -187,7 +187,7 @@ public class ControlsMenu : MonoBehaviour
         m_homeTiltSlider.value = 0.5f;
         m_tiltAmplificationSlider.value = 0.5f;       
         m_gyroToggle.isOn = true;
-        m_gyroSmoothingSlider.value = 0.0f;
+        m_gyroSmoothingSlider.value = 0.1f;
         m_gyroPollRateSlider.value = 1.0f;
         m_accelerometerSmoothingSlider.value = 0.3333f;
         m_cubeRotateSpeedSlider.value = 0.3333f;
